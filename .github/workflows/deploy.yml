@@ -1,0 +1,65 @@
+name: Deploy to AWS Elastic Beanstalk
+
+on:
+  push:
+    branches:
+      - main  
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20
+
+    - name: Install dependencies
+      run: yarn install
+
+    - name: Build project
+      run: yarn build
+
+    - name: Set up environment variables
+      run: |
+        echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
+        echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> .env
+        echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
+        echo "BUCKET_NAME=${{ secrets.BUCKET_NAME }}" >> .env
+        echo "DB_CONNECTION=${{ secrets.DB_CONNECTION }}" >> .env
+        echo "EB_APP_NAME=${{ secrets.EB_APP_NAME }}" >> .env
+        echo "EB_ENV_NAME=${{ secrets.EB_ENV_NAME }}" >> .env
+        echo "EC2_BACKEND_HOST=${{ secrets.EC2_BACKEND_HOST }}" >> .env
+        echo "EMAIL_ACCOUNT=${{ secrets.EMAIL_ACCOUNT }}" >> .env
+        echo "EMAIL_HOST=${{ secrets.EMAIL_HOST }}" >> .env
+        echo "EMAIL_PASS=${{ secrets.EMAIL_PASS }}" >> .env
+        echo "EMAIL_PORT=${{ secrets.EMAIL_PORT }}" >> .env
+        echo "FREECONVERT_API_KEY=${{ secrets.FREECONVERT_API_KEY }}" >> .env
+        echo "GPTZERO_API_KEY=${{ secrets.GPTZERO_API_KEY }}" >> .env
+        echo "INSTANCE_ID=${{ secrets.INSTANCE_ID }}" >> .env
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+        echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+        echo "PLAGIARISM_API_KEY=${{ secrets.PLAGIARISM_API_KEY }}" >> .env
+        echo "SAPLING_API_KEY=${{ secrets.SAPLING_API_KEY }}" >> .env
+        echo "UNDETECTABLE_KEY=${{ secrets.UNDETECTABLE_KEY }}" >> .env        
+    - name: Install AWS CLI
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3-pip
+        pip3 install --upgrade awscli
+        pip3 install awsebcli
+
+    - name: Deploy to Elastic Beanstalk
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        EB_ENV_NAME: ${{ secrets.EB_ENV_NAME }}
+        EB_APP_NAME: ${{ secrets.EB_APP_NAME }}
+      run: |
+        eb init -p "Node.js 20 running on 64bit Amazon Linux 2023/6.2.0" $EB_APP_NAME --region $AWS_REGION
+        eb deploy $EB_ENV_NAME
