@@ -31,6 +31,10 @@ jobs:
         cp -r dist deployment-package/
         cd deployment-package
         zip -r ../deployment-package.zip .
+        cd ..
+    
+    - name: List files
+      run: ls -la
 
     - name: Set up environment variables
       run: |
