@@ -21,8 +21,8 @@ jobs:
     - name: Install dependencies
       run: yarn install
 
-    - name: Build project
-      run: yarn build
+    - name: Build And Test Project
+      run: yarn test
     
     - name: Create ZIP file
       run: |

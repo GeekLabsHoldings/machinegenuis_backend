@@ -26,7 +26,7 @@ app.use(cors());
 
 
 app.get('/', async (_, res) => {
-    return res.send("Hello world!");
+    return res.json("Hello world!");
 });
 
 
