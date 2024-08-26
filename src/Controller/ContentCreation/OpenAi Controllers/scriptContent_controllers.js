@@ -64,7 +64,7 @@ const generateContent = async (req, res) => {
                 Make sure to mention the leading companies/figures mentioned in the article in the intro.
                 Body:
                 Keep it from a third person point of view.
-                Keep it engaging by throwing in one sarcastic joke about the stock market and the stock that we talk about.
+                Keep it engaging by throwing in one joke about the stock market and the stock that we talk about.
                 Maintain a conversational style, as if entertaining another human with the latest news while keeping a serious undertone.
                 Back all the statements you give with proven data to elaborate more on the news.
                 Analyze the tweets provided and use them to back up the statements you include.
@@ -73,7 +73,7 @@ const generateContent = async (req, res) => {
                 Wrap up the article with a persuasive statement to convince the reader to invest in the stock that we talk about.
                 Talk about the current state of the stock that we talk about, and include forecasts predicting its growth.
                 Highlight the current position of the stock that we talk about.
-                End the article with an engaging statement to ask about the reader’s opinions about the topic - Maintain a professional, yet conversational manner.
+                End the article with an engaging statement to ask about the readers opinions about the topic - Maintain a professional, yet conversational manner.
 `;
     } else if (brandName == "movieMyth") {
       prompt = `write a recap of from this content

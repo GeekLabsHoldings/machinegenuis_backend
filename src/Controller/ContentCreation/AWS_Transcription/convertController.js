@@ -16,26 +16,25 @@ const split = function (data) {
   const segments = [];
   let currentSegment = "";
   let segmentEndTime = 600;
-  let startTime = -1;
+  let startTime = 0;
   let endTime = 0;
   let part = 0;
 
   data.forEach((item) => {
     if (item.start_time < segmentEndTime) {
-      if (startTime === -1) startTime = item.start_time.split(".")[0];
       currentSegment += item.transcript + " ";
       endTime = item.end_time.split(".")[0];
     } else {
       part = part + 1;
       endTime = item.end_time.split(".")[0];
-      segments.push([
+      segments.push(
         {
           part: part,
           "time duration": `${startTime}:${endTime}`,
           transcription: { content: currentSegment },
         },
-      ]);
-      startTime = -1;
+      );
+      startTime = endTime;
       currentSegment = "";
       currentSegment += item.transcript + " ";
       segmentEndTime += 600;
@@ -43,13 +42,13 @@ const split = function (data) {
   });
   if (currentSegment.length > 0) {
     part = part + 1;
-      segments.push([
+      segments.push(
         {
           part: part,
           "time duration": `${startTime}:${endTime}`,
           transcription: { content: currentSegment },
         },
-      ]);
+      );
   }
 
   return segments;
@@ -86,8 +85,8 @@ const convertor = async (req, res) => {
       region,
       key: responseOutputName,
     });
-    const splitData = (split(jsonData))
-    return res.json({splitData});
+    const transcriptionResults = (split(jsonData))
+    return res.json({transcriptionResults});
     ////
     // openAi
     ////
