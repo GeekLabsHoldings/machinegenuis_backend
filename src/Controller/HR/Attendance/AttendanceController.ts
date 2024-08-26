@@ -93,9 +93,8 @@ class AttendanceController implements IAttendanceController {
                 const count = employeeLateAttendance.length;
                 const index = count < 5 ? count : 5;
                 if (!result[index]) {
-                    result[count] = [];
+                    result[index] = [];
                 }
-
                 result[index].push(employeeLateAttendance[employeeLateAttendance.length - 1]);
             }
         }
