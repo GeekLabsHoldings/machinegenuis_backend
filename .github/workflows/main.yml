@@ -76,6 +76,6 @@ jobs:
         environment_name: ${{ secrets.EB_ENV_NAME }}
         region: ${{ secrets.AWS_REGION }}
         version_label: "e-learn-${{ github.run_number }}"
-        deployment_package: deploy.zip
+        deployment_package: deployment-package.zip
 
       
