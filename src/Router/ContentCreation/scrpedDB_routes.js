@@ -6,5 +6,5 @@ const scrapedDBControllers = require('../../Controller/ContentCreation/Scraped D
 
 
 scraped_router.post('/scrapedDB' , scrapedDBControllers.get_scraped_fromDB);
-
+scraped_router.delete('/Delete-scrapedDB' , scrapedDBControllers.delete_scraped_fromDB);
 export default scraped_router
