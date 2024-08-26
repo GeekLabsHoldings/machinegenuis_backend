@@ -23,6 +23,14 @@ jobs:
 
     - name: Build project
       run: yarn build
+    
+    - name: Create ZIP file
+      run: |
+        mkdir -p deployment-package
+        cp package.json deployment-package/
+        cp -r dist deployment-package/
+        cd deployment-package
+        zip -r ../deployment-package.zip .
 
     - name: Set up environment variables
       run: |
@@ -45,7 +53,9 @@ jobs:
         echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
         echo "PLAGIARISM_API_KEY=${{ secrets.PLAGIARISM_API_KEY }}" >> .env
         echo "SAPLING_API_KEY=${{ secrets.SAPLING_API_KEY }}" >> .env
-        echo "UNDETECTABLE_KEY=${{ secrets.UNDETECTABLE_KEY }}" >> .env        
+        echo "UNDETECTABLE_KEY=${{ secrets.UNDETECTABLE_KEY }}" >> .env 
+        echo "Andrew=${{ secrets.Andrew }}" >> .env 
+
     - name: Install AWS CLI
       run: |
         sudo apt-get update
@@ -62,4 +72,4 @@ jobs:
         EB_APP_NAME: ${{ secrets.EB_APP_NAME }}
       run: |
         eb init -p "Node.js 20" $EB_APP_NAME --region $AWS_REGION
-        eb deploy $EB_ENV_NAME
+        eb deploy $EB_ENV_NAME --staged
