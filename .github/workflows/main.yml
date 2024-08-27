@@ -30,6 +30,7 @@ jobs:
       run: |
         mkdir -p deployment-package
         cp package.json deployment-package/
+        cp -r .platform deployment-package/
         cp -r dist deployment-package/
         cd deployment-package
         zip -r ../deployment-package.zip .
