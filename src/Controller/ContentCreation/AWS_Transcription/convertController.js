@@ -54,7 +54,6 @@ const split = function (data) {
   return segments;
 }
 
-
 const convertor = async (req, res) => {
   try {
     const fileName = req.body.s3BucketURL;

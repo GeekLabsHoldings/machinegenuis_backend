@@ -6,11 +6,10 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-const generateTitles = async (content , myPrompt) => {
+const generateTitles = async (content, myPrompt) => {
     try {
         const prompt = `${myPrompt} Here's the content: \n\n${content}`;
 
-        // Send the prompt to OpenAI
         const completion = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: [
@@ -18,26 +17,32 @@ const generateTitles = async (content , myPrompt) => {
             ],
         });
 
-        // Extract the response and format it
         const result = completion.choices[0].message.content.trim();
 
-        console.log("Results-->"+result)
-        const sections = result.split(/\d+\.\s*General Title:\s*/).map(section => section.trim()).filter(section => section);
+        console.log("Results-->", result);
 
-       
-        const structuredResults = sections.map(section => {
-            const lines = section.split('\n').map(line => line.trim()).filter(line => line);
-            const generalTitle = lines[0].replace('General Title: ', '').trim();
-            const id = uuidv4()
+        console.log("Check---->" , result.includes("General Title:"));
+        
+        if (result.includes("General Title:")) {
+            const sections = result.split(/\d+\.\s*General Title:\s*/)
+                .map(section => section.trim())
+                .filter(section => section);
 
-            return {
-                id,
-                generalTitle,
-            };
-        });
+            var structuredResults = sections.map(section => {
+                const lines = section.split('\n').map(line => line.trim()).filter(line => line);
+                const generalTitle = lines[0].replace('General Title: ', '').trim();
+                const id = uuidv4();
 
-        // Return general titles as an array
-        return structuredResults;
+                return {
+                    id,
+                    generalTitle,
+                };
+            });
+
+            return structuredResults;
+        } else {
+            return await generateTitles(content, myPrompt);
+        }
     } catch (error) {
         console.error("Error generating title and articles:", error);
         throw error;
@@ -48,7 +53,6 @@ const generateThumbnails = async (content , myPrompt) => {
     try {
         const prompt = `${myPrompt} Here's the content: \n\n${content}`;
 
-        // Send the prompt to OpenAI
         const completion = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: [
@@ -56,14 +60,15 @@ const generateThumbnails = async (content , myPrompt) => {
             ],
         });
 
-        // Extract the response and format it
         const result = completion.choices[0].message.content.trim();
 
         console.log("Results-->"+result)
-        const sections = result.split(/\d+\.\s*Thumbnail:\s*/).map(section => section.trim()).filter(section => section);
-
-       
-        const structuredResults = sections.map(section => {
+        const sections = result.split(/\d+\.\s*Thumbnail:\s*/).map(section => section.trim()).filter(section => section);        
+        
+        console.log("Check---->" , result.includes("Thumbnail:"));
+       if(result.includes("Thumbnail:"))
+       {
+        var structuredResults = sections.map(section => {
             const lines = section.split('\n').map(line => line.trim()).filter(line => line);
             const Thumbnail = lines[0].replace('Thumbnail: ', '').trim();
             const id = uuidv4()
@@ -73,6 +78,12 @@ const generateThumbnails = async (content , myPrompt) => {
                 Thumbnail,
             };
         });
+       }
+       else
+       {
+        return await generateThumbnails(content , prompt)
+       }
+
 
         // Return general titles as an array
         return structuredResults;
@@ -86,56 +97,46 @@ const generateContentTitles = async (req, res) => {
     try {
         const { content, brandName } = req.body;
         if (!content || !brandName) {
-          return res
-            .status(400)
-            .json({ success: false, error: "No content or brand name provided" });
+            return res
+                .status(400)
+                .json({ success: false, error: "No content or brand name provided" });
         }
+
         let prompt = "";
-        if (brandName === "streetPoliticsCanada") 
-        {
-            prompt = `You are given content. Your task is Create at least 10 hooking titles with a maximum of eight words for the topic selected. Make it provocative and aggressive, and include clickbait context..
-            Capitalize verbs and names.
+        if (brandName === "streetPoliticsCanada") {
+            prompt = `You are given content. Your task is to create at least 10 hooking titles with a maximum of eight words for the topic selected. Make it provocative and aggressive, and include clickbait context. Capitalize verbs and names.
 
             Return the result in the following format:
             1. General Title: [hooking title here]
             
             2. General Title: [hooking title here]
             and so on ......`;
-        } 
-        else if 
-        (brandName == "investocracy") 
-        {
-            prompt = `You are given content. Your task is Create at least 10 hooking titles with a maximum of eight words for the topic selected. Make it ecstatic and positive , and include clickbait context..
-            Capitalize verbs. Pick statistics or percentages from the content.
+        } else if (brandName === "investocracy") {
+            prompt = `You are given content. Your task is to create at least 10 hooking titles with a maximum of eight words for the topic selected. Make it ecstatic and positive, and include clickbait context. Capitalize verbs. Pick statistics or percentages from the content.
 
-            
             1. General Title: [hooking title here]
             
             2. General Title: [hooking title here]
             and so on ......`;
-        }
-        else if 
-        (brandName == "movieMyth") 
-        {
-            prompt = `You are given content. Your task is Create at least 10 hooking titles with a maximum of eight words for the topic selected. Make it thrilling yet mysterious and suspenseful, and include clickbait context.
+        } else if (brandName === "movieMyth") {
+            prompt = `You are given content. Your task is to create at least 10 hooking titles with a maximum of eight words for the topic selected. Make it thrilling yet mysterious and suspenseful, and include clickbait context.
+
             Return the result in the following format:
-            
             1. General Title: [hooking title here]
             
             2. General Title: [hooking title here]`;
-        }
-        else
-        {
+        } else {
             return res
-            .status(404)
-            .json({ success: false, error: "brandName Not correct" });
+                .status(404)
+                .json({ success: false, error: "brandName Not correct" });
         }
-        const generatedTitles= await generateTitles(content , prompt);
+
+        const generatedTitles = await generateTitles(content, prompt);
         res.json({ success: true, Titles: generatedTitles });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
-}
+};
 
 const generateContentThumbnails = async (req, res) => {
     try {
