@@ -1,18 +1,18 @@
 const dotenv = require("dotenv");
-const processFile = require("../../../Service/ContentCreation/uploadToconvert/uploadFile");
-const fs = require("fs");
-const path = require("path");
 import Ec2Service from "../../../Service/AWS/EC2";
 import S3_services from "../../../Service/AWS/S3_Bucket/presinedURL";
 import TranscribeService from "../../../Service/AWS/Transcribe/transcription";
+const {recapContent} = require('../OpenAi Controllers/recapTranscript_controller');
+
 dotenv.config();
+
 const delay = async (time) => {
   return new Promise(function (resolve) {
     setTimeout(resolve, time);
   });
 };
 
-const split = function (data) {
+const split = async function (data) {
   const segments = [];
   let currentSegment = "";
   let segmentEndTime = 600;
@@ -20,35 +20,39 @@ const split = function (data) {
   let endTime = 0;
   let part = 0;
 
-  data.forEach((item) => {
+  for (const item of data) {
     if (item.start_time < segmentEndTime) {
       currentSegment += item.transcript + " ";
       endTime = item.end_time.split(".")[0];
     } else {
       part = part + 1;
       endTime = item.end_time.split(".")[0];
-      segments.push(
-        {
-          part: part,
-          "time duration": `${startTime}:${endTime}`,
-          transcription: { content: currentSegment },
-        },
-      );
+
+      const recappedContent = await recapContent(currentSegment);
+      
+      segments.push({
+        part: part,
+        "time duration": `${startTime}:${endTime}`,
+        transcription: { content: recappedContent },
+      });
+
       startTime = endTime;
       currentSegment = "";
       currentSegment += item.transcript + " ";
       segmentEndTime += 600;
     }
-  });
+  }
+
   if (currentSegment.length > 0) {
     part = part + 1;
-      segments.push(
-        {
-          part: part,
-          "time duration": `${startTime}:${endTime}`,
-          transcription: { content: currentSegment },
-        },
-      );
+
+    const recappedContent = await recapContent(currentSegment);
+    
+    segments.push({
+      part: part,
+      "time duration": `${startTime}:${endTime}`,
+      transcription: { content: recappedContent },
+    });
   }
 
   return segments;
@@ -84,16 +88,19 @@ const convertor = async (req, res) => {
       region,
       key: responseOutputName,
     });
-    const transcriptionResults = (split(jsonData))
+
+    const transcriptionResults = await split(jsonData);
     return res.json({transcriptionResults});
-    ////
-    // openAi
-    ////
 
   } catch (error) {
     return res.status(500).json({ error });
   }
 };
 
-
+// const convertor = async (req, res) => 
+// {
+//   const response = await recapContent("Helow Iam Moahmed Gow ar you Couls you please eat wit me and playing");
+//   return res.json({response})
+// }
+  
 export { convertor };
