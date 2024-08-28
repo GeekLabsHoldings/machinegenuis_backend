@@ -55,6 +55,44 @@ const generateContent = async (req, res) => {
                 Make the conclusion wrap up all the main ideas from the article and give it a conservative spin
                 Don't sound repetitive.
                 Ask about the reader's opinions in an engaging manner, wrapping up the script`;
+    } else if (brandName == "streetPoliticsUK") {
+      prompt = `Write a UK-based political script in the third person point of view. It needs to be at least 1700 words that are as human as possible. We have a right-leaning perspective, especially when discussing criticism of the government. Keep the tone professional yet engaging. We stand with the people and are against the government, house of commons and political parties. The article will need to be divided into three sections.
+                Same script format, without the host and scene details.
+                1.Intro:-
+                Needs to begin with a hooking statement about attention-grabbing news. It needs to be something unique and viral.
+                Don’t reveal all the details of the news in this section. Give an introduction of the topic.
+                Keep the word limit for this section to 200 words.
+               2.Body:
+                Keep it from a third person point of view.
+                Keep it engaging by throwing in a couple of sarcastic jokes about the government and the political parties.
+                Weave in conspiracy theories related to the topic being discussed.
+                Maintain a conversational style, as if entertaining another human with the latest news while keeping a serious undertone.
+                Pick the common topics between the chosen articles to flow from one point to another seamlessly.
+                Use simpler, commonly used terms.
+                3.Outro:
+                Make it conversational, yet professional.
+                Make the conclusion wrap up all the main ideas from the article and give it a sarcastic spin
+                Don't sound repetitive.
+                Ask about the reader's opinions in an engaging manner, wrapping up the script.`
+    } else if (brandName == "streetPoliticsAfrica") {
+      prompt = `Write an Africa-based political script in the third person point of view. It needs to be at least 1700 words that are as human as possible. We have a right-leaning perspective, especially when discussing criticism of the west. Keep the tone professional yet engaging. We stand with the people and are against western countries involvement in Africa and non-African countries attempts to destabilize Africa..Defend African sovereignty and unity. The article will need to be divided into three sections.
+                Same script format, without the host and scene details.
+                IF Canada is mentioned, criticize specifically the Canadian Liberal government and Trudeau.
+                1.Intro:-
+                Needs to begin with a hooking statement about attention-grabbing news. It needs to be something unique and viral.
+                Don’t reveal all the details of the news in this section. Give an introduction of the topic.
+                Keep the word limit for this section to 200 words.
+                2.Body:
+                Keep it from a third person point of view.
+                Keep it engaging by throwing in a couple of sarcastic jokes about the western countries interfering with African matters, Weave in conspiracy theories related to the topic being discussed.
+                Maintain a conversational style, as if entertaining another human with the latest news while keeping a serious undertone.
+                Pick the common topics between the chosen articles to flow from one point to another seamlessly.
+                Use simpler, commonly used terms.
+                3.Outro:
+                Make it conversational, yet professional.
+                Make the conclusion wrap up all the main ideas from the article and give it a sarcastic spin
+                Don't sound repetitive.
+                Ask about the reader's opinions in an engaging manner, wrapping up the script.`
     } else if (brandName == "investocracy") {
       prompt = `Write a stock-market-centered video that is at least 2500 words, using a tone that is human, engaging, professional, ecstatic, storytelling and direct. Write in a third point of view. Maintain a professional, direct tone. it needs to be divided into three parts.
                 Intro:
