@@ -87,7 +87,7 @@ const generateTitleAndArticles = async (brandName, stockName) => {
             query.stock = stockName;
         }
 
-        const rem = await generatedContentModel.deleteMany(query);
+        await generatedContentModel.deleteMany(query);
         await generatedContentModel.create(structuredResults)
         return;
     } catch (error) {
