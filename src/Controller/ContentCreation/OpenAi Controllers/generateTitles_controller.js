@@ -111,6 +111,26 @@ const generateContentTitles = async (req, res) => {
             
             2. General Title: [hooking title here]
             and so on ......`;
+        } else if (brandName === "streetPoliticsUK") {
+            prompt = `You are given content. Your task is Create at least 10 hooking titles with a maximum of eight words for the topic selected. Make it provocative and aggressive, and include clickbait context..
+            Capitalize verbs, mention politician or political party names.
+            Keywords to include: “EXPOSED, BUSTED LEAKED, SHOCKING, SCANDAL, BREAKING, BETRAYED, MASSIVE, IN PUBLIC, PUBLICLY, CHAOS, INSANE, DESTROY, HUMILIATED, SABOTAGE, UNHINGED, BACKFIRES, OFFICIALLY”
+
+            Return the result in the following format:
+            1. General Title: [hooking title here]
+            
+            2. General Title: [hooking title here]
+            and so on ......`;
+        } else if (brandName === "streetPoliticsAfrica") {
+            prompt = `You are given content. Your task is Create at least 10 hooking titles with a maximum of eight words for the topic selected. Make it provocative and aggressive, and include clickbait context..
+            Capitalize verbs, mention politician or political party names.
+            Keywords to include: “EXPOSED, BUSTED LEAKED, SHOCKING, SCANDAL, BREAKING, BETRAYED, MASSIVE, IN PUBLIC, PUBLICLY, CHAOS, INSANE, DESTROY, HUMILIATED, SABOTAGE, UNHINGED, BACKFIRES, OFFICIALLY” 
+
+            Return the result in the following format:
+            1. General Title: [hooking title here]
+            
+            2. General Title: [hooking title here]
+            and so on ......`;
         } else if (brandName === "investocracy") {
             prompt = `You are given content. Your task is to create at least 10 hooking titles with a maximum of eight words for the topic selected. Make it ecstatic and positive, and include clickbait context. Capitalize verbs. Pick statistics or percentages from the content.
 
@@ -150,6 +170,7 @@ const generateContentThumbnails = async (req, res) => {
         if (brandName === "streetPoliticsCanada") 
         {
             prompt = `Create 10 hooking titles with a maximum of five words for the topic selected. Start with a grasping exclamation of one adjective. Make it in a clickbait and provocative context.
+            Capitalize verbs, mention politician or political party names.
             Keywords to include: “CHAOS, BUSTED, LEAKED, HECKLED, UNHINGED, BREAKING, OFFICIAL, EXPOSED, SHAMEFUL, RUTHLESS, F**K OFF, DISASTER, CRAZY, BRUTAL, END IS NEAR, INTENSE, , Shame, Scandal, Humiliated, Breaking, Pathetic, Leave, Official,, Savage, Finally, Brutal, Mutiny, Leaked,, Abandoned, Horrible, Insane, Coward”
 
 
@@ -160,6 +181,34 @@ const generateContentThumbnails = async (req, res) => {
             2. Thumbnail: [hooking title here]
             and so on ......`;
         } 
+        else if 
+        (brandName == "streetPoliticsUK") 
+        {
+            prompt = `Create 10 hooking titles with a maximum of five words for the topic selected. Start with a grasping exclamation of one adjective. Make it in a clickbait and provocative context.
+            Mention Politician names.
+            Keywords to include: “CHAOS, BUSTED, LEAKED, HECKLED, UNHINGED, BREAKING, OFFICIAL, EXPOSED, SHAMEFUL, RUTHLESS, F**K OFF, DISASTER, CRAZY, BRUTAL, END IS NEAR, INTENSE, , Shame, Scandal, Humiliated, Breaking, Pathetic, Leave, Official,, Savage, Finally, Brutal, Mutiny, Leaked,, Abandoned, Horrible, Insane, Coward”
+
+            Return the result in the following format:-
+            
+            1. Thumbnail: [hooking title here]
+            
+            2. Thumbnail: [hooking title here]
+            and so on ......`;
+        }
+        else if 
+        (brandName == "streetPoliticsAfrica") 
+        {
+            prompt = `CCreate 10 hooking titles with a maximum of five words for the topic selected. Start with a grasping exclamation of one adjective. Make it in a clickbait and provocative context.
+            Mention Politician names.
+            Keywords to include: “CHAOS, BUSTED, LEAKED, HECKLED, UNHINGED, BREAKING, OFFICIAL, EXPOSED, SHAMEFUL, RUTHLESS, F**K OFF, DISASTER, CRAZY, BRUTAL, END IS NEAR, INTENSE, , Shame, Scandal, Humiliated, Breaking, Pathetic, Leave, Official,, Savage, Finally, Brutal, Mutiny, Leaked,, Abandoned, Horrible, Insane, Coward”
+
+            Return the result in the following format:-
+            
+            1. Thumbnail: [hooking title here]
+            
+            2. Thumbnail: [hooking title here]
+            and so on ......`;
+        }
         else if 
         (brandName == "investocracy") 
         {
