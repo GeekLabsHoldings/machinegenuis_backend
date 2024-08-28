@@ -1,16 +1,13 @@
 import { Schema, model } from "mongoose";
 import { scrapedSchema } from "../Scraped/scraped_model"
-import { RequiredNumber } from "../../../Utils/Schemas";
+import { RequiredNumber, RequiredString } from "../../../Utils/Schemas";
 
 
 const GeneratedContentSchema = new Schema({
-    generalTitle: {
-        type: String,
-        required: true,
-    },
+    generalTitle: RequiredString,
     articleJson: [scrapedSchema],
-    brand: { type: String, required: true },
-    stock: { type: String, required: true },
+    brand: RequiredString,
+    stock: RequiredString,
     createdAt: RequiredNumber
 })
 
