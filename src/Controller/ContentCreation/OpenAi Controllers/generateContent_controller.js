@@ -74,10 +74,9 @@ const generateTitleAndArticles = async (brandName, stockName) => {
             }
 
             return {
-                organizedArticles: {
-                    generalTitle,
-                    articleJson,
-                },
+
+                generalTitle,
+                articleJson,
                 brand: brandName,
                 stock: stockName,
                 createdAt: moment().valueOf()
@@ -89,7 +88,7 @@ const generateTitleAndArticles = async (brandName, stockName) => {
         }
 
         const rem = await generatedContentModel.deleteMany(query);
-       await generatedContentModel.create(structuredResults)
+        await generatedContentModel.create(structuredResults)
         return;
     } catch (error) {
         console.error("Error generating title and articles:", error);
