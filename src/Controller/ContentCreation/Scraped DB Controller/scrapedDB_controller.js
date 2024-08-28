@@ -59,4 +59,21 @@ const delete_scraped_fromDB = async (req, res) => {
     }
 };
 
-export { get_scraped_fromDB, getScrapedData, delete_scraped_fromDB, getGeneratedContentData };
+const delete_data_fromDB = async (req, res) => {
+    try {
+        const { brandName, stockName } = req.body;
+        const query = { brand: brandName};
+        if (stockName) {
+            query.stock = stockName;
+        }
+
+        const results = await scraped_dataBase.deleteMany(query);
+        return res
+            .status(200)
+            .json({ msg: `All documents with brand: ${brandName} and stock: ${stockName} with empty content deleted successfully.`, deletedCount: results.deletedCount });
+    } catch (error) {
+        return res.status(500).json({ msg: "Error in deleting scraped data", error });
+    }
+};
+
+export { get_scraped_fromDB, getScrapedData , delete_scraped_fromDB , delete_data_fromDB , getGeneratedContentData};
