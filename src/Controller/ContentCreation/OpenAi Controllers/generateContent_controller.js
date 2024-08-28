@@ -1,5 +1,8 @@
+import moment from 'moment-timezone';
+import generatedContentModel from '../../../Model/ContentCreation/Generated/GeneratedContent_Model';
 import scrapedModel from '../../../Model/ContentCreation/Scraped/scraped_model'
-const scrapedDBControllers = require('../../../Controller/ContentCreation/Scraped DB Controller/scrapedDB_controller')
+import { getGeneratedContentData } from '../Scraped DB Controller/scrapedDB_controller'
+const scrapedDBControllers = require('../Scraped DB Controller/scrapedDB_controller')
 require('dotenv').config()
 const mongoose = require("mongoose");
 const OpenAI = require('openai');
@@ -10,9 +13,10 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-const generateTitleAndArticles = async (articles) => {
+const generateTitleAndArticles = async (brandName, stockName) => {
     try {
-        const articlesTitles = articles.map((article, index) => `Title: ${article.title}`).join('\n\n');
+        const articles = await scrapedDBControllers.getScrapedData(brandName, stockName);
+        const articlesTitles = articles.map((item, index) => `Title: ${item.title}`).join('\n\n');
         // Create a detailed prompt explaining the task
         const prompt = `
             You are given a list of article titles. Your task is to group these titles that talk about same news or event under general and suitable headings and provide a title for each group. Also, return any titles that do not fit into any group separately.
@@ -70,13 +74,23 @@ const generateTitleAndArticles = async (articles) => {
             }
 
             return {
-                generalTitle,
-                articleJson
+                organizedArticles: {
+                    generalTitle,
+                    articleJson,
+                },
+                brand: brandName,
+                stock: stockName,
+                createdAt: moment().valueOf()
             };
         });
+        const query = { brand: brandName };
+        if (stockName) {
+            query.stock = stockName;
+        }
 
-        // Return general titles as an array
-        return structuredResults;
+        const rem = await generatedContentModel.deleteMany(query);
+       await generatedContentModel.create(structuredResults)
+        return;
     } catch (error) {
         console.error("Error generating title and articles:", error);
         throw error;
@@ -92,15 +106,14 @@ const generateContent = async (req, res) => {
             return res.status(400).json({ success: false, error: 'No brand Name provided' });
         }
 
-        const scrapeResponse = await scrapedDBControllers.getScrapedData(brandName, stockName);
+        const scrapeResponse = await getGeneratedContentData(brandName, stockName);
 
         if (!scrapeResponse || scrapeResponse.length === 0) {
             return res.status(404).json({ success: false, error: 'No content found for the given brand and stock' });
         }
 
-        const organizedArticles = await generateTitleAndArticles(scrapeResponse);
 
-        res.json({ success: true, organizedArticles });
+        return res.json({ success: true, organizedArticles: scrapeResponse });
     } catch (error) {
         console.error("Error in generateContent:", error);
         res.status(500).json({ success: false, error: error.message });
@@ -109,5 +122,6 @@ const generateContent = async (req, res) => {
 
 
 export {
-    generateContent
+    generateContent,
+    generateTitleAndArticles
 }

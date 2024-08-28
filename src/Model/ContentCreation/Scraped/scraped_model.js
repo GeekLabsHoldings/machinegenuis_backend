@@ -31,3 +31,4 @@ const scrapedSchema = new Schema({
 
 const scrapedModel = model('Scraped', scrapedSchema);
 export default scrapedModel;
+export { scrapedSchema }
