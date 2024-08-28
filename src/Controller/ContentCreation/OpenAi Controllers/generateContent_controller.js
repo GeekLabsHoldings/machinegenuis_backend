@@ -19,8 +19,7 @@ const generateTitleAndArticles = async (brandName, stockName) => {
         const articlesTitles = articles.map((item, index) => `Title: ${item.title}`).join('\n\n');
         // Create a detailed prompt explaining the task
         const prompt = `
-            You are given a list of article titles. Your task is to group these titles that talk about same news or event under general and suitable headings and provide a title for each group. Also, return any titles that do not fit into any group separately.
-            
+            You are given a list of article titles. Your task is to group these titles that talk about same news or event under specific and detailed relevant headings provide a title for each group. Also, return any titles that do not fit into any group separately.
             Here are the article titles:
             
             ${articlesTitles}
