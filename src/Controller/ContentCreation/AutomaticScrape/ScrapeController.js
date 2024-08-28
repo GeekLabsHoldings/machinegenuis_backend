@@ -12,7 +12,9 @@ class ScrapeController {
                 { brandName: "investocracy", stockName: "AMD" },
                 { brandName: "investocracy", stockName: "AMZN" },
                 { brandName: "investocracy", stockName: "PLTR" },
-                { brandName: "investocracy", stockName: "TSLA" }
+                { brandName: "investocracy", stockName: "TSLA" },
+                { brandName: "streetPoliticsAfrica", stockName: "" },
+                { brandName: "streetPoliticsUK", stockName: "" }
             ]
         this.axiosRequest = axios.create({
             baseURL: `${process.env.EC2_BACKEND_HOST}`,
