@@ -2,7 +2,6 @@ import { app } from './app';
 import 'dotenv/config';
 import { DBConnection } from './DbSetup/DbConfig';
 import ScrapCronJob from './Utils/CronJobs/ScrapCronJob';
-import Ec2Service from './Service/AWS/EC2';
 
 const port = process.env.PORT || 4000
 app.listen(port, async () => {

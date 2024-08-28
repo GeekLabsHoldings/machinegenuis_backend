@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import scraped_dataBase from "../../../Model/ContentCreation/Scraped/scraped_model";
 import 'dotenv/config';
+import generatedContentModel from "../../../Model/ContentCreation/Generated/GeneratedContent_Model";
 
 const getScrapedData = async (brandName, stockName) => {
     try {
@@ -8,13 +9,27 @@ const getScrapedData = async (brandName, stockName) => {
         if (stockName) {
             query.stock = stockName;
         }
-        const results = await scraped_dataBase.find(query);
-        return results.reverse().slice(0, 100);
+        const results = await scraped_dataBase.find(query).skip(0).limit(70);
+        return results.reverse();
     } catch (error) {
         console.error("Error occurred:", error);
         throw new Error("Internal Server Error");
     }
 };
+
+const getGeneratedContentData = async (brandName, stockName) => {
+    try {
+        const query = { brand: brandName };
+        if (stockName) {
+            query.stock = stockName;
+        }
+        const result = await generatedContentModel.find(query).sort({ createdAt: -1 })
+        return result
+    } catch (error) {
+        console.error("Error occurred:", error);
+        throw new Error("Internal Server Error");
+    }
+}
 
 const get_scraped_fromDB = async (req, res) => {
     try {
@@ -44,4 +59,4 @@ const delete_scraped_fromDB = async (req, res) => {
     }
 };
 
-export { get_scraped_fromDB, getScrapedData , delete_scraped_fromDB};
+export { get_scraped_fromDB, getScrapedData, delete_scraped_fromDB, getGeneratedContentData };
