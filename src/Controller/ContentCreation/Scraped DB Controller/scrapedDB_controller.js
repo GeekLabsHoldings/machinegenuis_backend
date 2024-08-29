@@ -9,9 +9,8 @@ const getScrapedData = async (brandName, stockName, session) => {
         if (stockName) {
             query.stock = stockName;
         }
-        const results = await scraped_dataBase.find(query).session(session)
-            .skip(0).limit(70);
-        return results.reverse();
+        const results = await scraped_dataBase.find(query).session(session).sort({time : -1}).limit(70)
+        return results
     } catch (error) {
         console.error("Error occurred:", error);
         throw new Error("Internal Server Error");

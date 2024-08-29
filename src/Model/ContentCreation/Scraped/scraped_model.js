@@ -17,6 +17,11 @@ const scrapedSchema = new Schema({
     type: String,
     required: false
   },
+  time:
+  {
+    type: Number,
+    required: false
+  },
   brand:
   {
     type: String,
