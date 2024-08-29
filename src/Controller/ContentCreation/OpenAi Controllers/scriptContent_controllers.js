@@ -4,29 +4,23 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-
 const generateTitleAndContent = async (content, myPrompt) => {
   try {
-    const prompt = `${myPrompt} Here's the articles: \n\n${content} please give me the response in html format
-     without head and body tag by setting any headline in h4 tag and paragraphs in p tag`;
-    if(myPrompt === "HTML")
-    {
-     const prompt = ` Here's the articles: \n\n${content} please give me the response in html format
-                      without head and body tag by setting any headline in h4 tag and paragraphs in p tag with intro and body and outro as a h4 tag like that :-
-                      
-                      <h4>intro</h4>
-                      <p>......</p>
-                      <p>......</p>
-                      <p>......</p>
-                      <h4>body</h4>
-                      <p>......</p>
-                      <p>......</p>
-                      <p>......</p>
-                      <h4>outro</h4>
-                      <p>......</p>
-                      <p>......</p>
-                      <p>......</p>
-                      `
+    if (myPrompt === "HTML") {
+      var prompt = `Here's the articles: \n\n ${content} "Please generate a response that follows this structure:
+        1. **Intro**: Begin with a brief introduction related to the topic.
+        2. **Body**: Provide the main content or explanation in detail.
+        3. **Outro**: Conclude with a closing statement summarizing the topic or providing a final thought.
+        The response should be formatted as:
+        <h4>Intro</h4>
+        <p>[Your introductory text here]</p>
+        <h4>Body</h4>
+        <p>[Your main content here]</p>
+        <h4>Outro</h4>
+        <p>[Your closing statement here]</p>`;
+    } else {
+      var prompt = `${myPrompt} Here's the articles: \n\n${content} please give me the response in html format
+      without head and body tag by setting any headline in h4 tag and paragraphs in p tag`;
     }
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -36,7 +30,7 @@ const generateTitleAndContent = async (content, myPrompt) => {
     const result = completion.choices[0].message.content.trim();
     const [...newContent] = result;
     return {
-      content: newContent.join("")
+      content: newContent.join(""),
     };
   } catch (error) {
     console.error("Error generating title and content:", error);
@@ -91,7 +85,7 @@ const generateContent = async (req, res) => {
                 Make it conversational, yet professional.
                 Make the conclusion wrap up all the main ideas from the article and give it a sarcastic spin
                 Don't sound repetitive.
-                Ask about the reader's opinions in an engaging manner, wrapping up the script.`
+                Ask about the reader's opinions in an engaging manner, wrapping up the script.`;
     } else if (brandName == "streetPoliticsAfrica") {
       prompt = `Write an Africa-based political script in the third person point of view. It needs to be at least 1700 words that are as human as possible. We have a right-leaning perspective, especially when discussing criticism of the west. Keep the tone professional yet engaging. We stand with the people and are against western countries involvement in Africa and non-African countries attempts to destabilize Africa..Defend African sovereignty and unity. The article will need to be divided into three sections.
                 Same script format, without the host and scene details.
@@ -110,7 +104,7 @@ const generateContent = async (req, res) => {
                 Make it conversational, yet professional.
                 Make the conclusion wrap up all the main ideas from the article and give it a sarcastic spin
                 Don't sound repetitive.
-                Ask about the reader's opinions in an engaging manner, wrapping up the script.`
+                Ask about the reader's opinions in an engaging manner, wrapping up the script.`;
     } else if (brandName == "investocracy") {
       prompt = `Write a stock-market-centered video that is at least 2500 words, using a tone that is human, engaging, professional, ecstatic, storytelling and direct. Write in a third point of view. Maintain a professional, direct tone. it needs to be divided into three parts.
                 Intro:
@@ -134,10 +128,8 @@ const generateContent = async (req, res) => {
     } else if (brandName == "movieMyth") {
       prompt = `write a recap of from this content
       write it in detail, giving me a scene by scene explanation, without titles.`;
-    }
-    else
-    {
-        return res
+    } else {
+      return res
         .status(404)
         .json({ success: false, error: "brandName Not correct" });
     }
@@ -173,7 +165,7 @@ const convertContentTo_HTML = async (req, res) => {
     }
 
     const finalArticles = [];
-    let prompt = "HTML"
+    let prompt = "HTML";
     try {
       const { title, content } = await generateTitleAndContent(
         contentBody,
@@ -195,8 +187,4 @@ const convertContentTo_HTML = async (req, res) => {
   }
 };
 
-
-export {
-  generateContent,
-  convertContentTo_HTML
-};
+export { generateContent, convertContentTo_HTML };
