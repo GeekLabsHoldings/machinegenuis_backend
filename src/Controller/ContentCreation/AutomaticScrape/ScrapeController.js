@@ -3,6 +3,7 @@ import { generateTitleAndArticles } from '../OpenAi Controllers/generateContent_
 class ScrapeController {
     endpoints;
     axiosRequest;
+    newBrandsArticle;
     constructor() {
         this.endpoints =
             [
@@ -24,15 +25,28 @@ class ScrapeController {
                 "Content-Type": "application/json",
             },
         });
+        this.newBrandsArticle = [];
     }
     async generateScraping() {
         for (const item of this.endpoints) {
             const url = item.brandName + (item.stockName ? `/${item.stockName}` : "");
             const res = await this.axiosRequest.get(`/collect/${url}`);
-            console.log({ result: res.data.StartOpenAI })
+            console.log({ brandName: item.brandName, stockName: item.stockName, result: res.data.StartOpenAI })
             if (res.data.StartOpenAI) {
+                this.newBrandsArticle.push(item);
+            }
+        }
+    }
+
+    async generateTitleAndArticles() {
+        try {
+            console.log({ res: this.newBrandsArticle });
+            for (const item of this.newBrandsArticle) {
                 await generateTitleAndArticles(item.brandName, item.stockName);
             }
+        } catch (error) {
+            console.log("error when generate title and Articles=======>", { error });
+            return;
         }
     }
 }

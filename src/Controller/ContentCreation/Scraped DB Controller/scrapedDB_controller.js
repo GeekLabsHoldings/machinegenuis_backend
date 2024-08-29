@@ -3,13 +3,14 @@ import scraped_dataBase from "../../../Model/ContentCreation/Scraped/scraped_mod
 import 'dotenv/config';
 import generatedContentModel from "../../../Model/ContentCreation/Generated/GeneratedContent_Model";
 
-const getScrapedData = async (brandName, stockName) => {
+const getScrapedData = async (brandName, stockName, session) => {
     try {
         const query = { brand: brandName };
         if (stockName) {
             query.stock = stockName;
         }
-        const results = await scraped_dataBase.find(query).skip(0).limit(70);
+        const results = await scraped_dataBase.find(query).session(session)
+            .skip(0).limit(70);
         return results.reverse();
     } catch (error) {
         console.error("Error occurred:", error);
@@ -62,7 +63,7 @@ const delete_scraped_fromDB = async (req, res) => {
 const delete_data_fromDB = async (req, res) => {
     try {
         const { brandName, stockName } = req.body;
-        const query = { brand: brandName};
+        const query = { brand: brandName };
         if (stockName) {
             query.stock = stockName;
         }
@@ -76,4 +77,4 @@ const delete_data_fromDB = async (req, res) => {
     }
 };
 
-export { get_scraped_fromDB, getScrapedData , delete_scraped_fromDB , delete_data_fromDB , getGeneratedContentData};
+export { get_scraped_fromDB, getScrapedData, delete_scraped_fromDB, delete_data_fromDB, getGeneratedContentData };

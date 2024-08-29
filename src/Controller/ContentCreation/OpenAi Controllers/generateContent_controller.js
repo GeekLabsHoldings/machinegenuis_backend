@@ -14,8 +14,10 @@ const openai = new OpenAI({
 });
 
 const generateTitleAndArticles = async (brandName, stockName) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
-        const articles = await scrapedDBControllers.getScrapedData(brandName, stockName);
+        const articles = await scrapedDBControllers.getScrapedData(brandName, stockName, session);
         const articlesTitles = articles.map((item, index) => `Title: ${item.title}`).join('\n\n');
         // Create a detailed prompt explaining the task
         const prompt = `
@@ -86,12 +88,16 @@ const generateTitleAndArticles = async (brandName, stockName) => {
             query.stock = stockName;
         }
 
-        await generatedContentModel.deleteMany(query);
-        await generatedContentModel.create(structuredResults)
+        await generatedContentModel.deleteMany(query).session(session);
+        await generatedContentModel.create(structuredResults, { session });
+        await session.commitTransaction();
         return;
     } catch (error) {
+        await session.abortTransaction();
         console.error("Error generating title and articles:", error);
-        throw error;
+        return;
+    } finally {
+        await session.endSession();
     }
 };
 

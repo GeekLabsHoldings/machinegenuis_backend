@@ -10,27 +10,34 @@ const delay = async (time: number): Promise<any> => {
     });
 }
 const ScrapCronJob = cron.schedule('0 * * * *', async () => {
+    const day = moment().day();
+    if (day === 5 || day === 6) {
+        console.log("========Today is a vacation===================");
+        return;
+    }
+    const hour = moment().hour();
+    if (hour <= 9 || hour >= 17) {
+        console.log("================After work hour================");
+        return;
+    }
+    const instanceId = process.env.INSTANCE_ID as string
+    const ec2Service = new Ec2Service(instanceId);
+    const scrapeController = new ScrapeController()
     try {
         console.log("===================cron job started=======================");
-        const day = moment().day();
-        if (day === 5 || day === 6)
-            return;
-        const hour = moment().hour();
-        if (hour <= 7 || hour >= 19)
-            return;
-        const instanceId = process.env.INSTANCE_ID as string
-        const ec2Service = new Ec2Service(instanceId);
         await ec2Service.instanceActionStart();
         await delay(40000);
-        console.log("After wait 20s")
-        const scrapeController = new ScrapeController()
+        console.log("After wait 40s")
         await scrapeController.generateScraping()
-        await ec2Service.instanceActionStop();
     } catch (error) {
         console.log("=======================>Enter inside error<===================")
         console.log("==========================>", { error })
     } finally {
-        console.log("===================cron job ended=======================");
+        await ec2Service.instanceActionStop();
+        console.log("===================instance job ended=======================");
+        await scrapeController.generateTitleAndArticles();
+        console.log("===================Cron job ended=======================")
+
     }
 });
 
