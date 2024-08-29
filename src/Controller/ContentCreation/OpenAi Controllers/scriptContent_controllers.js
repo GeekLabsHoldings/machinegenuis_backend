@@ -9,16 +9,34 @@ const generateTitleAndContent = async (content, myPrompt) => {
   try {
     const prompt = `${myPrompt} Here's the articles: \n\n${content} please give me the response in html format
      without head and body tag by setting any headline in h4 tag and paragraphs in p tag`;
+    if(myPrompt === "HTML")
+    {
+     const prompt = ` Here's the articles: \n\n${content} please give me the response in html format
+                      without head and body tag by setting any headline in h4 tag and paragraphs in p tag with intro and body and outro as a h4 tag like that :-
+                      
+                      <h4>intro</h4>
+                      <p>......</p>
+                      <p>......</p>
+                      <p>......</p>
+                      <h4>body</h4>
+                      <p>......</p>
+                      <p>......</p>
+                      <p>......</p>
+                      <h4>outro</h4>
+                      <p>......</p>
+                      <p>......</p>
+                      <p>......</p>
+                      `
+    }
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
     });
 
     const result = completion.choices[0].message.content.trim();
-    const [title, ...newContent] = result.split("\n");
+    const [...newContent] = result;
     return {
-      title: title.replace("Title: ", "").trim(),
-      content: newContent.join(" ").trim(),
+      content: newContent.join("")
     };
   } catch (error) {
     console.error("Error generating title and content:", error);
@@ -145,6 +163,40 @@ const generateContent = async (req, res) => {
   }
 };
 
+const convertContentTo_HTML = async (req, res) => {
+  try {
+    const { contentBody } = req.body;
+    if (!contentBody) {
+      return res
+        .status(400)
+        .json({ success: false, error: "No content provided" });
+    }
+
+    const finalArticles = [];
+    let prompt = "HTML"
+    try {
+      const { title, content } = await generateTitleAndContent(
+        contentBody,
+        prompt
+      );
+      finalArticles.push({ title, content });
+    } catch (error) {
+      console.error("Error generating title and content:", error);
+      finalArticles.push({
+        title: "Error generating title",
+        content: "Failed to process content",
+      });
+    }
+
+    res.json({ success: true, articles: finalArticles });
+  } catch (error) {
+    console.error("Error processing request:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+
 export {
-  generateContent
+  generateContent,
+  convertContentTo_HTML
 };

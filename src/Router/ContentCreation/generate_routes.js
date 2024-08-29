@@ -51,5 +51,7 @@ g_routes.post('/generate-thumbnails', generateTitles.generateContentThumbnails);
 //////////
 g_routes.post('/transcript-audio' , transcriptAudio.convertor);
 
+//////////
+g_routes.post('/format-to-html', finalizeScriptContent.convertContentTo_HTML);
 export default g_routes;
 export { msg }
