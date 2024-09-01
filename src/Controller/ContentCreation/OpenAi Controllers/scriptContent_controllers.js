@@ -7,20 +7,25 @@ const openai = new OpenAI({
 const generateTitleAndContent = async (content, myPrompt) => {
   try {
     if (myPrompt === "HTML") {
-      var prompt = `Here's the articles: \n\n ${content} "Please generate a response that follows this structure:
-        1. **Intro**: Begin with a brief introduction related to the topic.
-        2. **Body**: Provide the main content or explanation in detail.
-        3. **Outro**: Conclude with a closing statement summarizing the topic or providing a final thought.
-        The response should be formatted as:
+      var prompt = `Here's the articles: \n\n ${content} get this content in html format like this structure:-  
         <h4>Intro</h4>
         <p>[Your introductory text here]</p>
         <h4>Body</h4>
         <p>[Your main content here]</p>
         <h4>Outro</h4>
-        <p>[Your closing statement here]</p>`;
+        <p>[Your closing statement here]</p>
+        NOTE*  PLEASE I NEED THE ORIGINAL ARTICLE , DON'T EDIT ON IT ANY WAAAAAAAAAAAAAY!!!
+        `;
     } else {
-      var prompt = `${myPrompt} Here's the articles: \n\n${content} please give me the response in html format
-      without head and body tag by setting any headline in h4 tag and paragraphs in p tag`;
+      var prompt = `${myPrompt} Here's the articles: \n\n${content} get this content in html format like this structure:-  
+        <h4>Intro</h4>
+        <p>[Your introductory text here]</p>
+        <h4>Body</h4>
+        <p>[Your main content here]</p>
+        <h4>Outro</h4>
+        <p>[Your closing statement here]</p>
+        NOTE*  PLEASE I NEED THE ORIGINAL ARTICLE , DON'T EDIT ON IT ANY WAAAAAAAAAAAAAY!!!
+        `;
     }
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
