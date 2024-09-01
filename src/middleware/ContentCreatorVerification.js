@@ -33,7 +33,8 @@ const decodeToken = (req , res)  =>
     const authHeader = req.header('Authorization') || req.header('authorization')
     if (!authHeader)
     {
-        return res.status(401).json({ message : "Token is req."})
+        res.status(401).json({ message : "Token is req."})
+        return null
     }
 
     const token = authHeader.split(' ')[1]    
@@ -47,7 +48,8 @@ const decodeToken = (req , res)  =>
     catch(err)
     {
         console.log(err);        
-        return res.status(401).json({ message: "Invalid Token" })
+        res.status(401).json({ message: "Invalid Token" })
+        return null
     }    
 } 
 
