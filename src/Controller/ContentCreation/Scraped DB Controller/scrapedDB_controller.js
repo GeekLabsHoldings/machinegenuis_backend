@@ -23,7 +23,7 @@ const getGeneratedContentData = async (brandName, stockName) => {
         if (stockName) {
             query.stock = stockName;
         }
-        const result = await generatedContentModel.find(query).sort({ createdAt: -1 })
+        const result = await generatedContentModel.find(query)
         return result
     } catch (error) {
         console.error("Error occurred:", error);
@@ -76,4 +76,17 @@ const delete_data_fromDB = async (req, res) => {
     }
 };
 
-export { get_scraped_fromDB, getScrapedData, delete_scraped_fromDB, delete_data_fromDB, getGeneratedContentData };
+/////////////////////
+const get_generated_fromDB = async (req, res) => {
+    try {
+        const { brandName, stockName } = req.body;
+
+        const result = await getGeneratedContentData(brandName, stockName);
+        return res.status(200).json({ msg: "Generated DB fetched successfully", result });
+    } catch (error) {
+        return res.status(500).json({ msg: "Error in fetching Generated DB", error });
+    }
+};
+
+
+export { get_scraped_fromDB, getScrapedData, delete_scraped_fromDB, delete_data_fromDB, getGeneratedContentData  , get_generated_fromDB};

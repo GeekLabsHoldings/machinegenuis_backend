@@ -10,13 +10,8 @@ const delay = async (time: number): Promise<any> => {
     });
 }
 const ScrapCronJob = cron.schedule('0 * * * *', async () => {
-    const day = moment().day();
-    if (day === 5 || day === 6) {
-        console.log("========Today is a vacation===================");
-        return;
-    }
     const hour = moment().hour();
-    if (hour <= 9 || hour >= 17) {
+    if (hour <= 6 || hour >= 19) {
         console.log("================After work hour================");
         return;
     }
