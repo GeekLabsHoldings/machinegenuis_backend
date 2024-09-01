@@ -1,5 +1,4 @@
 require('dotenv').config()
-//const contentModel = require("../../../Model/ContentCreation/Content/content_model");
 const verifyToken = require('../../../middleware/ContentCreatorVerification')
 const mongoose = require("mongoose");
 import contentModel from '../../../Model/ContentCreation/Content/content_model'
@@ -13,9 +12,13 @@ const get_all_content = async (req, res) => {
     const LIMIT = querying.limit;
     const PAGE = querying.page;
     const SKIP = (PAGE - 1) * LIMIT;
+
+    const decodedToken = JSON.parse(verifyToken.decodeToken(req, res));
+    if (!decodedToken) return; // Stop further execution if token is invalid or missing to prevent the application crash 
+    const userId = decodedToken._id;
     try {
-        const content = await contentModel.find({}, { "__v": false }).limit(LIMIT).skip(SKIP);;
-        res.json(content);
+        const content = await contentModel.find({user_id: userId}, { "__v": false }).limit(LIMIT).skip(SKIP);;
+        res.json({message: "successfully" , content});
     }
     catch (error) {
         res.status(500).json({ error: error.message });
@@ -26,6 +29,7 @@ const add_new_content = async (req, res) => {
     const { content_title, content, brand, content_type, views, date, approvals, movie, SEO } = req.body;
 
     const decodedToken = JSON.parse(verifyToken.decodeToken(req, res));
+    if (!decodedToken) return; // Stop further execution if token is invalid or missing to prevent the application crash 
     console.log(decodedToken);
 
     const user_id = decodedToken._id;
