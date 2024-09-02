@@ -19,8 +19,7 @@ const get_all_content = async (req, res) => {
         let content = await contentModel.find({ user_id: userId }, { "__v": false })
             .limit(LIMIT)
             .skip(SKIP);
-
-        content = content.reverse(); 
+            
         res.json({message: "successfully" , content});
     }
     catch (error) {
