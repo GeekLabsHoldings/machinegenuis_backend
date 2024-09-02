@@ -3,3 +3,4 @@
 /dist
 /.wwebjs_*
 /.env
+/yarn.lock
