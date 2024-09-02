@@ -51,7 +51,7 @@ const split = async function (data) {
     segments.push({
       part: part,
       "time duration": `${startTime}:${endTime}`,
-      transcription: { content: recappedContent },
+      transcription: { content: recappedContent.content },
     });
   }
 
@@ -96,11 +96,5 @@ const convertor = async (req, res) => {
     return res.status(500).json({ error });
   }
 };
-
-// const convertor = async (req, res) => 
-// {
-//   const response = await recapContent("Helow Iam Moahmed Gow ar you Couls you please eat wit me and playing");
-//   return res.json({response})
-// }
   
 export { convertor };
