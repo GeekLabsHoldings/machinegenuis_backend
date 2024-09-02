@@ -1,7 +1,6 @@
 import { Router, Request, Response } from 'express';
 import systemError from '../../Utils/Error/SystemError';
 import attendanceController from '../../Controller/HR/Attendance/AttendanceController';
-import moment from 'moment-timezone';
 
 const AttendanceRouter = Router();
 

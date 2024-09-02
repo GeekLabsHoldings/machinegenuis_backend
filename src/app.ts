@@ -14,6 +14,8 @@ import bodyParser from 'body-parser';
 
 import path from "path"
 import content_creation_router from './Router/ContentCreation/main';
+import { checkAuthority } from './middleware/verifyToken';
+import RouterEnum from './Utils/Routes';
 
 app.use('/uploads', express.static(path.join(__dirname, "uploads")))
 // Middleware for parsing request body
@@ -39,11 +41,12 @@ app.get('/check-tld', async (_, res) => {
 })
 
 
-app.use('/authentication', AuthenticationRouter);
-app.use('/hr', HR_Router);
-app.use('/admin', AdminRouter);
-app.use('/user', UserRouter);
-app.use('/calendly', CalendlyRouter);
-app.use('/un-authorized', unAuthorizerApis)
-app.use('/content-creation', content_creation_router)
+app.use(`/${RouterEnum.authentication}`, AuthenticationRouter);
+app.use(`/${RouterEnum.unAuthorizer}`, unAuthorizerApis)
+app.use(`/${RouterEnum.calendly}`, CalendlyRouter);
+app.use(checkAuthority)
+app.use(`/${RouterEnum.hr}`, HR_Router);
+app.use(`/${RouterEnum.admin}`, AdminRouter);
+app.use(`/${RouterEnum.user}`, UserRouter);
+app.use(`/${RouterEnum.ContentCreation}`, content_creation_router)
 export { app };

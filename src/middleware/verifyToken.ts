@@ -4,34 +4,19 @@ import employeeService from "../Service/Employee/EmployeeService";
 import { ErrorMessages } from "../Utils/Error/ErrorsEnum";
 import { DepartmentEnum } from "../Utils/DepartmentAndRoles";
 import { EmployeeTypeEnum } from "../Utils/employeeType";
+import IEmployeeModel from "../Model/Employee/IEmployeeModel";
+import systemError from "../Utils/Error/SystemError";
+import RouterEnum from "../Utils/Routes";
 
-const checkEmployeeAuthority = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-): Promise<void> => {
-    try {
-        const authorizationHeader = req.headers["authorization"];
-        const token = authorizationHeader && authorizationHeader.split(" ")[1];
-        const result = await authenticationService.verifyToken(token as string);
-        req.body.decodedToken = result;
-        const employee = await employeeService.getOneEmployee(req.body.decodedToken._id);
-        if (!employee || !(employee.token === token)) {
-            throw ErrorMessages.USER_TOKEN_IS_INVALID
-        }
-        req.body.decodedToken = employee;
-        next();
-    } catch (err) {
-        res.status(401).json({
-            message: err,
-        });
-        return;
+
+
+declare module 'express' {
+    export interface Request {
+        currentUser?: IEmployeeModel;
     }
-};
+}
 
-
-
-const check_HR_Authority = async (
+const checkAuthority = async (
     req: Request,
     res: Response,
     next: NextFunction
@@ -42,50 +27,49 @@ const check_HR_Authority = async (
         const result = await authenticationService.verifyToken(token as string);
         req.body.decodedToken = result;
         const employee = await employeeService.getOneEmployee(req.body.decodedToken._id);
-        req.body.decodedToken = employee;
         if (!employee || !(employee.token === token)) {
             throw ErrorMessages.USER_TOKEN_IS_INVALID
         }
-        if (employee.department[0] === DepartmentEnum.CEO)
-            return next();
-        if (!employee.department.includes((DepartmentEnum.HR)))
-            throw ErrorMessages.USER_TOKEN_IS_INVALID
-        return next();
-    } catch (err) {
+        req.currentUser = employee;
+        req.body.decodedToken = employee;
+        if (employee.department.includes(DepartmentEnum.CEO))
+            next();
+        else {
+            console.log(req.url);
+            const knownUrl = req.url.split('/')[1]
+            console.log({ knownUrl });
+            const checkAuth = (() => {
+                switch (knownUrl) {
+                    case EmployeeTypeEnum.ADMIN:
+                    case EmployeeTypeEnum.USER:
+                        return checkTypeAuthority(employee.type, knownUrl);
+                    case RouterEnum.checkAuth:
+                    case RouterEnum.logout:
+                        return true
+                    default:
+                        return checkDepartmentAuthority(employee.department, knownUrl);
+                }
+            })
+            if (checkAuth())
+                next();
+            else
+                return systemError.setStatus(401).setMessage(ErrorMessages.USER_TOKEN_IS_INVALID).throw();
+        }
+
+    } catch (error) {
         res.status(401).json({
-            message: err,
+            message: error,
         });
         return;
     }
 }
 
+const checkDepartmentAuthority = (userDepartments: string[], endpointDepartment: string): boolean => {
+    return userDepartments.includes(endpointDepartment);
+}
 
-const checkAdminAuthority = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-): Promise<void> => {
-    try {
-        const authorizationHeader = req.headers["authorization"];
-        const token = authorizationHeader && authorizationHeader.split(" ")[1];
-        const result = await authenticationService.verifyToken(token as string);
-        req.body.decodedToken = result;
-        const employee = await employeeService.getOneEmployee(req.body.decodedToken._id);
-        req.body.decodedToken = employee;
-        if (!employee || !(employee.token === token)) {
-            throw ErrorMessages.USER_TOKEN_IS_INVALID
-        }
-        if (employee.department[0] === DepartmentEnum.CEO)
-            return next();
-        if (!(employee.type === EmployeeTypeEnum.ADMIN))
-            throw ErrorMessages.USER_TOKEN_IS_INVALID
-        next();
-    } catch (err) {
-        res.status(401).json({
-            message: err,
-        });
-        return;
-    }
-};
+const checkTypeAuthority = (userType: string, endpointType: string): boolean => {
+    return userType === endpointType;
+}
 
-export { checkEmployeeAuthority, check_HR_Authority, checkAdminAuthority };
+export { checkAuthority };
