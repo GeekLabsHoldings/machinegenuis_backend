@@ -1,7 +1,6 @@
 require('dotenv').config()
 const verifyToken = require('../../../middleware/ContentCreatorVerification')
 const mongoose = require("mongoose");
-import { reverse } from 'dns';
 import contentModel from '../../../Model/ContentCreation/Content/content_model'
 
 
@@ -32,8 +31,8 @@ const get_all_content = async (req, res) => {
 const add_new_content = async (req, res) => {
     const { content_title, content, brand, content_type, views, date, approvals, movie, SEO } = req.body;
 
-    const user_id = req.currentUser._id;
-    const user_name = req.currentUser.email
+    const user_id = req.body.currentUser._id;
+    const user_name = req.body.currentUser.email
     console.log("userID", user_id);
 
     try {
