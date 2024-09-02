@@ -30,7 +30,7 @@ AuthenticationRouter.post('/logout', checkAuthority,async (req: Request, res: Re
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-        const { _id } = req.body.decodedToken;
+        const { _id } = req.body.currentUser;
         const authenticationController = new AuthenticationController(session);
         await authenticationController.logout(_id);
         await session.commitTransaction();
@@ -44,7 +44,7 @@ AuthenticationRouter.post('/logout', checkAuthority,async (req: Request, res: Re
 })
 
 AuthenticationRouter.get('/check-auth', checkAuthority,async (req: Request, res: Response): Promise<Response> => {
-    return res.json({ result: req.body.decodedToken });
+    return res.json({ result: req.body.currentUser });
 });
 
 export default AuthenticationRouter;

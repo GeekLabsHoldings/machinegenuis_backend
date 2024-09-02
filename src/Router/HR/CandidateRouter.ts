@@ -117,7 +117,7 @@ CandidateRouter.put('/convert-to-employee/:_id', async (req: Request, res: Respo
     session.startTransaction();
     try {
         const { _id } = req.params;
-        const employer_id = req.body.decodedToken;
+        const employer_id = req.body.currentUser;
         const { paper, birthday, email, theme, password } = req.body;
         const employeeController = new EmployeeController();
 

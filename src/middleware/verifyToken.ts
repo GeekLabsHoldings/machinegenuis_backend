@@ -4,17 +4,12 @@ import employeeService from "../Service/Employee/EmployeeService";
 import { ErrorMessages } from "../Utils/Error/ErrorsEnum";
 import { DepartmentEnum } from "../Utils/DepartmentAndRoles";
 import { EmployeeTypeEnum } from "../Utils/employeeType";
-import IEmployeeModel from "../Model/Employee/IEmployeeModel";
 import systemError from "../Utils/Error/SystemError";
 import RouterEnum from "../Utils/Routes";
 
 
 
-declare module 'express' {
-    export interface Request {
-        currentUser?: IEmployeeModel;
-    }
-}
+
 
 const checkAuthority = async (
     req: Request,
@@ -25,13 +20,12 @@ const checkAuthority = async (
         const authorizationHeader = req.headers["authorization"];
         const token = authorizationHeader && authorizationHeader.split(" ")[1];
         const result = await authenticationService.verifyToken(token as string);
-        req.body.decodedToken = result;
-        const employee = await employeeService.getOneEmployee(req.body.decodedToken._id);
+        req.body.currentUser = result;
+        const employee = await employeeService.getOneEmployee(req.body.currentUser._id);
         if (!employee || !(employee.token === token)) {
             throw ErrorMessages.USER_TOKEN_IS_INVALID
         }
-        req.currentUser = employee;
-        req.body.decodedToken = employee;
+        req.body.currentUser = employee;
         if (employee.department.includes(DepartmentEnum.CEO))
             next();
         else {
