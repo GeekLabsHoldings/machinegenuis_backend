@@ -69,7 +69,7 @@ const checkDepartmentAuthority = (userDepartments: string[], endpointDepartment:
 }
 
 const checkTypeAuthority = (userType: string, endpointType: string): boolean => {
-    return userType === endpointType;
+    return userType === EmployeeTypeEnum.ADMIN || userType === endpointType;
 }
 
 export { checkAuthority };
