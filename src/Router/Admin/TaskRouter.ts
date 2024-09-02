@@ -16,7 +16,7 @@ TaskRouter.post('/create', async (req: Request, res: Response): Promise<Response
             end: req.body.end,
             startNumber: moment(req.body.start, 'YYYY-MM-DD').startOf('day').valueOf(),
             endNumber: moment(req.body.end, 'YYYY-MM-DD').endOf('day').valueOf(),
-            createdBy: req.body.decodedToken._id,
+            createdBy: req.body.currentUser._id,
             backgroundColor: req.body.backgroundColor,
             assignedTo: req.body.assignedTo
         }
@@ -37,7 +37,7 @@ TaskRouter.put('/edit-task/:_id', async (req: Request, res: Response): Promise<R
             end: req.body.end,
             startNumber: moment(req.body.start, 'YYYY-MM-DD').startOf('day').valueOf(),
             endNumber: moment(req.body.end, 'YYYY-MM-DD').endOf('day').valueOf(),
-            createdBy: req.body.decodedToken._id,
+            createdBy: req.body.currentUser._id,
             backgroundColor: req.body.backgroundColor,
             assignedTo: req.body.assignedTo
         }
@@ -51,7 +51,7 @@ TaskRouter.put('/edit-task/:_id', async (req: Request, res: Response): Promise<R
 
 TaskRouter.get('/department-task', async (req: Request, res: Response): Promise<Response> => {
     try {
-        const department = req.body.decodedToken.department;
+        const department = req.body.currentUser.department;
         const taskController = new TaskController();
         const result = await taskController.getDepartmentTask(department);
         return res.json(result);

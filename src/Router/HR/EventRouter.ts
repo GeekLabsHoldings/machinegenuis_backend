@@ -15,7 +15,7 @@ EventRouter.post('/create', async (req: Request, res: Response): Promise<Respons
             end: req.body.end,
             startNumber: moment(req.body.start, 'YYYY-MM-DD').startOf('day').valueOf(),
             endNumber: moment(req.body.end, 'YYYY-MM-DD').endOf('day').valueOf(),
-            createdBy: req.body.decodedToken._id,
+            createdBy: req.body.currentUser._id,
             backgroundColor: req.body.backgroundColor,
         }
         const eventController = new EventController();
@@ -35,7 +35,7 @@ EventRouter.put('/edit-event/:_id', async (req: Request, res: Response): Promise
             end: req.body.end,
             startNumber: moment(req.body.start, 'YYYY-MM-DD').startOf('day').valueOf(),
             endNumber: moment(req.body.end, 'YYYY-MM-DD').endOf('day').valueOf(),
-            createdBy: req.body.decodedToken._id,
+            createdBy: req.body.currentUser._id,
             backgroundColor: req.body.backgroundColor,
         }
         const eventController = new EventController();

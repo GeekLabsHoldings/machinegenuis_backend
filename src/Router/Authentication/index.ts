@@ -1,9 +1,9 @@
 import { Router, Request, Response } from "express";
 import mongoose from "mongoose";
 import AuthenticationController from "../../Controller/Authentication/AuthenticationController";
-import { checkEmployeeAuthority } from "../../middleware/verifyToken";
 import systemError from "../../Utils/Error/SystemError";
 import SuccessMessage from "../../Utils/SuccessMessages";
+import { checkAuthority } from "../../middleware/verifyToken";
 
 const AuthenticationRouter = Router();
 
@@ -26,11 +26,11 @@ AuthenticationRouter.post('/', async (req: Request, res: Response): Promise<Resp
 })
 
 
-AuthenticationRouter.post('/logout', checkEmployeeAuthority, async (req: Request, res: Response): Promise<Response> => {
+AuthenticationRouter.post('/logout', checkAuthority,async (req: Request, res: Response): Promise<Response> => {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-        const { _id } = req.body.decodedToken;
+        const { _id } = req.body.currentUser;
         const authenticationController = new AuthenticationController(session);
         await authenticationController.logout(_id);
         await session.commitTransaction();
@@ -43,8 +43,8 @@ AuthenticationRouter.post('/logout', checkEmployeeAuthority, async (req: Request
     }
 })
 
-AuthenticationRouter.get('/check-auth', checkEmployeeAuthority, async (req: Request, res: Response): Promise<Response> => {
-    return res.json({ result: req.body.decodedToken });
+AuthenticationRouter.get('/check-auth', checkAuthority,async (req: Request, res: Response): Promise<Response> => {
+    return res.json({ result: req.body.currentUser });
 });
 
 export default AuthenticationRouter;

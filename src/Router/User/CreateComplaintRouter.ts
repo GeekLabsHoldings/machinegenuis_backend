@@ -10,7 +10,7 @@ CreateComplaintRouter.post('/create', async (req: Request, res: Response): Promi
         const complaint: IComplaintModel = {
             complaintIssue: req.body.complaintIssue,
             description: req.body.description,
-            employee: req.body.decodedToken._id,
+            employee: req.body.currentUser._id,
             urgencyLevel: req.body.urgencyLevel || UrgencyLevelEnum.LOW,
             solved: false,
             createdAt: Date.now()

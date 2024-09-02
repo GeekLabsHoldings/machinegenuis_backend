@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import GroupRouter from './GroupRouter';
-import { check_HR_Authority } from '../../middleware/verifyToken';
 import TemplateRouter from './TemplateRouter';
 import HiringRouter from './HiringRouter';
 import AttendanceRouter from './AttendanceRouter';
@@ -13,7 +12,6 @@ import MessageRouter from './MessagesRouter';
 
 const HR_Router = Router();
 
-HR_Router.use(check_HR_Authority);
 
 HR_Router.use('/group', GroupRouter);
 HR_Router.use('/template', TemplateRouter);

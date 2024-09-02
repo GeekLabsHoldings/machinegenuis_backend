@@ -1,15 +1,10 @@
 enum DepartmentEnum {
-    Development = "Development",
-    Graphic = "Graphic",
-    HR = "HR",
-    ContentCreator = "ContentCreator",
+    HR = "hr",
+    ContentCreator = "content-creation",
     CEO = "CEO"
 }
 
 enum RoleEnum {
-    Backend = "Backend",
-    Frontend = "Frontend",
-    Full_Stack = "Full_Stack",
     ContentWriter = "ContentWriter",
     Payroll = "Payroll",
     CEO = "CEO"
@@ -18,10 +13,8 @@ enum RoleEnum {
 
 
 const DepartmentRoles = {
-    Development: ["Backend", "Frontend", "Full-stack"],
-    Graphic: ["Video-editor", "photoShop"],
-    HR: ["Recruiter", "Payroll", "Training", "Employee Relations"],
-    ContentCreator: ["Video-editor", "photoShop"],
+    hr: ["Recruiter", "Payroll", "Training", "Employee Relations"],
+    "content-creation": ["ContentWriter"],
     CEO: ['CEO']
 } as const;
 

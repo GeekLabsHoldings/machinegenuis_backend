@@ -7,7 +7,7 @@ const TaskRouter = Router()
 TaskRouter.put('/update-task/:_id', async (req: Request, res: Response): Promise<Response> => {
     try {
         const { _id } = req.params;
-        const employee = req.body.decodedToken._id;
+        const employee = req.body.currentUser._id;
         const article: { article: string; articleImg: string; articleTitle: string; } = {
             article: req.body.article,
             articleImg: req.body.articleImg,
@@ -36,7 +36,7 @@ TaskRouter.get('/get-one/:_id', async (req: Request, res: Response): Promise<Res
 
 TaskRouter.get('/all', async (req: Request, res: Response): Promise<Response> => {
     try {
-        const _id = req.body.decodedToken._id;
+        const _id = req.body.currentUser._id;
         const taskController = new TaskController();
         const result = await taskController.getMyTask(_id);
         return res.json(result);
