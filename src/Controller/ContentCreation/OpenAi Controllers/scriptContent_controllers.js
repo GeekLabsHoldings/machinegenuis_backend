@@ -55,25 +55,9 @@ const generateContent = async (req, res) => {
 
     let prompt = "";
     if (brandName == "streetPoliticsCanada") {
-      prompt = `Write a Canada-based political script in the third person point of view. It needs to be at least 1700 words that are as human as possible. We have a right-leaning perspective, especially when discussing criticism of the Liberals. Keep the tone professional yet engaging. We are against Justin Trudeau and the liberal party. The article will need to be divided into three sections.
-                Do not mention Pierre Poilievre unless it is stated in the original content.
-                Same script format, without the host and scene details.
-                1.Intro:-
-                Needs to begin with a hooking statement about attention-grabbing news. It needs to be something unique and viral.
-                Don’t reveal all the details of the news in this section. Give an introduction of the topic.
-                Keep the word limit for this section to 200 words.
-                2.Body:
-                Keep it from a third person point of view.
-                Keep it engaging by throwing in a couple of sarcastic jokes about the Liberals and Justin Trudeau.
-                Weave in conspiracy theories related to the topic being discussed.
-                Maintain a conversational style, as if entertaining another human with the latest news while keeping a serious undertone.
-                Pick the common topics between the chosen articles to flow from one point to another seamlessly.
-                Use simpler, commonly used terms.
-                3.Outro:
-                Make it conversational, yet professional.
-                Make the conclusion wrap up all the main ideas from the article and give it a conservative spin
-                Don't sound repetitive.
-                Ask about the reader's opinions in an engaging manner, wrapping up the script`;
+      prompt = await promptsController.get_brand_prompts(brandName , "script");
+      console.log(prompt).join("");
+      
     } else if (brandName == "streetPoliticsUK") {
       prompt = `Write a UK-based political script in the third person point of view. It needs to be at least 1700 words that are as human as possible. We have a right-leaning perspective, especially when discussing criticism of the government and the current Prime Minister. Keep the tone professional yet engaging. We stand with the people and are against the government, house of commons,  political parties, Politicians and the Prime Minister. The article will need to be divided into three sections.
               Same script format, without the host and scene details.
