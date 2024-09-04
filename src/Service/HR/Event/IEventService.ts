@@ -10,5 +10,6 @@ export default interface IEventService {
     getDepartmentTask(department: string): Promise<IEventModel[]>;
     updateTask(_id: string, articleImg: string, article: string, articleTitle: string, employee: string): Promise<IEventModel | null>;
     editEvent(_id: string, event: IEventModel | ICreateEventBody): Promise<IEventModel | null>;
-    deleteEvent(_id: string): Promise<boolean>
+    deleteEvent(_id: string): Promise<boolean>;
+    getBusyTime(employee_id: string, startTime: number, endTime: number): Promise<IEventModel[]>;
 }
