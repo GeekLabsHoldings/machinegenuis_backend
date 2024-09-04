@@ -5,6 +5,11 @@ export interface ICreateTaskBody extends ICreateEventBody {
     assignedTo: string
 }
 
+export interface IInterviewTypeFreeTime {
+    startTime: number,
+    endTime: number
+}
+
 export default interface ITaskController {
     createTask(task: ICreateTaskBody): Promise<IEventModel>;
     editTask(_id: string, task: ICreateTaskBody): Promise<IEventModel>;
@@ -13,4 +18,5 @@ export default interface ITaskController {
     updateTask(_id: string, article: { article: string, articleImg: string, articleTitle: string }, employee: string): Promise<IEventModel>;
     getOneTask(_id: string): Promise<IEventModel>;
     deleteTask(_id: string): Promise<string>;
+    getFreeTime(date: number, type: string, employee_id: string): Promise<IInterviewTypeFreeTime[]>;
 }

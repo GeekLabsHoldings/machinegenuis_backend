@@ -1,4 +1,4 @@
-import { PipelineStage } from "mongoose";
+import { PipelineStage, Types } from "mongoose";
 import { ICreateTaskBody } from "../../../Controller/Task/ITaskController";
 import { ICreateEventBody } from "../../../Controller/HR/Event/IEventController";
 import eventModel from "../../../Model/event/EventModel";
@@ -95,6 +95,18 @@ class EventService implements IEventService {
     async deleteEvent(_id: string): Promise<boolean> {
         const result = await eventModel.deleteOne({ _id });
         return result.deletedCount === 1;
+    }
+
+    async getBusyTime(employee_id: string, startTime: number, endTime: number): Promise<IEventModel[]> {
+        const query = {
+            assignedTo: new Types.ObjectId(employee_id),
+            startNumber: { 
+                $gte: startTime, 
+                $lte: endTime 
+            }
+        };
+        const result = await eventModel.find(query).exec();
+        return result;
     }
 
 }
