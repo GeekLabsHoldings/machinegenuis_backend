@@ -3,6 +3,7 @@ require("dotenv").config();
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+const promptsController = require('../Prompts Database/promptsDB_controller')
 
 const generateTitleAndContent = async (content, myPrompt) => {
   try {
@@ -54,7 +55,8 @@ const generateContent = async (req, res) => {
 
     let prompt = "";
     if (brandName == "streetPoliticsCanada") {
-      prompt = `Write a Canada-based political script in the third person point of view. It needs to be at least 1700 words that are as human as possible. We have a right-leaning perspective, especially when discussing criticism of the Liberals. Keep the tone professional yet engaging. We stand with Pierre Poilievre and are against Justin Trudeau. The article will need to be divided into three sections.
+      prompt = `Write a Canada-based political script in the third person point of view. It needs to be at least 1700 words that are as human as possible. We have a right-leaning perspective, especially when discussing criticism of the Liberals. Keep the tone professional yet engaging. We are against Justin Trudeau and the liberal party. The article will need to be divided into three sections.
+                Do not mention Pierre Poilievre unless it is stated in the original content.
                 Same script format, without the host and scene details.
                 1.Intro:-
                 Needs to begin with a hooking statement about attention-grabbing news. It needs to be something unique and viral.
@@ -74,28 +76,31 @@ const generateContent = async (req, res) => {
                 Ask about the reader's opinions in an engaging manner, wrapping up the script`;
     } else if (brandName == "streetPoliticsUK") {
       prompt = `Write a UK-based political script in the third person point of view. It needs to be at least 1700 words that are as human as possible. We have a right-leaning perspective, especially when discussing criticism of the government and the current Prime Minister. Keep the tone professional yet engaging. We stand with the people and are against the government, house of commons,  political parties, Politicians and the Prime Minister. The article will need to be divided into three sections.
-                Same script format, without the host and scene details.
-                IF Keir Starmer, the labor party or the tories are mentioned, we must criticize them heavily.
-                1.Intro:-
-                Needs to begin with a hooking statement about attention-grabbing news. It needs to be something unique and viral.
-                Don’t reveal all the details of the news in this section. Give an introduction of the topic.
-                Keep the word limit for this section to 200 words.
-                2.Body:
-                Keep it from a third person point of view.
-                Keep it engaging by throwing in a couple of sarcastic jokes about the government and the political parties.
-                Weave in conspiracy theories related to the topic being discussed.
-                Maintain a conversational style, as if entertaining another human with the latest news while keeping a serious undertone.
-                Pick the common topics between the chosen articles to flow from one point to another seamlessly.
-                Use simpler, commonly used terms.
-                3.Outro:
-                Make it conversational, yet professional.
-                Make the conclusion wrap up all the main ideas from the article and give it a sarcastic spin
-                Don't sound repetitive.
-                Ask about the reader's opinions in an engaging manner, wrapping up the script`;
+              Same script format, without the host and scene details.
+              IF Keir Starmer, the labor party or the tories are mentioned, we must criticize them heavily. Do not mention Keir Starmer unless it is stated in the original content.
+
+              1.Intro:-
+              Needs to begin with a hooking statement about attention-grabbing news. It needs to be something unique and viral.
+              Don’t reveal all the details of the news in this section. Give an introduction of the topic.
+              Keep the word limit for this section to 200 words.
+              2.Body:
+              Keep it from a third person point of view.
+              Keep it engaging by throwing in a couple of sarcastic jokes about the government and the political parties.
+              Weave in conspiracy theories related to the topic being discussed.
+              Maintain a conversational style, as if entertaining another human with the latest news while keeping a serious undertone.
+              Pick the common topics between the chosen articles to flow from one point to another seamlessly.
+              Use simpler, commonly used terms.
+              3.Outro:
+              Make it conversational, yet professional.
+              Make the conclusion wrap up all the main ideas from the article and give it a sarcastic spin
+              Don't sound repetitive.
+              Ask about the reader's opinions in an engaging manner, wrapping up the script.`;
     } else if (brandName == "streetPoliticsAfrica") {
-      prompt = `Write an Africa-based political script in the third person point of view. It needs to be at least 1700 words that are as human as possible. We have a right-leaning perspective, especially when discussing criticism of the west. Keep the tone professional yet engaging. We stand with the people and are against western countries involvement in Africa and non-African countries attempts to destabilize Africa..Defend African sovereignty and unity. The article will need to be divided into three sections.
+      prompt = `Write an Africa-based political script in the third person point of view. It needs to be at least 1700 words that are as human as possible. We have a Africa-centered perspective, especially when discussing criticism of the west. Keep the tone professional yet engaging. We stand with the people and are against western countries involvement in Africa and non-African countries attempts to destabilize Africa..Defend African sovereignty and unity. The article will need to be divided into three sections.
                 Same script format, without the host and scene details.
-                IF Canada is mentioned, criticize specifically the Canadian Liberal government and Trudeau.
+                [IF CONDITION] Canada is mentioned in the original content, criticizing specifically the Canadian Liberal government and Trudeau. Do not mention Canada unless it is stated in the original content.
+                IF Any country that’s an ally to African countries is mentioned; praise it.
+                DO NOT mention or include Egypt.
                 1.Intro:-
                 Needs to begin with a hooking statement about attention-grabbing news. It needs to be something unique and viral.
                 Don’t reveal all the details of the news in this section. Give an introduction of the topic.
@@ -129,11 +134,9 @@ const generateContent = async (req, res) => {
                 Wrap up the article with a persuasive statement to convince the reader to invest in the stock that we talk about.
                 Talk about the current state of the stock that we talk about, and include forecasts predicting its growth.
                 Highlight the current position of the stock that we talk about.
-                End the article with an engaging statement to ask about the readers opinions about the topic - Maintain a professional, yet conversational manner.
-`;
+                End the article with an engaging statement to ask about the reader’s opinions about the topic - Maintain a professional, yet conversational manner..`;
     } else if (brandName == "movieMyth") {
-      prompt = `write a recap of from this content
-      write it in detail, giving me a scene by scene explanation, without titles.`;
+      prompt = `Write me a movie recap for this transcript use storytelling format and write it in third person point of view, divide it into timestamps whereas each paragraph is 3 seconds only. Total maximum duration is 20 minutes. Write it in a suspenseful tone, apply emotions when applicable.`;
     } else {
       return res
         .status(404)

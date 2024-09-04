@@ -1,14 +1,14 @@
 require("dotenv").config();
 const axios = require('axios');
 
-const handleSearchImg = async (searchImgKeyword) => {
+const handleSearchImg = async (searchImgKeyword , my_api_key) => {
   try {
     const response = await axios.get('https://serpapi.com/search.json', {
       params: {
         q: searchImgKeyword,
         engine: 'google_images',
         ijn: '0',
-        api_key: process.env.SERPAPI_KEY || "1af5ce540feb70a718d1bc3038d05229fc3439667054d2e9ed4c272256468f2d"
+        api_key: my_api_key
       }
     });
     
@@ -21,15 +21,15 @@ const handleSearchImg = async (searchImgKeyword) => {
 
 const getImg = async (req, res) => {
   try {
-    const { searchImgKeyword } = req.body;
-    if (!searchImgKeyword) {
+    const { searchImgKeyword , api_key } = req.body;
+    if (!searchImgKeyword || ! api_key) {
       return res
         .status(400)
-        .json({ success: false, error: "No image name provided" });
+        .json({ success: false, error: "No image name provided or api key " });
     }
 
     
-    const images = await handleSearchImg(searchImgKeyword);
+    const images = await handleSearchImg(searchImgKeyword , api_key);
 
 
     return res.json({ success: true, images });
