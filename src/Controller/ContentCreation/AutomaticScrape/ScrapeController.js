@@ -7,7 +7,6 @@ class ScrapeController {
     constructor() {
         this.endpoints =
             [
-                { brandName: "streetPoliticsCanada", stockName: "" },
                 { brandName: "investocracy", stockName: "NVDA" },
                 { brandName: "investocracy", stockName: "AAPL" },
                 { brandName: "investocracy", stockName: "AMD" },
@@ -15,7 +14,8 @@ class ScrapeController {
                 { brandName: "investocracy", stockName: "PLTR" },
                 { brandName: "investocracy", stockName: "TSLA" },
                 { brandName: "streetPoliticsAfrica", stockName: "" },
-                { brandName: "streetPoliticsUK", stockName: "" }
+                { brandName: "streetPoliticsUK", stockName: "" },
+                { brandName: "streetPoliticsCanada", stockName: "" }
             ]
         this.axiosRequest = axios.create({
             baseURL: `${process.env.EC2_BACKEND_HOST}`,
