@@ -3,18 +3,29 @@ const verifyToken = require('../../../middleware/ContentCreatorVerification')
 const mongoose = require("mongoose");
 import promptsModel from '../../../Model/ContentCreation/Prompts/prompts_model'
 
+const get_brand_prompts = async (brandName, type) => {
+    try {
+        const projection = { _id: 0 }; 
 
-const get_brand_prompts = async (brandName , type) => {
-    try 
-    {
-        const prompts = await promptsModel.find({ brand:brandName })
-            
-        return prompts
+        if (type === "script") {
+            projection.script_prompt = 1;
+        } else if (type === "title") {
+            projection.title_prompt = 1;
+        } else if (type === "thumbnail") {
+            projection.thumnail_prompt = 1;
+        }
+
+        const prompts = await promptsModel.find(
+            { brand: brandName }, 
+            projection 
+        ).lean();
+
+        return prompts;
+    } catch (error) {
+        console.error('Error fetching prompts:', error);
+        throw new Error('Failed to fetch prompts');
     }
-    catch (error) {
-        return error
-    }
-}
+};
 
 const get_all_prompts = async (req, res) => {
     const querying = req.query
