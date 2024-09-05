@@ -1,6 +1,5 @@
 import conversationModel from "../../Model/Chat/conversation.model";
 import messageModel from "../../Model/Chat/message.model";
-import seenModel from "../../Model/Chat/seen.model";
 import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
 import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
 import { handleSeenMessage, onlineUser } from "./chat.controller";
