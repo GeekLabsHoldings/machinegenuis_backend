@@ -6,10 +6,11 @@ import systemError from "../../../Utils/Error/SystemError";
 import IEventController, { ICreateEventBody } from "./IEventController";
 import { EndOfMonth, StartOfMonth } from "../../../Utils/DateAndTime";
 import SuccessMessage from "../../../Utils/SuccessMessages";
+import { ClientSession } from "mongoose";
 
 export default class EventController implements IEventController {
-    async createEvent(event: ICreateEventBody): Promise<IEventModel> {
-        const result = await eventService.createEvent(event);
+    async createEvent(event: ICreateEventBody, session: ClientSession): Promise<IEventModel> {
+        const result = await eventService.createEvent(event, session);
         return result;
     }
     async getOneEvent(_id: string): Promise<IEventModel> {

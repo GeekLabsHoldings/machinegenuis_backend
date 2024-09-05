@@ -1,3 +1,4 @@
+import { ClientSession } from "mongoose";
 import IEventModel from "../../Model/event/IEventModel";
 import { ICreateEventBody } from "../HR/Event/IEventController";
 
@@ -11,7 +12,7 @@ export interface IInterviewTypeFreeTime {
 }
 
 export default interface ITaskController {
-    createTask(task: ICreateTaskBody): Promise<IEventModel>;
+    createTask(task: ICreateTaskBody, session: ClientSession): Promise<IEventModel>;
     editTask(_id: string, task: ICreateTaskBody): Promise<IEventModel>;
     getDepartmentTask(department: string): Promise<IEventModel[]>;
     getMyTask(employee: string): Promise<IEventModel[]>;
@@ -19,4 +20,5 @@ export default interface ITaskController {
     getOneTask(_id: string): Promise<IEventModel>;
     deleteTask(_id: string): Promise<string>;
     getFreeTime(date: number, type: string, employee_id: string): Promise<IInterviewTypeFreeTime[]>;
+    candidateReserveTime(chosenDate: number, invitationDate: number, type: string, employee_id: string, candidate_id: string, session: ClientSession): Promise<IEventModel>
 }

@@ -63,12 +63,12 @@ const StringValidation = (validation: RegExp, message: string) => {
 
 
 
-const EnumStringRequired = (enumValues: Array<string>) => {
+const EnumStringRequired = (enumValues: Array<string>, index: number = 0) => {
     return {
         type: String,
         required: true,
         enum: enumValues,
-        default: enumValues[0]
+        default: enumValues[index]
     }
 }
 
