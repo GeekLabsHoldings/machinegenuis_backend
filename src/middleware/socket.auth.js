@@ -22,6 +22,7 @@ export const isAuthenticated = async (socket, next) => {
 
     return next();
   } catch (_) {
-    return next(new Error("Token is invalid!"));
+    console.log(error);
+    
   }
 };

@@ -5,7 +5,7 @@ import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
 import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
 import { onlineUser } from "./chat.controller";
 import { Types } from "mongoose";
-
+import moment from "../../Utils/DateAndTime";
 const addMemberJoin = (conversation_id, members) => {
   for (const item of members) {
     const socket = onlineUser.get(item);
@@ -41,7 +41,7 @@ export const createConversation = async (req, res) => {
         if (exist) return res.json({ message: "Exist" });
       }
     }
-    const createdAt = Date.now();
+    const createdAt = moment().valueOf();
     const conversation = await conversationModel.create({
       groupName,
       type,
@@ -84,7 +84,7 @@ export const getAllConversationsByUser = async (req, res) => {
           updatedAt: conversation.updatedAt,
           members: conversation.members,
           admin: conversation.admin,
-          lastMessage:conversation.lastMessage,
+          lastMessage: conversation.lastMessage,
           lastSeen, // Adding last seen information
         };
       })
@@ -136,7 +136,7 @@ export const getAllMessagesWithConversations = async (req, res) => {
       },
     ];
 
-    const createdAt = Date.now();
+    const createdAt = moment().valueOf();
     const seen = await seenModel.create({
       chat: conversationId,
       userId: user_id,
@@ -240,4 +240,3 @@ export const updateGroupName = async (req, res, next) => {
   if (!conversation) return res.json({ success: false, message: "Error" });
   return res.json({ success: true, message: "Done", result: conversation });
 };
- 

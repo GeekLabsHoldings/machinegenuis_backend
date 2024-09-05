@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import conversationModel from "../../Model/Chat/conversation.model.js";
 import messageModel from "../../Model/Chat/message.model.js";
 import seenModel from "../../Model/Chat/seen.model.js";
-
+import moment from "../../Utils/DateAndTime";
 // Define the msgHandler function
 export const onlineUser = new Map();
 export const msgHandler = async (io, socket) => {
@@ -21,13 +21,12 @@ export const msgHandler = async (io, socket) => {
     // Listen for messages from the client
     socket.on("sendMessage", (msgData) => handleMessage(io, socket, msgData));
 
-    
     // Handle socket disconnection
     socket.on("disconnect", () => {
       onlineUser.delete(user._id.toString());
     });
   } catch (error) {
-    return next(new Error(error.message));
+    console.log(error);
   }
 };
 
@@ -38,25 +37,28 @@ export const handleMessage = async (io, socket, msgData) => {
     const { conversationId, text, mediaUrl } = msgData;
     const senderId = socket.handshake.user._id;
     // Create a new message document
-    const newMessage = await messageModel.create([
-      {
-        sender: senderId,
-        text,
-        mediaUrl,
-        chat: conversationId,
-        createdAt: Date.now(),
-      }],
+    const moment_time = moment().valueOf();
+    const newMessage = await messageModel.create(
+      [
+        {
+          sender: senderId,
+          text,
+          mediaUrl,
+          chat: conversationId,
+          createdAt: moment_time,
+        },
+      ],
       { session }
     );
     const updateConversionLastMessage =
       await conversationModel.findByIdAndUpdate(
         conversationId,
-        { $set: { lastMessage: text, updatedAt: Date.now() } },
+        { $set: { lastMessage: text, updatedAt: moment_time } },
         { session }
       );
-      // Emit the message to all members of the conversation
-      io.to(conversationId).emit("message", newMessage);
-      await session.commitTransaction();
+    // Emit the message to all members of the conversation
+    io.to(conversationId).emit("message", newMessage);
+    await session.commitTransaction();
   } catch (error) {
     console.error("Error handling message:", error);
     await session.abortTransaction();
@@ -68,9 +70,10 @@ export const handleMessage = async (io, socket, msgData) => {
 export const handleSeenMessage = async (conversationId, userId) => {
   try {
     // Update the seen status
+    const moment_time = moment().valueOf();
     await seenModel.findOneAndUpdate(
       { chat: conversationId, userId: userId },
-      { seen: Date.now() },
+      { seen: moment_time },
       { upsert: true }
     );
 
@@ -78,7 +81,7 @@ export const handleSeenMessage = async (conversationId, userId) => {
     io.to(conversationId).emit("messageSeen", {
       userId,
       conversationId,
-      seenAt: Date.now(),
+      seenAt: moment_time,
     });
   } catch (error) {
     console.error("Error updating seen status:", error);
