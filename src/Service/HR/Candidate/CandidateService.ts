@@ -11,8 +11,8 @@ class CandidateService implements ICandidateService {
             .limit(limit);
         return result;
     }
-    async getCandidate(_id: string, session: ClientSession): Promise<ICandidateModel | null> {
-        const result = await candidateModel.findById(_id).session(session);
+    async getCandidate(_id: string, session?: ClientSession): Promise<ICandidateModel | null> {
+        const result = await candidateModel.findById(_id, null, { session });
         return result;
     }
 
