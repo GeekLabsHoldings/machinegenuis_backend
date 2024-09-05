@@ -8,8 +8,7 @@ const messageSchema = new Schema({
 
   chat: { type: Types.ObjectId, ref:SchemaTypesReference.Conversation },
   createdAt: {
-    type: Date,
-    default: Date.now,
+    type: Number
   },
 });
 const messageModel = model(SchemaTypesReference.Message, messageSchema);

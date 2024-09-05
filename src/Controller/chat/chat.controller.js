@@ -38,21 +38,20 @@ export const handleMessage = async (io, socket, msgData) => {
     const { conversationId, text, mediaUrl } = msgData;
     const senderId = socket.handshake.user._id;
     // Create a new message document
-    const dateNow = new Date().valueOf();
     const newMessage = await messageModel.create([
       {
         sender: senderId,
         text,
         mediaUrl,
         chat: conversationId,
-        createdAt: dateNow,
+        createdAt: Date.now(),
       }],
       { session }
     );
     const updateConversionLastMessage =
       await conversationModel.findByIdAndUpdate(
         conversationId,
-        { $set: { lastMessage: text, updatedAt: dateNow } },
+        { $set: { lastMessage: text, updatedAt: Date.now() } },
         { session }
       );
       // Emit the message to all members of the conversation
@@ -65,8 +64,6 @@ export const handleMessage = async (io, socket, msgData) => {
     await session.endSession();
   }
 };
-
-
 
 export const handleSeenMessage = async (conversationId, userId) => {
   try {

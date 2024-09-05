@@ -84,6 +84,7 @@ export const getAllConversationsByUser = async (req, res) => {
           updatedAt: conversation.updatedAt,
           members: conversation.members,
           admin: conversation.admin,
+          lastMessage:conversation.lastMessage,
           lastSeen, // Adding last seen information
         };
       })
@@ -150,7 +151,7 @@ export const getAllMessagesWithConversations = async (req, res) => {
 export const addMembersConversations = async (req, res, next) => {
   try {
     const { groupId } = req.params;
-    const { newMembers } = req.body;
+    let { newMembers } = req.body;
     const admin = req.body.currentUser._id;
     console.log({ admin });
 
@@ -160,11 +161,11 @@ export const addMembersConversations = async (req, res, next) => {
         error: true,
       });
     }
-
+    newMembers = [...new Set(newMembers)];
     const updatedGroup = await conversationModel.findOneAndUpdate(
       { _id: groupId, admin },
       {
-        $push: { members: { $each: newMembers } },
+        $addToSet: { members: { $each: newMembers } },
       },
       { new: true }
     );

@@ -21,7 +21,17 @@ const conversationSchema = new Schema({
   },
   lastMessage: NotRequiredString,
 });
+conversationSchema.pre('save', function (next) {
+  if (Array.isArray(this.members)) {
+    // Ensure the members array is unique
+    const uniqueMembers = [...new Set(this.members.map(member => member.toString()))];
+    this.members = uniqueMembers.map(member => new Types.ObjectId(member)); // Convert back to ObjectId
+  } else {
+    return next(new Error('Members field is not an array.'));
+  }
 
+  next();
+});
 const conversationModel = model(
   SchemaTypesReference.Conversation,
   conversationSchema
