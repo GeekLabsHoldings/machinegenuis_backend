@@ -13,6 +13,7 @@ class ScrapeController {
                 { brandName: "investocracy", stockName: "AMZN" },
                 { brandName: "investocracy", stockName: "PLTR" },
                 { brandName: "investocracy", stockName: "TSLA" },
+                { brandName: "investocracy", stockName: "ALPHA" },
                 { brandName: "streetPoliticsAfrica", stockName: "" },
                 { brandName: "streetPoliticsUK", stockName: "" },
                 { brandName: "streetPoliticsCanada", stockName: "" }
