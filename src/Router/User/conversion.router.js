@@ -10,5 +10,5 @@ conversationRouter.get(
 conversationRouter.put("/update/add-members/:groupId",conversionController.addMembersConversations);
 conversationRouter.put("/delete-members/:groupId",conversionController.removeMembersConversations);
 conversationRouter.put("/update/group-name/:groupId",conversionController.updateGroupName);
-
+conversationRouter.put("/update/group-admin/:groupId",conversionController.setNewAdmin);
 export default conversationRouter;

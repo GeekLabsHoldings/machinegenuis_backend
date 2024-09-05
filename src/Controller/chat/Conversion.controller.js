@@ -208,3 +208,16 @@ export const updateGroupName = async (req, res, next) => {
   if (!conversation) return res.json({ success: false, message: "Error" });
   return res.json({ success: true, message: "Done", result: conversation });
 };
+export const setNewAdmin = async (req, res, next) => {
+  const { groupId } = req.params;
+  const { newAdmin } = req.body;
+  if (!groupId)
+    return res.json({ success: false, message: "In -valid groupId" });
+  const conversation = await conversation_chat.updateGroupAdmin(
+    groupId,
+    newAdmin
+  );
+
+  if (!conversation) return res.json({ success: false, message: "Error" });
+  return res.json({ success: true, message: "Done", result: conversation });
+};

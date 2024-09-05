@@ -4,7 +4,7 @@ import messageModel from "../../Model/Chat/message.model";
 import seenModel from "../../Model/Chat/seen.model";
 import { create } from "domain";
 
-export const retrieveConversationsForMember = async (employee_Id) => {
+export const retrieveConversationsForMember = async ({employee_Id}) => {
   const conversations = await conversationModel.find({
     members: { $in: [employee_Id] },
   });
@@ -174,7 +174,16 @@ export const updateGroupName = async (groupId, groupName) => {
   );
   return conversation;
 };
-
+export const updateGroupAdmin = async (groupId, newAdmin) => {
+  const conversation = await conversationModel.findByIdAndUpdate(
+    groupId,
+    {
+      admin: newAdmin,
+    },
+    { new: true }
+  );
+  return conversation;
+};
 export const checkSenderAvailability = async (
   conversationId,
   senderId,

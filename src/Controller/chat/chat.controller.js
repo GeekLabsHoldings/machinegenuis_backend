@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import moment from "../../Utils/DateAndTime";
 import * as conversation_chat from "../../Service/Chat_system/Chat.service.js";
 import { io } from "../../socketIo.js";
+import messageModel from "../../Model/Chat/message.model.js";
 // Define the msgHandler function
 export const onlineUser = new Map();
 export const msgHandler = async (io, socket) => {
@@ -10,10 +11,21 @@ export const msgHandler = async (io, socket) => {
     const user = socket.handshake.user;
     onlineUser.set(user?._id?.toString(), socket);
     const conversations =
-      await conversation_chat.retrieveConversationsForMember(user._id);
+      await conversation_chat.retrieveConversationsForMember({employee_Id: user._id});
     for (const conversation of conversations) {
       socket.join(conversation._id.toString());
+
+      const messages = await messageModel.find({ chat: conversation._id });
+
+      // Emit all messages to the client once the connection is established
+      if (messages.length > 0) {
+        socket.emit("loadMessages", {
+          conversationId: conversation._id,
+          loadMessages: messages,
+        });
+      }
     }
+
     // Listen for messages from the client
     socket.on("sendMessage", (msgData) => handleMessage(io, socket, msgData));
 
