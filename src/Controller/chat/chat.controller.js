@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
-import conversationModel from "../../Model/Chat/conversation.model.js";
-import messageModel from "../../Model/Chat/message.model.js";
-import seenModel from "../../Model/Chat/seen.model.js";
 import moment from "../../Utils/DateAndTime";
+import * as conversation_chat from "../../Service/Chat_system/Chat.service.js";
+import { io } from "../../socketIo.js";
 // Define the msgHandler function
 export const onlineUser = new Map();
 export const msgHandler = async (io, socket) => {
@@ -10,13 +9,10 @@ export const msgHandler = async (io, socket) => {
   try {
     const user = socket.handshake.user;
     onlineUser.set(user?._id?.toString(), socket);
-    const conversations = await conversationModel.find({
-      members: { $in: [user._id] },
-    });
-    if (conversations) {
-      for (const conversation of conversations) {
-        socket.join(conversation._id.toString());
-      }
+    const conversations =
+      await conversation_chat.retrieveConversationsForMember(user._id);
+    for (const conversation of conversations) {
+      socket.join(conversation._id.toString());
     }
     // Listen for messages from the client
     socket.on("sendMessage", (msgData) => handleMessage(io, socket, msgData));
@@ -33,33 +29,43 @@ export const msgHandler = async (io, socket) => {
 export const handleMessage = async (io, socket, msgData) => {
   const session = await mongoose.startSession();
   session.startTransaction();
+  const senderId = socket.handshake.user._id;
   try {
     const { conversationId, text, mediaUrl } = msgData;
-    const senderId = socket.handshake.user._id;
     // Create a new message document
-    const moment_time = moment().valueOf();
-    const newMessage = await messageModel.create(
-      [
-        {
-          sender: senderId,
-          text,
-          mediaUrl,
-          chat: conversationId,
-          createdAt: moment_time,
-        },
-      ],
-      { session }
-    );
-    const updateConversionLastMessage =
-      await conversationModel.findByIdAndUpdate(
+    const checkSenderAvailability =
+      await conversation_chat.checkSenderAvailability(
         conversationId,
-        { $set: { lastMessage: text, updatedAt: moment_time } },
-        { session }
+        senderId,
+        session
       );
+    if (!checkSenderAvailability) throw new Error("Sender not available");
+    const moment_time = moment().valueOf();
+
+    const newMessage = await conversation_chat.createMessageInConversation(
+      session,
+      senderId,
+      text,
+      mediaUrl,
+      conversationId,
+      moment_time
+    );
+
+    await conversation_chat.setLastMessageForConversation(
+      session,
+      conversationId,
+      text,
+      moment_time
+    );
+
     // Emit the message to all members of the conversation
     io.to(conversationId).emit("message", newMessage);
     await session.commitTransaction();
   } catch (error) {
+    io.to(onlineUser.get(senderId.toString()).id).emit(
+      "message",
+      " Error sending message"
+    );
     console.error("Error handling message:", error);
     await session.abortTransaction();
   } finally {
@@ -71,12 +77,11 @@ export const handleSeenMessage = async (conversationId, userId) => {
   try {
     // Update the seen status
     const moment_time = moment().valueOf();
-    await seenModel.findOneAndUpdate(
-      { chat: conversationId, userId: userId },
-      { seen: moment_time },
-      { upsert: true }
+    await conversation_chat.updateSeenStatus(
+      conversationId,
+      userId,
+      moment_time
     );
-
     // Notify other users in the room
     io.to(conversationId).emit("messageSeen", {
       userId,
