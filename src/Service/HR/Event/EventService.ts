@@ -1,4 +1,4 @@
-import { PipelineStage, Types } from "mongoose";
+import { ClientSession, PipelineStage, Types } from "mongoose";
 import { ICreateTaskBody } from "../../../Controller/Task/ITaskController";
 import { ICreateEventBody } from "../../../Controller/HR/Event/IEventController";
 import eventModel from "../../../Model/event/EventModel";
@@ -9,10 +9,10 @@ import IEventService from "./IEventService";
 import { SchemaTypesReference } from "../../../Utils/Schemas/SchemaTypesReference";
 
 class EventService implements IEventService {
-    async createEvent(event: IEventModel | ICreateEventBody | ICreateTaskBody): Promise<IEventModel> {
+    async createEvent(event: IEventModel | ICreateEventBody | ICreateTaskBody, session: ClientSession): Promise<IEventModel> {
         try {
             const newEvent = new eventModel(event);
-            const result = await newEvent.save();
+            const result = await newEvent.save({ session });
             return result;
         } catch (error) {
             console.log(error);
@@ -100,11 +100,12 @@ class EventService implements IEventService {
     async getBusyTime(employee_id: string, startTime: number, endTime: number): Promise<IEventModel[]> {
         const query = {
             assignedTo: new Types.ObjectId(employee_id),
-            startNumber: { 
-                $gte: startTime, 
-                $lte: endTime 
-            }
-        };
+            $or: [
+                { startNumber: { $gte: startTime, $lt: endTime } },
+                { endNumber: { $gte: startTime, $lt: endTime } },
+                { startNumber: { $lt: startTime }, endNumber: { $gte: endTime } }
+            ]
+        }
         const result = await eventModel.find(query).exec();
         return result;
     }

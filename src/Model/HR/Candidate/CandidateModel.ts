@@ -26,12 +26,22 @@ const schema = new Schema<ICandidateModel>({
     hiring: RefType(SchemaTypesReference.HIRING, true),
     recommendation: RefType(SchemaTypesReference.Employee, false),
     createdAt: RequiredNumber,
-    currentStep: EnumStringRequired(HiringSteps),
+    currentStep: EnumStringRequired(HiringSteps, 2),
     stepsStatus: [stepStatusSchema],
     messageStatus: [stepStatusSchema]
 
 });
 
+schema.pre("save", function (next) {
+    const candidate = this as ICandidateModel;
+    candidate.stepsStatus = [];
+    candidate.messageStatus = [];
+    for (let i = 0; i < HiringSteps.length; i++) {
+        candidate.stepsStatus.push({ step: HiringSteps[i], status: statusArr[0] });
+        candidate.messageStatus.push({ step: HiringSteps[i], status: statusArr[0] });
+    }
+    next();
+});
 const candidateModel = model(SchemaTypesReference.Candidate, schema);
 export default candidateModel;
 

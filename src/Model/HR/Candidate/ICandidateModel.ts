@@ -21,7 +21,7 @@ export default interface ICandidateModel {
     appliedFrom: string,
     hiring: Types.ObjectId | IHiringModel,
     createdAt: number,
-    recommendation: Types.ObjectId | IEmployeeModel,
+    recommendation: Types.ObjectId | IEmployeeModel | null,
     currentStep: string,
     stepsStatus: Array<IStepStatus>,
     messageStatus: Array<IStepStatus>
