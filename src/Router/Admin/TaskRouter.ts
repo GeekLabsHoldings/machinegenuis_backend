@@ -9,6 +9,8 @@ import mongoose from "mongoose";
 const TaskRouter = Router()
 
 TaskRouter.post('/create', async (req: Request, res: Response): Promise<Response> => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
         const event: ICreateTaskBody = {
             title: req.body.title,
@@ -21,10 +23,14 @@ TaskRouter.post('/create', async (req: Request, res: Response): Promise<Response
             assignedTo: req.body.assignedTo
         }
         const taskController = new TaskController();
-        const result = await taskController.createTask(event);
+        const result = await taskController.createTask(event, session);
+        await session.commitTransaction();
         return res.json(result);
     } catch (error) {
+        await session.abortTransaction();
         return systemError.sendError(res, error);
+    } finally {
+        session.endSession();
     }
 });
 
@@ -36,7 +42,7 @@ TaskRouter.put('/edit-task/:_id', async (req: Request, res: Response): Promise<R
             start: req.body.start,
             end: req.body.end,
             startNumber: moment(req.body.start, 'YYYY-MM-DD').startOf('day').valueOf(),
-            endNumber: moment(req.body.end, 'YYYY-MM-DD').endOf('day').valueOf(),
+            endNumber: moment(req.body.end, 'YYYY-MM-YYYY-MM-DD').endOf('day').valueOf(),
             createdBy: req.body.currentUser._id,
             backgroundColor: req.body.backgroundColor,
             assignedTo: req.body.assignedTo

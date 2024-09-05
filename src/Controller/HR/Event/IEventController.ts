@@ -1,3 +1,4 @@
+import { ClientSession } from "mongoose";
 import IEventModel from "../../../Model/event/IEventModel";
 export interface ICreateEventBody {
     title: string,
@@ -10,7 +11,7 @@ export interface ICreateEventBody {
 }
 
 export default interface IEventController {
-    createEvent(event: ICreateEventBody): Promise<IEventModel>;
+    createEvent(event: ICreateEventBody, session: ClientSession): Promise<IEventModel>;
     getOneEvent(_id: string): Promise<IEventModel>;
     getMonthEvents(date: number): Promise<IEventModel[]>;
     editEvent(_id: string, event: ICreateEventBody): Promise<IEventModel>;
