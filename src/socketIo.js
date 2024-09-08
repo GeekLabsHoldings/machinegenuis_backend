@@ -29,3 +29,4 @@ const onConnection = (socket) => {
   msgHandler(io, socket);
   
 };
+export {io};

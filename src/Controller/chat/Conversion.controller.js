@@ -3,9 +3,11 @@ import messageModel from "../../Model/Chat/message.model";
 import seenModel from "../../Model/Chat/seen.model";
 import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
 import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
-import { onlineUser } from "./chat.controller";
+import { handleSeenMessage, onlineUser } from "./chat.controller";
 import { Types } from "mongoose";
 import moment from "../../Utils/DateAndTime";
+import * as conversation_chat from "../../Service/Chat_system/Chat.service";
+import systemError from "../../Utils/Error/SystemError";
 const addMemberJoin = (conversation_id, members) => {
   for (const item of members) {
     const socket = onlineUser.get(item);
@@ -27,6 +29,7 @@ const removeMemberLeave = (conversation_id, members) => {
 export const createConversation = async (req, res) => {
   try {
     const { groupName, type, members } = req.body;
+    const userId = req.body.currentUser._id;
     if (type == "oneToOne") {
       if (members.length !== 2) {
         return systemError
@@ -34,21 +37,20 @@ export const createConversation = async (req, res) => {
           .setMessage(ErrorMessages.CONVERSATION_ERROR)
           .throw();
       } else {
-        const exist = await conversationModel.findOne({
-          type: "oneToOne",
-          members: { $all: members },
-        });
+        const exist = await conversation_chat.findExistingOneToOneConversation(
+          members
+        );
         if (exist) return res.json({ message: "Exist" });
       }
     }
     const createdAt = moment().valueOf();
-    const conversation = await conversationModel.create({
+    const conversation = await conversation_chat.createConversationWithMembers(
       groupName,
       type,
       members,
-      admin: req.body.currentUser._id,
-      createdAt,
-    });
+      userId,
+      createdAt
+    );
     console.log({ onlineUser });
     addMemberJoin(conversation._id.toString(), members);
     return res.json({
@@ -57,18 +59,17 @@ export const createConversation = async (req, res) => {
       result: conversation,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return systemError.sendError(res, error);
   }
 };
 export const getAllConversationsByUser = async (req, res) => {
   try {
     const user_id = req.body.currentUser._id;
-    const allConversations = await conversationModel.find({
-      members: { $all: [user_id] },
-    });
-    const usersSeen = await seenModel.find({ userId: user_id });
+    const allConversations = await conversation_chat.getAllConversationsForUser(
+      user_id
+    );
+    const usersSeen = await conversation_chat.findSeenStatusesByUserId(user_id);
     console.log(usersSeen);
-
     const seenMap = new Map();
     usersSeen.forEach((item) => {
       seenMap.set(item.chat.toString(), item.seen);
@@ -91,7 +92,7 @@ export const getAllConversationsByUser = async (req, res) => {
     );
     return res.json({ success: true, result });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return systemError.sendError(res, error);
   }
 };
 
@@ -99,53 +100,21 @@ export const getAllMessagesWithConversations = async (req, res) => {
   try {
     const { conversationId } = req.params;
     const user_id = req.body.currentUser._id;
-
-    const pipeline = [
-      // Match messages belonging to a specific conversation
-      {
-        $match: { chat: new Types.ObjectId(conversationId) },
-      },
-      {
-        $lookup: {
-          from: "conversations",
-          localField: "chat",
-          foreignField: "_id",
-          as: "conversationDetails",
-        },
-      },
-      {
-        $unwind: "$conversationDetails",
-      },
-      {
-        $match: {
-          "conversationDetails.members": {
-            $in: [user_id],
-          },
-        },
-      },
-      {
-        $project: {
-          sender: 1,
-          text: 1,
-          mediaUrl: 1,
-          _id: 1,
-        },
-      },
-      {
-        $sort: { createdAt: -1 },
-      },
-    ];
-
     const createdAt = moment().valueOf();
-    const seen = await seenModel.create({
-      chat: conversationId,
-      userId: user_id,
-      seen: createdAt,
-    });
-    const messages = await messageModel.aggregate(pipeline);
+    // const seen = await conversation_chat.createSeenEntryForConversation(
+    //   conversationId,
+    //   user_id,
+    //   createdAt
+    // );
+    await handleSeenMessage(conversationId, user_id);
+
+    const messages = await conversation_chat.fetchMessagesByAggregation(
+      conversationId,
+      user_id
+    );
     return res.json({ success: true, messages });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return systemError.sendError(res, error);
   }
 };
 export const addMembersConversations = async (req, res, next) => {
@@ -162,12 +131,10 @@ export const addMembersConversations = async (req, res, next) => {
       });
     }
     newMembers = [...new Set(newMembers)];
-    const updatedGroup = await conversationModel.findOneAndUpdate(
-      { _id: groupId, admin },
-      {
-        $addToSet: { members: { $each: newMembers } },
-      },
-      { new: true }
+    const updatedGroup = await conversation_chat.addNewMembersToGroup(
+      groupId,
+      admin,
+      newMembers
     );
     if (!updatedGroup)
       return res
@@ -180,7 +147,7 @@ export const addMembersConversations = async (req, res, next) => {
       Message: "the group updated!",
     });
   } catch (error) {
-    res.status(500).json({ error: error.message, stack: error });
+    return systemError.sendError(res, error);
   }
 };
 export const removeMembersConversations = async (req, res, next) => {
@@ -197,16 +164,18 @@ export const removeMembersConversations = async (req, res, next) => {
         error: true,
       });
     }
-
+    const adminExist = membersToRemove.includes(admin);
+    if (adminExist)
+      return systemError
+        .setStatus(406)
+        .setMessage(ErrorMessages.ADMIN_CANNOT_REMOVE_HIMSELF)
+        .throw();
     // Remove members from the group
-    const updatedGroup = await conversationModel.findOneAndUpdate(
-      { _id: groupId, admin },
-      {
-        $pull: { members: { $in: membersToRemove } },
-      },
-      { new: true }
+    const updatedGroup = await conversation_chat.removeMembersFromGroup(
+      groupId,
+      admin,
+      membersToRemove
     );
-
     if (!updatedGroup) {
       return res
         .status(404)
@@ -223,20 +192,19 @@ export const removeMembersConversations = async (req, res, next) => {
     });
   } catch (error) {
     console.error("Error in removeMembersConversations:", error);
-    res.status(500).json({ error: error.message, stack: error.stack });
+    return systemError.sendError(res, error);
   }
 };
 export const updateGroupName = async (req, res, next) => {
   const { groupId } = req.params;
+  const { groupName } = req.body;
   if (!groupId)
     return res.json({ success: false, message: "In -valid groupId" });
-  const conversation = await conversationModel.findByIdAndUpdate(
+  const conversation = await conversation_chat.updateGroupName(
     groupId,
-    {
-      groupName: req.body.groupName,
-    },
-    { new: true }
+    groupName
   );
+
   if (!conversation) return res.json({ success: false, message: "Error" });
   return res.json({ success: true, message: "Done", result: conversation });
 };
