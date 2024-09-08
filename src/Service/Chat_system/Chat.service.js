@@ -3,6 +3,7 @@ import conversationModel from "../../Model/Chat/conversation.model";
 import messageModel from "../../Model/Chat/message.model";
 import seenModel from "../../Model/Chat/seen.model";
 import { create } from "domain";
+import offlineMembersModel from "../../Model/Chat/offline_messages.model";
 
 export const retrieveConversationsForMember = async (employee_Id) => {
   const conversations = await conversationModel.find({
@@ -197,4 +198,24 @@ export const checkSenderAvailability = async (
     })
     .session(session);
   return result;
+};
+export const getConversationsByUserId = async (conversationId) => {
+  const userConversations = await conversationModel.findById(conversationId);
+  return userConversations;
+};
+export const getOfflineMembers = async ({ userId }) => {
+  const offlineMembers = await offlineMembersModel.find({
+    userId,
+  });
+  return offlineMembers;
+};
+export const createOfflineMembers = async (messageOfflineMembers, session) => {
+  const offlineMembers = await offlineMembersModel.create(
+    messageOfflineMembers,
+    { session }
+  );
+  return offlineMembers;
+};
+export const deleteOfflineMembers = async ({ _id }) => {
+  await offlineMembersModel.findByIdAndDelete(_id);
 };
