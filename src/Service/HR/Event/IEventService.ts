@@ -1,9 +1,10 @@
 import { ICreateTaskBody } from "../../../Controller/Task/ITaskController";
 import { ICreateEventBody } from "../../../Controller/HR/Event/IEventController";
 import IEventModel from "../../../Model/event/IEventModel";
+import { ClientSession } from "mongoose";
 
 export default interface IEventService {
-    createEvent(event: IEventModel | ICreateEventBody | ICreateTaskBody): Promise<IEventModel>;
+    createEvent(event: IEventModel | ICreateEventBody | ICreateTaskBody, session: ClientSession): Promise<IEventModel>;
     getOneEvent(_id: string): Promise<IEventModel | null>;
     getMonthEvents(): Promise<IEventModel[]>;
     getMonthTasks(employee: string): Promise<IEventModel[]>;

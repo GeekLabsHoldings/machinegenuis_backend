@@ -9,7 +9,7 @@ const getScrapedData = async (brandName, stockName, session) => {
         if (stockName) {
             query.stock = stockName;
         }
-        const results = await scraped_dataBase.find(query).session(session).sort({time : -1}).limit(70)
+        const results = await scraped_dataBase.find(query).session(session).sort({time : -1}).limit(100)
         return results
     } catch (error) {
         console.error("Error occurred:", error);

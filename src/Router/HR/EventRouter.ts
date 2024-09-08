@@ -1,13 +1,15 @@
 import { Router, Request, Response } from 'express';
 import systemError from '../../Utils/Error/SystemError';
-import IEventModel from '../../Model/event/IEventModel';
-import moment from 'moment-timezone';
+import moment from '../../Utils/DateAndTime';
 import { ICreateEventBody } from '../../Controller/HR/Event/IEventController';
 import EventController from '../../Controller/HR/Event/EventController';
+import mongoose from 'mongoose';
 
 const EventRouter = Router();
 
 EventRouter.post('/create', async (req: Request, res: Response): Promise<Response> => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
         const event: ICreateEventBody = {
             title: req.body.title,
@@ -19,12 +21,17 @@ EventRouter.post('/create', async (req: Request, res: Response): Promise<Respons
             backgroundColor: req.body.backgroundColor,
         }
         const eventController = new EventController();
-        const result = await eventController.createEvent(event);
+        const result = await eventController.createEvent(event, session);
+        await session.commitTransaction();
         return res.json(result);
     } catch (error) {
+        await session.abortTransaction();
         return systemError.sendError(res, error);
+    } finally {
+        session.endSession();
     }
 });
+
 
 EventRouter.put('/edit-event/:_id', async (req: Request, res: Response): Promise<Response> => {
     try {
