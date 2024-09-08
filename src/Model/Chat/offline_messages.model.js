@@ -6,7 +6,7 @@ const offlineMemberSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: "Employee", required: true },
 
-    message: messageSchema,
+    message: messageSchema ,
   },
   { timestamps: true }
 ); // Adds createdAt and updatedAt fields
