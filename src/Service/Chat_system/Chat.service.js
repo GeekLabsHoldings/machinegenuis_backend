@@ -174,6 +174,16 @@ export const updateGroupName = async (groupId, groupName) => {
   );
   return conversation;
 };
+export const updateGroupAdmin = async (groupId, newAdmin) => {
+  const conversation = await conversationModel.findByIdAndUpdate(
+    groupId,
+    {
+      admin: newAdmin,
+    },
+    { new: true }
+  );
+  return conversation;
+};
 
 export const checkSenderAvailability = async (
   conversationId,

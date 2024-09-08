@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import moment from "../../Utils/DateAndTime";
 import * as conversation_chat from "../../Service/Chat_system/Chat.service.js";
 import { io } from "../../socketIo.js";
+import messageModel from "../../Model/Chat/message.model";
 // Define the msgHandler function
 export const onlineUser = new Map();
 export const msgHandler = async (io, socket) => {
@@ -13,6 +14,16 @@ export const msgHandler = async (io, socket) => {
       await conversation_chat.retrieveConversationsForMember(user._id);
     for (const conversation of conversations) {
       socket.join(conversation._id.toString());
+      const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const messages = await messageModel.find({
+        chat: conversation._id,
+        createdAt: { $gte: last24Hours }  // Get messages created within the last 24 hours
+      });
+
+      // Only emit messages if the array is not empty
+      if (messages.length > 0) {
+        socket.emit("loadMessages", { conversationId: conversation._id, messages });
+      }
     }
     // Listen for messages from the client
     socket.on("sendMessage", (msgData) => handleMessage(io, socket, msgData));
