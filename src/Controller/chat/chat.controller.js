@@ -14,6 +14,14 @@ export const msgHandler = async (io, socket) => {
     for (const conversation of conversations) {
       socket.join(conversation._id.toString());
     }
+    const offlineMembers = await conversation_chat.getOfflineMembers({
+      userId: user._id,
+    });
+
+    for (const offlineMember of offlineMembers) {
+      socket.emit("message", offlineMember.message);
+    }
+    await conversation_chat.deleteOfflineMembers({ _id: offlineMembers._id });
     // Listen for messages from the client
     socket.on("sendMessage", (msgData) => handleMessage(io, socket, msgData));
 
@@ -50,12 +58,27 @@ export const handleMessage = async (io, socket, msgData) => {
       conversationId,
       moment_time
     );
-
     await conversation_chat.setLastMessageForConversation(
       session,
       conversationId,
       text,
       moment_time
+    );
+    const userConversations = await conversation_chat.getConversationsByUserId(
+      conversationId
+    );
+    const offlineMembers = userConversations.members.filter((member) => {
+      return !onlineUser.has(member.toString());
+    });
+    const messageOfflineMembers = offlineMembers.map((member) => {
+      return {
+        userId: member,
+        message: newMessage[0],
+      };
+    });
+    await conversation_chat.createOfflineMembers(
+      messageOfflineMembers,
+      session
     );
 
     // Emit the message to all members of the conversation
