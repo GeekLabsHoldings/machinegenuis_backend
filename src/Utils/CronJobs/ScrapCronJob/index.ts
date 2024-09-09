@@ -32,8 +32,8 @@ const ScrapCronJob = cron.schedule('0 * * * *', async () => {
     try {
         console.log("===================cron job started=======================");
         await ec2Service.instanceActionStart();
-        await delay(120000);
-        console.log("After wait 120 seconds")
+        await delay(200000);
+        console.log("After wait 200 seconds")
         await scrapeController.generateScraping()
     } catch (error) {
         console.log("=======================>Enter inside error<===================")
