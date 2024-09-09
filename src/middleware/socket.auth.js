@@ -4,25 +4,19 @@ import authenticationService from "../Service/Authentication/AuthenticationServi
 export const isAuthenticated = async (socket, next) => {
   try {
     console.log("from authentication: ", socket.id);
-    let token = socket.handshake.headers.authorization;
+    let token = socket.handshake.auth.token;
     if (!token) return next(new Error("Token is required!"));
-
-    if (!token) return next(new Error("Invalid key!"));
 
     token = token.split(" ")[1];
     const decoded = await authenticationService.verifyToken(token);
     const user = await employeeModel.findById(decoded._id);
-    
-    
+
     if (!user) return next(new Error("User not found!"));
 
-    const userSocket = socket.handshake.user = user;
-   
-    
+    socket.handshake.user = user;
 
     return next();
-  } catch (_) {
+  } catch (error) {
     console.log(error);
-    
   }
 };
