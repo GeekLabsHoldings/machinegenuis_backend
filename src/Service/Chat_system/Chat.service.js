@@ -78,9 +78,11 @@ export const createConversationWithMembers = async (
   return conversation;
 };
 export const getAllConversationsForUser = async (user_id) => {
-  const allConversations = await conversationModel.find({
-    members: { $all: [user_id] },
-  });
+  const allConversations = await conversationModel
+    .find({
+      members: { $all: [user_id] },
+    })
+    .populate("members", "firstName lastName email");
   return allConversations;
 };
 export const findSeenStatusesByUserId = async (user_id) => {
@@ -114,7 +116,18 @@ export const fetchMessagesByAggregation = async (conversationId, user_id) => {
       },
     },
     {
+      $lookup: {
+        from: "employees",
+        localField: "sender",
+        foreignField: "_id",
+        as: "senderDetails",
+      },
+    },
+    {
       $unwind: "$conversationDetails",
+    },
+    {
+      $unwind: "$senderDetails",
     },
     {
       $match: {
@@ -130,7 +143,11 @@ export const fetchMessagesByAggregation = async (conversationId, user_id) => {
     },
     {
       $project: {
-        sender: 1,
+        sender: {
+          _id: "$senderDetails._id",
+          firstName: "$senderDetails.firstName",
+          lastName: "$senderDetails.lastName",
+        },
         text: 1,
         mediaUrl: 1,
         createdAt: 1,
@@ -200,7 +217,12 @@ export const checkSenderAvailability = async (
   return result;
 };
 export const getConversationsByUserId = async (conversationId) => {
-  const userConversations = await conversationModel.findById(conversationId);
+  const userConversations = await conversationModel
+    .findById(conversationId)
+    .populate({
+      path: "members",
+      select: "firstName lastName"
+    });
   return userConversations;
 };
 export const getOfflineMembers = async ({ userId }) => {
