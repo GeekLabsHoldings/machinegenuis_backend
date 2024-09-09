@@ -2,7 +2,6 @@ enum DepartmentEnum {
     HR = "hr",
     ContentCreator = "content-creation",
     Administrative = "administrative",
-    SocialMedia = "social-media",
     CEO = "CEO"
 }
 
@@ -10,7 +9,6 @@ enum RoleEnum {
     ContentWriter = "ContentWriter",
     Payroll = "Payroll",
     Administrative = "administrative",
- ///xx
     CEO = "CEO"
 }
 
@@ -21,7 +19,6 @@ const DepartmentRoles = {
     "content-creation": ["ContentWriter"],
     CEO: ['CEO'],
     administrative: ['administrative'],
-    "social-media": ['xx']
 } as const;
 
 const Departments = Object.keys(DepartmentRoles)
