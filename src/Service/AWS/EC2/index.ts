@@ -5,10 +5,7 @@ import {
     StartInstancesCommandOutput,
     StopInstancesCommand,
     StopInstancesCommandInput,
-    StopInstancesCommandOutput,
-    RunInstancesCommand,
-    RunInstancesCommandInput,
-    RunInstancesCommandOutput
+    StopInstancesCommandOutput
 } from "@aws-sdk/client-ec2";
 
 export default class Ec2Service {
