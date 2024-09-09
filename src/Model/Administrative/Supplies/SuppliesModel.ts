@@ -6,7 +6,7 @@ import { SchemaTypesReference } from '../../../Utils/Schemas/SchemaTypesReferenc
 
 const SuppliesSchema = new Schema<ISuppliesModel>({
     supplyName: RequiredString,
-    notificationOutOfStock: RequiredNumber,
+    wantedQuantity: RequiredNumber,
     queryType: EnumStringRequired(queryTypeEnumArray),
     type: EnumStringRequired(SuppliesEnumArray),
     productPrice: RequiredNumber

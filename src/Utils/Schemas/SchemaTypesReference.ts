@@ -15,6 +15,7 @@ enum SchemaTypesReference {
   Room = "room",
   Supplies = "supplies",
   Ticket = "ticket",
+  Receipt = "receipt",
   Seen = "seen",
 }
 

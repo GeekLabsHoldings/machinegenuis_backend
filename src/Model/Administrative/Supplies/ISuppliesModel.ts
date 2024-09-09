@@ -1,7 +1,7 @@
 
 export default interface ISuppliesModel {
     supplyName: string;
-    notificationOutOfStock: number;
+    wantedQuantity: number;
     queryType: string;
     type: string;
     productPrice: number;
