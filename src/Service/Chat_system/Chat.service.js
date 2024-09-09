@@ -219,7 +219,7 @@ export const checkSenderAvailability = async (
 export const getConversationsByUserId = async (conversationId) => {
   const userConversations = await conversationModel
     .findById(conversationId)
-    .populate("members", "name email");
+    .populate("members", "firstName lastName email");
   return userConversations;
 };
 export const getOfflineMembers = async ({ userId }) => {

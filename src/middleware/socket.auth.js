@@ -21,7 +21,7 @@ export const isAuthenticated = async (socket, next) => {
     
 
     return next();
-  } catch (_) {
+  } catch (error) {
     console.log(error);
     
   }

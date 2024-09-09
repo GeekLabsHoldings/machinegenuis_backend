@@ -13,6 +13,8 @@ enum SchemaTypesReference {
   Conversation = "conversation",
   Message = "message",
   Seen = "seen",
+  SocialMedia = "socialMedia",
+  TwitterData ="twitterData"
 }
 
 export { SchemaTypesReference };

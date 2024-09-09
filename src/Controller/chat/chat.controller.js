@@ -40,6 +40,8 @@ export const handleMessage = async (io, socket, msgData) => {
   const senderId = socket.handshake.user._id;
   try {
     const { conversationId, text, mediaUrl } = msgData;
+    console.log("Received message:", msgData);
+    
     // Create a new message document
     const checkSenderAvailability =
       await conversation_chat.checkSenderAvailability(
