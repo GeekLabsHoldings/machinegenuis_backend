@@ -210,7 +210,6 @@ export const checkSenderAvailability = async (
 export const getConversationsByUserId = async (conversationId) => {
   const userConversations = await conversationModel
     .findById(conversationId)
-    .sort({ updatedAt: -1 })
     .populate({
       path: "members",
       select: "firstName lastName",
