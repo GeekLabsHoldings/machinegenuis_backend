@@ -48,7 +48,7 @@ export const setLastMessageForConversation = async (
   );
 };
 export const updateSeenStatus = async (conversationId, userId, moment_time) => {
-  console.log({conversationId, userId, moment_time});
+  console.log({ conversationId, userId, moment_time });
   await seenModel.findOneAndUpdate(
     { chat: conversationId, userId },
     { seen: moment_time },
@@ -83,6 +83,7 @@ export const getAllConversationsForUser = async (user_id) => {
     .find({
       members: { $all: [user_id] },
     })
+    .sort({ updatedAt: -1 })
     .populate("members", "firstName lastName email");
   return allConversations;
 };
@@ -208,7 +209,8 @@ export const checkSenderAvailability = async (
 };
 export const getConversationsByUserId = async (conversationId) => {
   const userConversations = await conversationModel
-    .findById(conversationId).sort({ updatedAt: -1 })
+    .findById(conversationId)
+    .sort({ updatedAt: -1 })
     .populate({
       path: "members",
       select: "firstName lastName",
