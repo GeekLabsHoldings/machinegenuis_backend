@@ -48,6 +48,7 @@ export const setLastMessageForConversation = async (
   );
 };
 export const updateSeenStatus = async (conversationId, userId, moment_time) => {
+  console.log({conversationId, userId, moment_time});
   await seenModel.findOneAndUpdate(
     { chat: conversationId, userId },
     { seen: moment_time },
@@ -89,18 +90,7 @@ export const findSeenStatusesByUserId = async (user_id) => {
   const usersSeen = await seenModel.find({ userId: user_id });
   return usersSeen;
 };
-export const createSeenEntryForConversation = async (
-  conversationId,
-  user_id,
-  createdAt
-) => {
-  const seen = await seenModel.create({
-    chat: conversationId,
-    userId: user_id,
-    seen: createdAt,
-  });
-  return seen;
-};
+
 export const fetchMessagesByAggregation = async (conversationId, user_id) => {
   const pipeline = [
     // Match messages belonging to a specific conversation
@@ -218,10 +208,10 @@ export const checkSenderAvailability = async (
 };
 export const getConversationsByUserId = async (conversationId) => {
   const userConversations = await conversationModel
-    .findById(conversationId)
+    .findById(conversationId).sort({ updatedAt: -1 })
     .populate({
       path: "members",
-      select: "firstName lastName"
+      select: "firstName lastName",
     });
   return userConversations;
 };
@@ -238,6 +228,6 @@ export const createOfflineMembers = async (messageOfflineMembers, session) => {
   );
   return offlineMembers;
 };
-export const deleteOfflineMembers = async ({ _id }) => {
-  await offlineMembersModel.findByIdAndDelete(_id);
+export const deleteOfflineMembers = async (userId) => {
+  await offlineMembersModel.deleteMany({ userId });
 };

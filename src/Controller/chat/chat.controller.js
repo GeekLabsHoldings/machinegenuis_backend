@@ -21,9 +21,18 @@ export const msgHandler = async (io, socket) => {
     for (const offlineMember of offlineMembers) {
       socket.emit("message", offlineMember.message);
     }
-    await conversation_chat.deleteOfflineMembers({ _id: offlineMembers._id });
+    await conversation_chat.deleteOfflineMembers(user._id);
     // Listen for messages from the client
     socket.on("sendMessage", (msgData) => handleMessage(io, socket, msgData));
+    socket.on("userSeenMessage", async (msgData) => {
+      const moment_time = moment().valueOf();
+      const { conversationId } = msgData;
+      await conversation_chat.updateSeenStatus(
+        conversationId,
+        user._id,
+        moment_time
+      );
+    });
 
     // Handle socket disconnection
     socket.on("disconnect", () => {
@@ -40,8 +49,9 @@ export const handleMessage = async (io, socket, msgData) => {
   const senderId = socket.handshake.user._id;
   try {
     const { conversationId, text, mediaUrl } = msgData;
+    console.log({ conversationId, text, mediaUrl, senderId })
     console.log("Received message:", msgData);
-    
+
     // Create a new message document
     const checkSenderAvailability =
       await conversation_chat.checkSenderAvailability(
