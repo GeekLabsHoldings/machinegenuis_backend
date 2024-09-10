@@ -7,18 +7,30 @@ const promptsController = require('../Prompts Database/promptsDB_controller')
 
 const generateTitleAndContent = async (content, myPrompt) => {
   try {
+    console.log(`myPrompt value: "${myPrompt}"`);
     if (myPrompt === "Expand")
-    {
-      var prompt = `Expand this ${content} on it more, increase the word count further , get this content in html format like this structure:-  
+    { 
+      var prompt = `Expand this content: "${content}" and increase the word count further. Format it into HTML like this structure:
         <h4>Intro</h4>
         <p>[Your introductory text here]</p>
         <h4>Body</h4>
         <p>[Your main content here]</p>
         <h4>Outro</h4>
         <p>[Your closing statement here]</p>
-        NOTE*  PLEASE I NEED THE ORIGINAL ARTICLE , DON'T EDIT ON IT ANY WAAAAAAAAAAAAAY!!`
+        NOTE: Please keep the original article intact without editing!`
     }
-    if(myPrompt === "HTML") {
+    else if(myPrompt === "HTML") {
+      var prompt = `Here's the articles: \n\n ${content} get this content in html format like this structure:-  
+        <h4>Intro</h4>
+        <p>[Your introductory text here]</p>
+        <h4>Body</h4>
+        <p>[Your main content here]</p>
+        <h4>Outro</h4>
+        <p>[Your closing statement here]</p>
+        NOTE*  PLEASE I NEED THE ORIGINAL ARTICLE , DON'T EDIT ON IT ANY WAAAAAAAAAAAAAY!!!
+        `;
+    }
+    else {
       var prompt = `Here's the articles: \n\n ${content} get this content in html format like this structure:-  
         <h4>Intro</h4>
         <p>[Your introductory text here]</p>
