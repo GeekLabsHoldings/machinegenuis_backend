@@ -37,7 +37,7 @@ const generateTitleAndContent = async (content, myPrompt) => {
       <h4>Body</h4>
       <p>[Your main content here]</p>
       <h4>Outro</h4>
-      <p>[Your closing statement here]</p>`;
+      <p>[Your closing statement here]</p> `;
     }
     
     const completion = await openai.chat.completions.create({
