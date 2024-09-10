@@ -11,11 +11,14 @@ const app: Application = express();
 
 import bodyParser from "body-parser";
 
+
 import path from "path";
 import content_creation_router from "./Router/ContentCreation/main";
 import { checkAuthority } from "./middleware/verifyToken";
 import RouterEnum from "./Utils/Routes";
 import socialMediaRouter from "./Router/SocialMedia";
+import AdministrativeRouter from './Router/Administrative';
+
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Middleware for parsing request body
@@ -47,4 +50,6 @@ app.use(`/${RouterEnum.hr}`, HR_Router);
 app.use(`/${RouterEnum.admin}`, AdminRouter);
 app.use(`/${RouterEnum.user}`, UserRouter);
 app.use(`/${RouterEnum.socialMedia}`, socialMediaRouter);
+app.use(`/${RouterEnum.Administrative}`, AdministrativeRouter);
 export { app };
+

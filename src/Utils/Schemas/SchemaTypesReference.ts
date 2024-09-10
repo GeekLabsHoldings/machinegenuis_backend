@@ -12,6 +12,10 @@ enum SchemaTypesReference {
   Linkedin_Accounts = "linkedin_accounts",
   Conversation = "conversation",
   Message = "message",
+  Room = "room",
+  Supplies = "supplies",
+  Ticket = "ticket",
+  Receipt = "receipt",
   Seen = "seen",
   SocialMedia = "socialMedia",
   TwitterData ="twitterData"
