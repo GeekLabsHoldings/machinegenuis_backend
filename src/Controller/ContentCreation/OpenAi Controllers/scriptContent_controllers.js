@@ -17,8 +17,7 @@ const generateTitleAndContent = async (content, myPrompt) => {
         <h4>Body</h4>
         <p>[Your main content here]</p>
         <h4>Outro</h4>
-        <p>[Your closing statement here]</p>
-        NOTE: Please keep the original article intact without editing!`
+        <p>[Your closing statement here]</p>`
     }
     else if(myPrompt === "HTML") {
       var prompt = `Here's the articles: \n\n ${content} get this content in html format like this structure:-  
@@ -32,15 +31,13 @@ const generateTitleAndContent = async (content, myPrompt) => {
         `;
     }
     else {
-      var prompt = `Here's the articles: \n\n ${content} get this content in html format like this structure:-
-        <h4>Intro</h4>
-        <p>[Your introductory text here]</p>
-        <h4>Body</h4>
-        <p>[Your main content here]</p>
-        <h4>Outro</h4>
-        <p>[Your closing statement here]</p>
-        NOTE*  PLEASE I NEED THE ORIGINAL ARTICLE , DON'T EDIT ON IT ANY WAAAAAAAAAAAAAY!!!
-        `;
+      var prompt = `${myPrompt} Here's the articles: \n\n${content} get this content in html format like this structure:-  
+      <h4>Intro</h4>
+      <p>[Your introductory text here]</p>
+      <h4>Body</h4>
+      <p>[Your main content here]</p>
+      <h4>Outro</h4>
+      <p>[Your closing statement here]</p>`;
     }
     
     const completion = await openai.chat.completions.create({
