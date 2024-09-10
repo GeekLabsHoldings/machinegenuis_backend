@@ -7,18 +7,19 @@ const promptsController = require('../Prompts Database/promptsDB_controller')
 
 const generateTitleAndContent = async (content, myPrompt) => {
   try {
-    if (myPrompt === "HTML") {
-      var prompt = `Here's the articles: \n\n ${content} get this content in html format like this structure:-  
+    if (myPrompt === "Expand")
+    {
+      var prompt = `Expand this ${content} on it more, increase the word count further , get this content in html format like this structure:-  
         <h4>Intro</h4>
         <p>[Your introductory text here]</p>
         <h4>Body</h4>
         <p>[Your main content here]</p>
         <h4>Outro</h4>
         <p>[Your closing statement here]</p>
-        NOTE*  PLEASE I NEED THE ORIGINAL ARTICLE , DON'T EDIT ON IT ANY WAAAAAAAAAAAAAY!!!
-        `;
-    } else {
-      var prompt = `${myPrompt} Here's the articles: \n\n${content} get this content in html format like this structure:-  
+        NOTE*  PLEASE I NEED THE ORIGINAL ARTICLE , DON'T EDIT ON IT ANY WAAAAAAAAAAAAAY!!`
+    }
+    if(myPrompt === "HTML") {
+      var prompt = `Here's the articles: \n\n ${content} get this content in html format like this structure:-  
         <h4>Intro</h4>
         <p>[Your introductory text here]</p>
         <h4>Body</h4>
@@ -191,4 +192,35 @@ const convertContentTo_HTML = async (req, res) => {
   }
 };
 
-export { generateContent, convertContentTo_HTML };
+const expandScript = async (req, res) => {
+  try {
+    const { selectedContent } = req.body;
+    if (!selectedContent) {
+      return res
+        .status(400)
+        .json({ success: false, error: "No content provided" });
+    }
+
+    const finalArticles = [];
+    let prompt = "Expand";
+    try {
+      const { title, content } = await generateTitleAndContent(
+        selectedContent,
+        prompt
+      );
+      finalArticles.push({ title, content });
+    } catch (error) {
+      console.error("Error generating title and content:", error);
+      finalArticles.push({
+        title: "Error generating title",
+        content: "Failed to process content",
+      });
+    }
+
+    res.json({ success: true, articles: finalArticles });
+  } catch (error) {
+    console.error("Error processing request:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+export { generateContent, convertContentTo_HTML , expandScript };
