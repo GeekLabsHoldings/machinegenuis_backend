@@ -7,6 +7,7 @@ const promptsController = require('../Prompts Database/promptsDB_controller')
 
 const generateTitleAndContent = async (content, myPrompt) => {
   try {
+
     console.log(`myPrompt value: "${myPrompt}"`);
     if (myPrompt === "Expand")
     { 
@@ -31,7 +32,7 @@ const generateTitleAndContent = async (content, myPrompt) => {
         `;
     }
     else {
-      var prompt = `Here's the articles: \n\n ${content} get this content in html format like this structure:-  
+      var prompt = `Here's the articles: \n\n ${content} get this content in html format like this structure:-
         <h4>Intro</h4>
         <p>[Your introductory text here]</p>
         <h4>Body</h4>
@@ -41,6 +42,7 @@ const generateTitleAndContent = async (content, myPrompt) => {
         NOTE*  PLEASE I NEED THE ORIGINAL ARTICLE , DON'T EDIT ON IT ANY WAAAAAAAAAAAAAY!!!
         `;
     }
+    
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
