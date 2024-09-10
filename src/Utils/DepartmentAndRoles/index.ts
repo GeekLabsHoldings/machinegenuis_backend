@@ -1,6 +1,7 @@
 enum DepartmentEnum {
     HR = "hr",
     ContentCreator = "content-creation",
+    SocialMedia = "social-media",
     Administrative = "administrative",
     CEO = "CEO"
 }
@@ -8,8 +9,9 @@ enum DepartmentEnum {
 enum RoleEnum {
     ContentWriter = "ContentWriter",
     Payroll = "Payroll",
+    CEO = "CEO",
+    SocialMedia = "SocialMedia"
     Administrative = "administrative",
-    CEO = "CEO"
 }
 
 
@@ -18,6 +20,7 @@ const DepartmentRoles = {
     Departments: ["Recruiter", "Payroll", "Training", "Employee Relations"],
     "content-creation": ["ContentWriter"],
     CEO: ['CEO'],
+    "social-media": ["SocialMedia"]
     administrative: ['administrative'],
 } as const;
 
