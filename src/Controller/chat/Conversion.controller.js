@@ -101,11 +101,7 @@ export const getAllMessagesWithConversations = async (req, res) => {
     const { conversationId } = req.params;
     const user_id = req.body.currentUser._id;
     const createdAt = moment().valueOf();
-    // const seen = await conversation_chat.createSeenEntryForConversation(
-    //   conversationId,
-    //   user_id,
-    //   createdAt
-    // );
+    
     await handleSeenMessage(conversationId, user_id);
 
     const messages = await conversation_chat.fetchMessagesByAggregation(
