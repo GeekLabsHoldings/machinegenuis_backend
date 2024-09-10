@@ -1,10 +1,9 @@
 import { Schema, model } from "mongoose";
 import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
+import { EnumStringRequired } from "../../Utils/Schemas";
+import { brandArr } from "../../Utils/SocialMedia/Brand";
 const TwitterDataSchema = new Schema({
-  brand: {
-    type: String,
-    required: true,
-  },
+  brand: EnumStringRequired(brandArr),
   token: { type: String, required: true },
 });
 

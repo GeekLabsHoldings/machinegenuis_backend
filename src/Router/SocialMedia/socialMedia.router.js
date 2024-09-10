@@ -1,8 +1,8 @@
 import { Router } from "express";
 import * as socialMediaController from "../../Controller/SocialMedia/socialMedia.controller";
 
-const socialMediaRouter = Router();
-socialMediaRouter.post("/add-post", socialMediaController.addPostSocialMedia);
-socialMediaRouter.post("/Enc-Data", socialMediaController.encryptSensitiveData);
+const twitterRouter = Router();
+twitterRouter.post("/add-post", socialMediaController.addPostSocialMediaTwitter);
+twitterRouter.post("/add-new-account", socialMediaController.addNewAccountTwitter);
 
-export default socialMediaRouter;
+export default twitterRouter;

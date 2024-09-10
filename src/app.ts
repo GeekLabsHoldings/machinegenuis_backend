@@ -15,7 +15,7 @@ import path from "path";
 import content_creation_router from "./Router/ContentCreation/main";
 import { checkAuthority } from "./middleware/verifyToken";
 import RouterEnum from "./Utils/Routes";
-import socialMediaRouter from "./Router/SocialMedia/socialMedia.router";
+import socialMediaRouter from "./Router/SocialMedia";
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Middleware for parsing request body

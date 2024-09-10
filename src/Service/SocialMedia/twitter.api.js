@@ -1,18 +1,34 @@
-async function TwitterSocialMedia({ content }) {
+import { TwitterApi } from "twitter-api-v2";
+import systemError from "../../Utils/Error/SystemError";
+import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
+
+export const TwitterSocialMedia = async ({
+  content,
+  appKey,
+  appSecret,
+  accessToken,
+  accessSecret,
+}) => {
   const client = new TwitterApi({
-    appKey: "iy6xHq3V6jAJgf553lKvP02Yo", 
-    appSecret: "bJElvj5GjoXnFApCinIZ9q15TRoHYzPhping730pFSIO3qNLli",
-    accessToken: "1833043345876144128-UvvV1h3oA6BYjo3fCLMExaVE3q5G98",
-    accessSecret: "9TUf4GGPPEJz8L3QDILMxL3lSd28ZwsMDq4nX2FADVn0h",
+    appKey,
+    appSecret,
+    accessToken,
+    accessSecret,
   });
 
-  // Define a function to post a tweet
-  export async function postTweet() {
-    try {
-      const tweet = await client.v2.tweet(content);
-      console.log("Tweet posted successfully:", tweet);
-    } catch (error) {
-      console.error("Error posting tweet:", error);
+  try {
+    const tweet = await client.v2.tweet(content);
+    if (tweet.status && tweet.status === 403) {
+      return systemError
+        .setStatus(403)
+        .getMessage(ErrorMessages.TWEET_IS_ALREADY_EXIST);
     }
+    console.log("Tweet posted successfully:", tweet);
+    return {
+      message: "Tweet posted successfully",
+      tweet,
+    };
+  } catch (error) {
+    console.error("Error posting tweet:", error);
   }
-}
+};

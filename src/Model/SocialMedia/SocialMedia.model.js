@@ -1,34 +1,25 @@
 import { hash } from "bcrypt";
 import { Schema, model, Types } from "mongoose";
-import { platform } from "os";
+import { platform, type } from "os";
 import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
+import { EnumStringRequired } from "../../Utils/Schemas";
+import { PlatformArr } from "../../Utils/SocialMedia/Platform";
+import { brandArr } from "../../Utils/SocialMedia/Brand";
 const socialMediaSchema = new Schema({
-  platform: {
-    type: String,
-    required: true,
-    enum: ["facebook", "twitter", "linkedin", "reddit"],
-  },
-  brand: {
-    type: String,
-    required: true,
-    enum: [
-      "PST",
-      "Street Politics",
-      "Movie Myth",
-      "Investorcracy",
-      "Media Projects",
-      "PST Canada",
-    ],
-  },
+  platform: EnumStringRequired(PlatformArr),
+  brand: EnumStringRequired(brandArr),
   content: {
     type: String,
     required: true,
   },
+  postId: { type: String, required: true },
   employeeId: {
     type: Types.ObjectId,
     required: true,
     ref: SchemaTypesReference.Employee,
   },
-  
 });
-export const socialMediaModel= model(SchemaTypesReference.SocialMedia, socialMediaSchema);
+export const socialMediaModel = model(
+  SchemaTypesReference.SocialMedia,
+  socialMediaSchema
+);

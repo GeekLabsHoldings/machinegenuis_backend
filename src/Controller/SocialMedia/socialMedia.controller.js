@@ -4,31 +4,83 @@ import { socialMediaModel } from "../../Model/SocialMedia/SocialMedia.model";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import twitterModel from "../../Model/SocialMedia/TwitterData.model";
-export const addPostSocialMedia = async (req, res) => {
+import { TwitterSocialMedia } from "../../Service/SocialMedia/twitter.api";
+import systemError from "../../Utils/Error/SystemError";
+import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
+import { PlatformEnum } from "../../Utils/SocialMedia/Platform";
+import {
+  createAccountTwitter,
+  createSocialMediaPostTwitter,
+  createTwitterAccountSecret,
+} from "../../Service/SocialMedia/twitter.service";
+
+function decrypt(encryptedText) {
+  const algorithm = "aes-256-cbc";
+  const secretKeyHex = process.env.SECRET_KEY;
+  if (!secretKeyHex) {
+    throw new Error("SECRET_KEY environment variable is not set.");
+  }
+  if (secretKeyHex.length !== 64) {
+    throw new Error("SECRET_KEY must be a 64-character hexadecimal string.");
+  }
+  const secretKey = Buffer.from(secretKeyHex, "hex");
+  // Split the encrypted text into IV and the actual encrypted data
+  const [ivHex, encryptedData] = encryptedText.split(":");
+  const iv = Buffer.from(ivHex, "hex");
+  const decipher = crypto.createDecipheriv(algorithm, secretKey, iv);
+  let decrypted = decipher.update(encryptedData, "hex", "utf8");
+  decrypted += decipher.final("utf8");
+  return decrypted;
+}
+
+export const addPostSocialMediaTwitter = async (req, res) => {
   try {
-    const { platform, brand, content } = req.body;
+    const { brand, content } = req.body;
     const userId = req.body.currentUser._id;
-    if (!platform || !brand || !content) {
-      return res.status(400).json({
-        message: "Please fill all the fields",
-      });
+    if (!brand || !content) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.DATA_IS_REQUIRED)
+        .throw();
     }
-    const createPost = await socialMediaModel.create({
-      platform,
+    const twitterData = await twitterModel.findOne({ brand });
+    if (!twitterData) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.BRAND_NOT_FOUND)
+        .throw();
+    }
+    const { token } = twitterData;
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const decryptedAppKey = decrypt(decodedToken.appKey);
+    const decryptedAppSecret = decrypt(decodedToken.appSecret);
+    const decryptedAccessToken = decrypt(decodedToken.accessToken);
+    const decryptedAccessSecret = decrypt(decodedToken.accessSecret);
+
+    const response = await TwitterSocialMedia({
+      content,
+      appKey: decryptedAppKey,
+      appSecret: decryptedAppSecret,
+      accessToken: decryptedAccessToken,
+      accessSecret: decryptedAccessSecret,
+    });
+    const createPost = await createAccountTwitter(
+      PlatformEnum.TWITTER,
       brand,
       content,
-      employeeId: userId,
-    });
+      userId,
+      response.tweet.data.id
+    );
     return res.status(200).json({
-      message: "Post created successfully",
-      createPost,
+      tweet: response,
+      result: createPost,
     });
   } catch (error) {
-    console.log(error);
+    return systemError.sendError(res, error);
   }
 };
 
-export const encryptSensitiveData = async (req, res) => {
+export const addNewAccountTwitter = async (req, res) => {
   try {
     const algorithm = "aes-256-cbc";
 
@@ -68,12 +120,9 @@ export const encryptSensitiveData = async (req, res) => {
         accessToken: encryptedAccessToken,
         accessSecret: encryptedAccessSecret,
       },
-      process.env.JWT_SECRET_TWITTER
+      process.env.JWT_SECRET
     );
-    await twitterModel.create({
-      brand,
-      token,
-    });
+    await createTwitterAccountSecret(brand, token);
 
     return res.json({ message: "Done" });
   } catch (error) {
