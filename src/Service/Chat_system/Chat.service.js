@@ -69,14 +69,18 @@ export const createConversationWithMembers = async (
   userId,
   createdAt
 ) => {
-  const conversation = await conversationModel.create({
+  const newConversation = new conversationModel({
     groupName,
     type,
     members,
     admin: userId,
     createdAt,
   });
-  return conversation;
+  const result = (await newConversation.save()).populate({
+    path: "members",
+    select: "_id firstName lastName",
+  });
+  return result;
 };
 export const getAllConversationsForUser = async (user_id) => {
   const allConversations = await conversationModel
