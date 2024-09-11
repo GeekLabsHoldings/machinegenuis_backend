@@ -5,6 +5,8 @@ import mongoose, { Types } from "mongoose";
 import ICandidateQuestionsModel from "../../Model/HR/Candidate/ICandidateQuestionsModel";
 import { StatusEnum } from "../../Utils/Hiring";
 import EmployeeController from "../../Controller/HR/Employee/EmployeeController";
+import IPayrollModel from "../../Model/Accounting/Payroll/IPayrollModel";
+import moment from "../../Utils/DateAndTime"
 
 const CandidateRouter = Router();
 
@@ -119,9 +121,15 @@ CandidateRouter.put('/convert-to-employee/:_id', async (req: Request, res: Respo
         const { _id } = req.params;
         const employer_id = req.body.currentUser;
         const { paper, birthday, email, theme, password } = req.body;
+        const payrollData: IPayrollModel = {
+            socialInsurance: req.body.socialInsurance,
+            medicalInsurance: req.body.medicalInsurance,
+            netSalary: req.body.netSalary,
+            createdAt: moment().valueOf()
+        }
         const employeeController = new EmployeeController();
 
-        const result = await employeeController.convertCandidateToEmployee(employer_id, _id, paper, email, password, birthday, theme, session);
+        const result = await employeeController.convertCandidateToEmployee(employer_id, _id, paper, email, password, birthday, theme, payrollData, session);
         await session.commitTransaction()
         return res.json(result);
     } catch (error) {

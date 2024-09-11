@@ -1,5 +1,6 @@
 import IReceiptModel from "../../../Model/Administrative/Receipt/IReceiptModel";
 import ReceiptModel from "../../../Model/Administrative/Receipt/ReceiptModel";
+import { SchemaTypesReference } from "../../../Utils/Schemas/SchemaTypesReference";
 import IReceiptService from "./IReceiptService";
 
 class ReceiptService implements IReceiptService {
@@ -10,8 +11,11 @@ class ReceiptService implements IReceiptService {
     }
 
     async getAllReceipts(page: number, limit: number): Promise<IReceiptModel[]> {
-        return await ReceiptModel.find().sort({ createdAt: -1 })
-            .skip((page - 1) * limit).limit(limit);
+        return await ReceiptModel.find()
+            .populate({
+                path: SchemaTypesReference.Employee,
+                select: { _id: 1, firstName: 1, lastName: 1 }
+            }).sort({ createdAt: -1 }).skip((page) * limit).limit(limit);
     }
 }
 

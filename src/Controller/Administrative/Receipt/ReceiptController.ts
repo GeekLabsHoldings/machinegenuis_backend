@@ -1,8 +1,8 @@
 import IReceiptModel from "../../../Model/Administrative/Receipt/IReceiptModel";
 import IReceiptController from "./IReceiptController";
-import moment from "../../../Utils/DateAndTime";
 import receiptService from "../../../Service/Administrative/Receipt/ReceiptService";
 import S3_services from "../../../Service/AWS/S3_Bucket/presinedURL";
+import moment from "../../../Utils/DateAndTime";
 export default class ReceiptController implements IReceiptController {
     async generateReceiptPresignedUrl(): Promise<string> {
         const s3Service = new S3_services();
@@ -12,13 +12,8 @@ export default class ReceiptController implements IReceiptController {
         const url = await s3Service.createPresignedUrlWithClient({ region, bucket, key });
         return url;
     }
-    async createReceipt(ReceiptUrl: string, totalPrice: number): Promise<any> {
-        const receipt: IReceiptModel = {
-            receiptUrl: ReceiptUrl,
-            totalPrice,
-            createdAt: moment().valueOf()
-        }
-        const result = await receiptService.createReceipt(receipt);
+    async createReceipt(receiptData: IReceiptModel): Promise<any> {
+        const result = await receiptService.createReceipt(receiptData);
         return result;
     }
     async getAllReceipts(page: number, limit: number): Promise<any[]> {

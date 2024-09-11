@@ -1,6 +1,9 @@
 import { Router, Request, Response } from 'express';
 import ReceiptController from '../../Controller/Administrative/Receipt/ReceiptController';
 import systemError from '../../Utils/Error/SystemError';
+import IReceiptModel from '../../Model/Administrative/Receipt/IReceiptModel';
+import moment from "../../Utils/DateAndTime";
+
 const ReceiptRouter = Router();
 
 
@@ -16,10 +19,14 @@ ReceiptRouter.get('/presigned-url', async (req: Request, res: Response) => {
 
 ReceiptRouter.post('/', async (req: Request, res: Response) => {
     try {
+        const receiptData: IReceiptModel = {
+            receiptUrl: req.body.receiptUrl,
+            totalPrice: req.body.totalPrice,
+            employee: req.body.currentUser,
+            createdAt: moment().valueOf()
+        }
         const receiptController = new ReceiptController();
-        const receiptUrl = req.body.receiptUrl;
-        const totalPrice = req.body.totalPrice;
-        const result = await receiptController.createReceipt(receiptUrl, totalPrice);
+        const result = await receiptController.createReceipt(receiptData);
         return res.json({ result });
     } catch (error) {
         return systemError.sendError(res, error);
