@@ -1,6 +1,7 @@
 enum OfficeCleaningEnum {
     Done = 'Done',
     Missed = 'Missed',
+    CheckList = 'CheckList'
 }
 
 enum SuppliesEnum {
@@ -9,11 +10,9 @@ enum SuppliesEnum {
     Cleaning = 'Cleaning'
 }
 
-enum QueryTypeEnum {
-    Daily = 'Daily',
-    Weekly = 'Weekly',
-    Monthly = 'Monthly',
-    Yearly = 'Yearly'
+enum SuppliesTypeEnum {
+    Food = 'Food',
+    Cleaning = 'Cleaning',
 }
 
 enum TicketTypeEnum {
@@ -22,11 +21,17 @@ enum TicketTypeEnum {
     Request = 'Request',
 }
 
+enum SuppliesStatusEnum {
+    CheckList = "CheckList",
+    Available = "Available",
+    Repurchase = "Repurchase"
+}
+
 
 
 const OfficeCleaningEnumArray = Object.values(OfficeCleaningEnum);
 const SuppliesEnumArray = Object.values(SuppliesEnum);
-const queryTypeEnumArray = Object.values(QueryTypeEnum);
+const SuppliesTypeArr = Object.values(SuppliesTypeEnum);
 const ticketTypeEnumArray = Object.values(TicketTypeEnum);
-
-export { OfficeCleaningEnumArray, SuppliesEnumArray, queryTypeEnumArray, ticketTypeEnumArray };
+const SuppliesStatusEnumArray = Object.values(SuppliesStatusEnum);
+export { OfficeCleaningEnum, SuppliesEnum, SuppliesTypeEnum, SuppliesStatusEnum, OfficeCleaningEnumArray, SuppliesEnumArray, SuppliesTypeArr, ticketTypeEnumArray, SuppliesStatusEnumArray };

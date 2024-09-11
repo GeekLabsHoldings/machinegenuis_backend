@@ -1,14 +1,15 @@
 import { model, Schema } from 'mongoose';
 import ISuppliesModel from './ISuppliesModel';
 import { EnumStringRequired, RequiredNumber, RequiredString } from '../../../Utils/Schemas';
-import { queryTypeEnumArray, SuppliesEnumArray } from '../../../Utils/Administrative';
+import { SuppliesTypeArr, SuppliesEnumArray, SuppliesStatusEnumArray } from '../../../Utils/Administrative';
 import { SchemaTypesReference } from '../../../Utils/Schemas/SchemaTypesReference';
 
 const SuppliesSchema = new Schema<ISuppliesModel>({
     supplyName: RequiredString,
     wantedQuantity: RequiredNumber,
-    queryType: EnumStringRequired(queryTypeEnumArray),
-    type: EnumStringRequired(SuppliesEnumArray),
+    subType: EnumStringRequired(SuppliesEnumArray),
+    type: EnumStringRequired(SuppliesTypeArr),
+    supplyStatus: EnumStringRequired(SuppliesStatusEnumArray),
     productPrice: RequiredNumber
 });
 
