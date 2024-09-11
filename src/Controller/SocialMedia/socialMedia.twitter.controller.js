@@ -132,3 +132,39 @@ export const addNewAccountTwitter = async (req, res) => {
       .json({ message: "Error encrypting data", error: error.message });
   }
 };
+
+export const getTwitterAccountSecretData = async (req, res) => {
+  try {
+    const { brand } = req.body;
+    
+    if (!brand) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.DATA_IS_REQUIRED)
+        .throw();
+    }
+    const twitterData = await getTwitterData(brand);
+    if (!twitterData) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.BRAND_NOT_FOUND)
+        .throw();
+    }
+    const { token } = twitterData;
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const decryptedAppKey = decrypt(decodedToken.appKey);
+    const decryptedAppSecret = decrypt(decodedToken.appSecret);
+    const decryptedAccessToken = decrypt(decodedToken.accessToken);
+    const decryptedAccessSecret = decrypt(decodedToken.accessSecret);
+    return res.status(200).json({
+      message:"Success",
+     Data:{ appKey: decryptedAppKey,
+      appSecret: decryptedAppSecret,
+      accessToken: decryptedAccessToken,
+      accessSecret: decryptedAccessSecret,}
+
+    });
+  } catch (error) {
+    return systemError.sendError(res, error);
+  }
+};

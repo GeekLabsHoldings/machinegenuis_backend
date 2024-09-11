@@ -29,7 +29,3 @@ export const createTwitterAccountSecret = async (brand, token) => {
     token,
   });
 };
-export const getTwitterAccountSecretDate = async (brand) => {
-  const twitterData = await twitterModel.findOne({ brand });
-  return twitterData;
-};
