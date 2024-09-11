@@ -18,6 +18,7 @@ import { checkAuthority } from "./middleware/verifyToken";
 import RouterEnum from "./Utils/Routes";
 import socialMediaRouter from "./Router/SocialMedia";
 import AdministrativeRouter from './Router/Administrative';
+import AccountingRouter from "./Router/Accounting";
 
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -51,5 +52,7 @@ app.use(`/${RouterEnum.admin}`, AdminRouter);
 app.use(`/${RouterEnum.user}`, UserRouter);
 app.use(`/${RouterEnum.socialMedia}`, socialMediaRouter);
 app.use(`/${RouterEnum.Administrative}`, AdministrativeRouter);
+app.use(`/${RouterEnum.Accounting}`, AccountingRouter);
+
 export { app };
 
