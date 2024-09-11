@@ -4,7 +4,7 @@ import { DBConnection } from "./DbSetup/DbConfig";
 import ScrapCronJob from "./Utils/CronJobs/ScrapCronJob";
 import createIo from "./socketIo";
 
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 4001;
 const server = app.listen(port, async () => {
   try {
     await DBConnection();
@@ -14,8 +14,6 @@ const server = app.listen(port, async () => {
     console.log(error);
   }
 });
-
-
 
 createIo(server);
 export default app;

@@ -1,7 +1,7 @@
 import { socialMediaModel } from "../../Model/SocialMedia/SocialMedia.model";
 import twitterModel from "../../Model/SocialMedia/TwitterData.model";
 
-export const createAccountTwitter = async (
+export const createAccountSocialMedia = async (
   platform,
   brand,
   content,
@@ -9,7 +9,6 @@ export const createAccountTwitter = async (
   postId
 ) => {
   try {
-    console.log({ platform, brand, content, userId, postId });
     const createPost = await socialMediaModel.create({
       platform,
       brand,
@@ -17,7 +16,6 @@ export const createAccountTwitter = async (
       employeeId: userId,
       postId,
     });
-    console.log({ createPost });
     return createPost;
   } catch (error) {
     console.log("=============", { error });
@@ -29,7 +27,7 @@ export const createTwitterAccountSecret = async (brand, token) => {
     token,
   });
 };
-export const getTwitterAccountSecretDate = async (brand) => {
+export const getTwitterData = async (brand) => {
   const twitterData = await twitterModel.findOne({ brand });
   return twitterData;
-};
+}
