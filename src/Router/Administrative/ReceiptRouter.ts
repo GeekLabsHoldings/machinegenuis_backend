@@ -17,7 +17,9 @@ ReceiptRouter.get('/presigned-url', async (req: Request, res: Response) => {
 ReceiptRouter.post('/', async (req: Request, res: Response) => {
     try {
         const receiptController = new ReceiptController();
-        const result = await receiptController.createReceipt(req.body.receiptUrl);
+        const receiptUrl = req.body.receiptUrl;
+        const totalPrice = req.body.totalPrice;
+        const result = await receiptController.createReceipt(receiptUrl, totalPrice);
         return res.json({ result });
     } catch (error) {
         return systemError.sendError(res, error);

@@ -2,7 +2,8 @@
 export default interface ISuppliesModel {
     supplyName: string;
     wantedQuantity: number;
-    queryType: string;
+    supplyStatus: string;
     type: string;
+    subType: string;
     productPrice: number;
 }
