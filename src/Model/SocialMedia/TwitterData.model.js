@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, model,Types } from "mongoose";
 import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
 import { EnumStringRequired } from "../../Utils/Schemas";
 import { brandArr } from "../../Utils/SocialMedia/Brand";

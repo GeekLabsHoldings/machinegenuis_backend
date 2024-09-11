@@ -1,5 +1,7 @@
 import { TwitterApi } from "twitter-api-v2";
 import systemError from "../../Utils/Error/SystemError";
+import { TwitterApi } from "twitter-api-v2";
+import systemError from "../../Utils/Error/SystemError";
 import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
 
 export const TwitterSocialMedia = async ({
@@ -8,6 +10,7 @@ export const TwitterSocialMedia = async ({
   appSecret,
   accessToken,
   accessSecret,
+  mediaId
 }) => {
   const client = new TwitterApi({
     appKey,
@@ -17,7 +20,12 @@ export const TwitterSocialMedia = async ({
   });
 
   try {
-    const tweet = await client.v2.tweet(content);
+    const tweet = await client.v2.tweet({
+      text:content,
+      media:{
+        media_ids:[mediaId]
+      }
+    });
     if (tweet.status && tweet.status === 403) {
       return systemError
         .setStatus(403)
