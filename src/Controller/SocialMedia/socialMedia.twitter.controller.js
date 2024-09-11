@@ -1,6 +1,5 @@
 import { TwitterApi } from "twitter-api-v2";
 import { socialMediaModel } from "../../Model/SocialMedia/SocialMedia.model";
-
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import twitterModel from "../../Model/SocialMedia/TwitterData.model";
@@ -9,11 +8,11 @@ import systemError from "../../Utils/Error/SystemError";
 import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
 import { PlatformEnum } from "../../Utils/SocialMedia/Platform";
 import {
-  createAccountTwitter,
+  createAccountSocialMedia,
   createSocialMediaPostTwitter,
   createTwitterAccountSecret,
-  getTwitterAccountSecretDate,
-} from "../../Service/SocialMedia/twitter.service";
+  getTwitterData,
+} from "../../Service/SocialMedia/socialMedia.service";
 
 function decrypt(encryptedText) {
   const algorithm = "aes-256-cbc";
@@ -36,7 +35,7 @@ function decrypt(encryptedText) {
 
 export const addPostSocialMediaTwitter = async (req, res) => {
   try {
-    const { brand, content } = req.body;
+    const { brand, content, mediaId } = req.body;
     const userId = req.body.currentUser._id;
     if (!brand || !content) {
       return systemError
@@ -44,7 +43,7 @@ export const addPostSocialMediaTwitter = async (req, res) => {
         .setMessage(ErrorMessages.DATA_IS_REQUIRED)
         .throw();
     }
-    const twitterData = await twitterModel.findOne({ brand });
+    const twitterData = await getTwitterData(brand);
     if (!twitterData) {
       return systemError
         .setStatus(400)
@@ -57,15 +56,15 @@ export const addPostSocialMediaTwitter = async (req, res) => {
     const decryptedAppSecret = decrypt(decodedToken.appSecret);
     const decryptedAccessToken = decrypt(decodedToken.accessToken);
     const decryptedAccessSecret = decrypt(decodedToken.accessSecret);
-
     const response = await TwitterSocialMedia({
       content,
       appKey: decryptedAppKey,
       appSecret: decryptedAppSecret,
       accessToken: decryptedAccessToken,
       accessSecret: decryptedAccessSecret,
+      mediaId
     });
-    const createPost = await createAccountTwitter(
+    const createPost = await createAccountSocialMedia(
       PlatformEnum.TWITTER,
       brand,
       content,
@@ -133,10 +132,18 @@ export const addNewAccountTwitter = async (req, res) => {
       .json({ message: "Error encrypting data", error: error.message });
   }
 };
-export const getAllDataByTwitterAccount = async (req, res) => {
+
+export const getTwitterAccountSecretData = async (req, res) => {
   try {
     const { brand } = req.body;
-   const twitterData = await getTwitterAccountSecretDate(brand);
+    
+    if (!brand) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.DATA_IS_REQUIRED)
+        .throw();
+    }
+    const twitterData = await getTwitterData(brand);
     if (!twitterData) {
       return systemError
         .setStatus(400)
@@ -149,19 +156,15 @@ export const getAllDataByTwitterAccount = async (req, res) => {
     const decryptedAppSecret = decrypt(decodedToken.appSecret);
     const decryptedAccessToken = decrypt(decodedToken.accessToken);
     const decryptedAccessSecret = decrypt(decodedToken.accessSecret);
-    return res.json({
-      message: "Done",
-      Data: {
-        AppKey: decryptedAppKey,
-        AppSecret: decryptedAccessSecret,
-        AccessToken: decryptedAccessToken,
-        AccessSecret: decryptedAccessSecret,
-      },
+    return res.status(200).json({
+      message:"Success",
+     Data:{ appKey: decryptedAppKey,
+      appSecret: decryptedAppSecret,
+      accessToken: decryptedAccessToken,
+      accessSecret: decryptedAccessSecret,}
+
     });
   } catch (error) {
-    console.error("Error encrypting data:", error);
-    res
-      .status(500)
-      .json({ message: "Error encrypting data", error: error.message });
+    return systemError.sendError(res, error);
   }
 };
