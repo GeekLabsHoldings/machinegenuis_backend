@@ -3,23 +3,20 @@ require("dotenv").config();
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-const promptsController = require('../Prompts Database/promptsDB_controller')
+const promptsController = require("../Prompts Database/promptsDB_controller");
 
 const generateTitleAndContent = async (content, myPrompt) => {
   try {
-
     console.log(`myPrompt value: "${myPrompt}"`);
-    if (myPrompt === "Expand")
-    { 
+    if (myPrompt === "Expand") {
       var prompt = `Expand this content: "${content}" and increase the word count further. Format it into HTML like this structure:
         <h4>Intro</h4>
         <p>[Your introductory text here]</p>
         <h4>Body</h4>
         <p>[Your main content here]</p>
         <h4>Outro</h4>
-        <p>[Your closing statement here]</p>`
-    }
-    else if(myPrompt === "HTML") {
+        <p>[Your closing statement here]</p>`;
+    } else if (myPrompt === "HTML") {
       var prompt = `Here's the articles: \n\n ${content} get this content in html format like this structure:-  
         <h4>Intro</h4>
         <p>[Your introductory text here]</p>
@@ -29,8 +26,7 @@ const generateTitleAndContent = async (content, myPrompt) => {
         <p>[Your closing statement here]</p>
         NOTE*  PLEASE I NEED THE ORIGINAL ARTICLE , DON'T EDIT ON IT ANY WAAAAAAAAAAAAAY!!!
         `;
-    }
-    else {
+    } else {
       var prompt = `${myPrompt} Here's the articles: \n\n${content} get this content in html format like this structure:-  
       <h4>Intro</h4>
       <p>[Your introductory text here]</p>
@@ -39,7 +35,7 @@ const generateTitleAndContent = async (content, myPrompt) => {
       <h4>Outro</h4>
       <p>[Your closing statement here]</p> `;
     }
-    
+
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
@@ -87,21 +83,25 @@ const generateContent = async (req, res) => {
                 Don't sound repetitive.
                 Ask about the reader's opinions in an engaging manner, wrapping up the script`;
     } else if (brandName == "streetPoliticsUK") {
-      prompt = `Write a UK-based political script in the third person point of view. It needs to be at least 2000 words that are as human as possible,
-                If there isn't enough information; add additional context to meet the word count. We have a right-leaning perspective, especially when discussing criticism of the government 
-                and the current Prime Minister. Keep the tone professional yet engaging. We stand with the people and are against the government, house of commons,
-                political parties, Politicians and the Prime Minister. The article will need to be divided into three sections. Same script format,
-                without the host and scene details. IF Keir Starmer, the labor party or the tories are mentioned, we must criticize them heavily.
-                Do not mention Keir Starmer unless it is stated in the original content.
-                1.Intro:
-                Needs to begin with a hooking statement about attention-grabbing news. It needs to be something unique and viral. Don’t reveal all the details of the news in this section.
-                Give an introduction of the topic. Keep the word limit for this section to 200 words. 
-                2.Body: 
-                Keep it from a third person point of view. Keep it engaging by throwing in a couple of sarcastic jokes about the government and the political parties.
-                Weave in conspiracy theories related to the topic being discussed. Maintain a conversational style, as if entertaining another human with the latest news while keeping a serious undertone. Pick the common topics between the chosen articles to flow from one point to another seamlessly.
+      prompt = `Write a UK-based political script in the third person point of view. It needs to be at least 5000  words that are as human as possible. We have a right-leaning perspective, especially when discussing criticism of the government and the current Prime Minister. Keep the tone professional yet engaging. We stand with the people and are against the government, house of commons,  political parties, Politicians and Keir Starmer. The article will need to be divided into three sections.
+                Same script format, without the host and scene details.
+                IF Keir Starmer, the labor party or the tories are mentioned, we must criticize them heavily. Do not mention Keir Starmer unless it is stated in the original content.
+                1.Intro:-
+                Needs to begin with a hooking statement about attention-grabbing news. It needs to be something unique and viral.
+                Don’t reveal all the details of the news in this section. Give an introduction of the topic.
+                Keep the word limit for this section to 200 words.
+                2.Body:
+                Keep it from a third person point of view.
+                Keep it engaging by throwing in a couple of sarcastic jokes about the government and the political parties.
+                Weave in conspiracy theories related to the topic being discussed.
+                Maintain a conversational style, as if entertaining another human with the latest news while keeping a serious undertone.
+                Pick the common topics between the chosen articles to flow from one point to another seamlessly.
                 Use simpler, commonly used terms.
-                3.Outro: 
-                Make it conversational, yet professional. Make the conclusion wrap up all the main ideas from the article and give it a sarcastic spin Don't sound repetitive. Ask about the reader's opinions in an engaging manner, wrapping up the script.`;
+                3.Outro:
+                Make it conversational, yet professional.
+                Make the conclusion wrap up all the main ideas from the article and give it a sarcastic spin
+                Don't sound repetitive.
+                Ask about the reader's opinions in an engaging manner, wrapping up the script.`;
     } else if (brandName == "streetPoliticsAfrica") {
       prompt = `Write an Africa-based political script in the third person point of view. It needs to be at least 1700 words that are as human as possible. We have a Africa-centered perspective, especially when discussing criticism of the west. Keep the tone professional yet engaging. We stand with the people and are against western countries involvement in Africa and non-African countries attempts to destabilize Africa..Defend African sovereignty and unity. The article will need to be divided into three sections.
                 Same script format, without the host and scene details.
@@ -234,4 +234,4 @@ const expandScript = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
-export { generateContent, convertContentTo_HTML , expandScript };
+export { generateContent, convertContentTo_HTML, expandScript };
