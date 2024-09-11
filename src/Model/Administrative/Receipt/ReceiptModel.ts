@@ -1,12 +1,13 @@
-import {model, Schema} from 'mongoose';
+import { model, Schema } from 'mongoose';
 
 
-import {RequiredString, RequiredNumber} from '../../../Utils/Schemas';
+import { RequiredString, RequiredNumber } from '../../../Utils/Schemas';
 import { SchemaTypesReference } from '../../../Utils/Schemas/SchemaTypesReference';
 import IReceiptModel from './IReceiptModel';
 
 const ReceiptSchema = new Schema<IReceiptModel>({
     receiptUrl: RequiredString,
+    totalPrice: RequiredNumber,
     createdAt: RequiredNumber
 });
 

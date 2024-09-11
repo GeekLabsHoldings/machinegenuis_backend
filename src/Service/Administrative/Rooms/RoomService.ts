@@ -1,5 +1,6 @@
 import IRoomModel from "../../../Model/Administrative/RoomModel/IRoomModel";
 import RoomModel from "../../../Model/Administrative/RoomModel/RoomModel";
+import { OfficeCleaningEnum } from "../../../Utils/Administrative";
 import IRoomService from "./IRoomService";
 
 class RoomService implements IRoomService {
@@ -9,8 +10,8 @@ class RoomService implements IRoomService {
         return result;
     }
 
-    async updateRoom(_id: string, RoomData: IRoomModel): Promise<IRoomModel | null> {
-        const result = await RoomModel.findByIdAndUpdate(_id, RoomData, { new: true });
+    async updateRoom(_id: string, typeStatus: string, warning: boolean): Promise<IRoomModel | null> {
+        const result = await RoomModel.findByIdAndUpdate(_id, { $set: { typeStatus, warning } }, { new: true });
         return result;
     }
 
@@ -19,6 +20,10 @@ class RoomService implements IRoomService {
         return result;
     }
 
+    async resetRoomsStatus(): Promise<void> {
+        await RoomModel.updateMany({ typeStatus: OfficeCleaningEnum.Missed }, { $set: { warning: true } });
+        await RoomModel.updateMany({}, { $set: { typeStatus: OfficeCleaningEnum.CheckList } });
+    }
 }
 
 const roomService = new RoomService();

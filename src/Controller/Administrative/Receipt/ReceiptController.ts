@@ -12,9 +12,10 @@ export default class ReceiptController implements IReceiptController {
         const url = await s3Service.createPresignedUrlWithClient({ region, bucket, key });
         return url;
     }
-    async createReceipt(ReceiptUrl: string): Promise<any> {
+    async createReceipt(ReceiptUrl: string, totalPrice: number): Promise<any> {
         const receipt: IReceiptModel = {
             receiptUrl: ReceiptUrl,
+            totalPrice,
             createdAt: moment().valueOf()
         }
         const result = await receiptService.createReceipt(receipt);
