@@ -37,11 +37,12 @@ const ScrapCronJob = cron.schedule('0 * * * *', async () => {
         await scrapeController.generateScraping()
     } catch (error) {
         console.log("=======================>Enter inside error<===================")
-        await emailService.sendEmail({
-            to: process.env.EMAIL_ACCOUNT as string,
-            subject: "Warning",
-            html: warningHTMLEmail()
-        });
+        for (const x of ["andrewgeeklab@gmail.com", "mostafageeklabs@gmail.com", "mohamedmamdouhgeeklab@gmail.com"])
+            await emailService.sendEmail({
+                to: x,
+                subject: "Warning",
+                html: warningHTMLEmail()
+            });
         console.log("==========================>", { error })
     } finally {
         await ec2Service.instanceActionStop();
