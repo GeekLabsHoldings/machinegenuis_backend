@@ -24,6 +24,8 @@ export const msgHandler = async (io, socket) => {
     await conversation_chat.deleteOfflineMembers(user._id);
     // Listen for messages from the client
     socket.on("sendMessage", (msgData) => handleMessage(io, socket, msgData));
+    socket.on("userTyping", (msgData) => handleUserTyping(io, socket, msgData));
+
     socket.on("userSeenMessage", async (msgData) => {
       const moment_time = moment().valueOf();
       const { conversationId } = msgData;
@@ -49,7 +51,7 @@ export const handleMessage = async (io, socket, msgData) => {
   const senderId = socket.handshake.user._id;
   try {
     const { conversationId, text, mediaUrl } = msgData;
-    console.log({ conversationId, text, mediaUrl, senderId })
+    console.log({ conversationId, text, mediaUrl, senderId });
     console.log("Received message:", msgData);
 
     // Create a new message document
@@ -94,7 +96,7 @@ export const handleMessage = async (io, socket, msgData) => {
     );
 
     // Emit the message to all members of the conversation
-    io.to(conversationId).emit("message", newMessage);
+    socket.to(conversationId).emit("message", newMessage);
     await session.commitTransaction();
   } catch (error) {
     io.to(onlineUser.get(senderId.toString()).id).emit(
@@ -108,6 +110,21 @@ export const handleMessage = async (io, socket, msgData) => {
   }
 };
 
+export const handleUserTyping = async (io, socket, msgData) => {
+  try {
+    const { conversationId } = msgData;
+    const { _id, firstName, lastName, theme } = socket.handshake.user;
+    socket
+      .to(conversationId)
+      .emit("userTyping", {
+        user: { _id, firstName, lastName, theme },
+        conversationId,
+      });
+  } catch (error) {
+    console.error("Error handling user typing:", error);
+  }
+};
+
 export const handleSeenMessage = async (conversationId, userId) => {
   try {
     // Update the seen status
@@ -118,7 +135,7 @@ export const handleSeenMessage = async (conversationId, userId) => {
       moment_time
     );
     // Notify other users in the room
-    io.to(conversationId).emit("messageSeen", {
+    socket.to(conversationId).emit("messageSeen", {
       userId,
       conversationId,
       seenAt: moment_time,
