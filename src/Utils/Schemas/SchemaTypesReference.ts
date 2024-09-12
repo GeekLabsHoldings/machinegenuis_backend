@@ -25,7 +25,7 @@ enum SchemaTypesReference {
   Assets = "assets",
   RealState = "realState",
   Equipment = "equipment",
-  DigitalAsset = "digital-asset",
+  DigitalAsset = "digital-asset"
 }
 
 export { SchemaTypesReference };
