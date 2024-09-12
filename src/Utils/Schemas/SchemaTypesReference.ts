@@ -22,6 +22,10 @@ enum SchemaTypesReference {
   Payroll = "payroll",
   Subscription = "subscription",
   BankAccount = "bankAccount",
+  Assets = "assets",
+  RealState = "realState",
+  Equipment = "equipment",
+  DigitalAsset = "digital-asset",
 }
 
 export { SchemaTypesReference };
