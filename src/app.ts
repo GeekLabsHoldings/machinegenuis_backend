@@ -33,9 +33,10 @@ app.get("/", async (_, res) => {
   return res.json("Hello world!");
 });
 
-app.get("/generate-image", async (_, res) => {
-  console.log("==================User Open the link==================");
-  return res.sendFile('https://machine-genius.s3.amazonaws.com/images/1722347458335.jpg');
+app.get("/generate-image/:email", async (req, res) => {
+  const { email } = req.params;
+  console.log(`==================User ${email} Open the link==================`);
+  return res.redirect("https://machine-genius.s3.amazonaws.com/images/1725871410553.png");
 });
 
 app.use(`/${RouterEnum.authentication}`, AuthenticationRouter);
