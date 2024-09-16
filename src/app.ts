@@ -34,7 +34,8 @@ app.get("/", async (_, res) => {
 });
 
 app.get("/generate-image", async (_, res) => {
-  return res.redirect('https://www.machinegenius.io');
+  console.log("==================User Open the link==================");
+  return res.sendFile('https://machine-genius.s3.amazonaws.com/images/1722347458335.jpg');
 });
 
 app.use(`/${RouterEnum.authentication}`, AuthenticationRouter);
