@@ -62,7 +62,7 @@ export const addPostSocialMediaTwitter = async (req, res) => {
       appSecret: decryptedAppSecret,
       accessToken: decryptedAccessToken,
       accessSecret: decryptedAccessSecret,
-      mediaId
+      mediaId,
     });
     const createPost = await createAccountSocialMedia(
       PlatformEnum.TWITTER,
@@ -136,7 +136,7 @@ export const addNewAccountTwitter = async (req, res) => {
 export const getTwitterAccountSecretData = async (req, res) => {
   try {
     const { brand } = req.body;
-    
+
     if (!brand) {
       return systemError
         .setStatus(400)
@@ -157,12 +157,13 @@ export const getTwitterAccountSecretData = async (req, res) => {
     const decryptedAccessToken = decrypt(decodedToken.accessToken);
     const decryptedAccessSecret = decrypt(decodedToken.accessSecret);
     return res.status(200).json({
-      message:"Success",
-     Data:{ appKey: decryptedAppKey,
-      appSecret: decryptedAppSecret,
-      accessToken: decryptedAccessToken,
-      accessSecret: decryptedAccessSecret,}
-
+      message: "Success",
+      Data: {
+        ConsumerKey: decryptedAppKey,
+        ConsumerSecret: decryptedAccessSecret,
+        AccessToken: decryptedAccessToken,
+        TokenSecret: decryptedAccessSecret,
+      },
     });
   } catch (error) {
     return systemError.sendError(res, error);
