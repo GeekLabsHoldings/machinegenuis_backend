@@ -32,14 +32,9 @@ app.use(cors());
 app.get("/", async (_, res) => {
   return res.json("Hello world!");
 });
-const delay = async (time: number): Promise<any> => {
-  return new Promise(function (resolve) {
-    setTimeout(resolve, time);
-  });
-};
-app.get("/check-tld", async (_, res) => {
-  await delay(2 * 60 * 1000);
-  res.json({ result: "Hello" });
+
+app.get("/generate-image", async (_, res) => {
+  return res.redirect('https://www.machinegenius.io');
 });
 
 app.use(`/${RouterEnum.authentication}`, AuthenticationRouter);
