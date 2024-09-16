@@ -6,11 +6,11 @@ import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
 
 export const TwitterSocialMedia = async ({
   content,
+  mediaId,
   appKey,
   appSecret,
   accessToken,
   accessSecret,
-  mediaId
 }) => {
   const client = new TwitterApi({
     appKey,
@@ -21,17 +21,18 @@ export const TwitterSocialMedia = async ({
 
   try {
     const tweet = await client.v2.tweet({
-      text:content,
-      media:{
-        media_ids:[mediaId]
-      }
+      text: content,
+      media: mediaId
+        ? {
+            media_ids: [mediaId],
+          }
+        : undefined,
     });
     if (tweet.status && tweet.status === 403) {
       return systemError
         .setStatus(403)
         .getMessage(ErrorMessages.TWEET_IS_ALREADY_EXIST);
     }
-    console.log("Tweet posted successfully:", tweet);
     return {
       message: "Tweet posted successfully",
       tweet,

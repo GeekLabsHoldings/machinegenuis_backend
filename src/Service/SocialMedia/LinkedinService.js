@@ -58,7 +58,7 @@ export const registerUpload = async () => {
       'https://api.linkedin.com/v2/assets?action=registerUpload',
       {
         registerUploadRequest: {
-          owner: 'urn:li:person:e9TWnKwRZC', // Update this to the correct owner
+          owner:  `${process.env.LINKEDIN_AUTHOR_ID}`, // Update this to the correct owner
           recipes: ['urn:li:digitalmediaRecipe:feedshare-image'],
           serviceRelationships: [
             {
