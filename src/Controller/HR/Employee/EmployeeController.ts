@@ -12,9 +12,14 @@ import employeePaperService from "../../../Service/HR/EmployeePaper/EmployeePape
 import EmailController from "../Messages/EmailController";
 import { generateWelcomeEmail, HiringEmailEnum } from "../../../Utils/Message";
 import authenticationService from "../../../Service/Authentication/AuthenticationService";
+import IPayrollModel from "../../../Model/Accounting/Payroll/IPayrollModel";
+import PayrollService from "../../../Service/Accounting/Payroll/PayrollService";
 
 export default class EmployeeController implements IEmployeeController {
-    async convertCandidateToEmployee(employer_id: string, _id: string, paper: IEmployeePaperModel, email: string, password: string, birthday: number, theme: string, session: ClientSession): Promise<IEmployeeModel> {
+    async convertCandidateToEmployee(
+        employer_id: string, _id: string, paper: IEmployeePaperModel, email: string,
+        password: string, birthday: number, theme: string, payroll: IPayrollModel,
+        session: ClientSession): Promise<IEmployeeModel> {
         const candidate = await candidateService.getCandidate(_id, session);
         if (!candidate)
             return systemError.setStatus(404).setMessage(ErrorMessages.CANDIDATE_NOT_FOUND).throw();
@@ -41,6 +46,9 @@ export default class EmployeeController implements IEmployeeController {
         const convertToEmployee = await employeeService.addEmployee(employeeData, session);
         paper.employee = (convertToEmployee._id) as Types.ObjectId;
         await employeePaperService.addEmployeePaper(paper, session);
+        payroll.employee = convertToEmployee._id;
+        const payrollService = new PayrollService();
+        await payrollService.createPayroll(payroll, session);
         const emailController = new EmailController(session);
         const message = generateWelcomeEmail(email, password);
         await emailController.sendEmail(candidate.email, HiringEmailEnum.WELCOME_MESSAGE, message);

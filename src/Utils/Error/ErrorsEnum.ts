@@ -49,7 +49,7 @@ enum ErrorMessages {
   INVALID_FACEBOOK_API  = "invalid facebook Api", 
   CAN_NOT_CREATE_REDDIT_POST = "CAN_NOT_CREATE_REDDIT_POST",
   ISSING_ASSET_OR_UPLOAD__URL = "issing asset or upload URL",
-  NULL = "NULL",
+  ASSET_TYPE_NOT_EXIST = "ASSET_TYPE_NOT_EXIST",
+  NULL = "NULL"
 }
-
 export { ErrorMessages };

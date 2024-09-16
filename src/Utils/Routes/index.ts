@@ -11,7 +11,8 @@ enum RouterEnum {
     hr = DepartmentEnum.HR,
     ContentCreation = DepartmentEnum.ContentCreator,
     Administrative = DepartmentEnum.Administrative,
-    socialMedia = DepartmentEnum.SocialMedia
+    socialMedia = DepartmentEnum.SocialMedia,
+    Accounting = DepartmentEnum.Accounting
 }
 
 export default RouterEnum;

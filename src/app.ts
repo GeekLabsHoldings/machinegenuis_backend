@@ -18,6 +18,7 @@ import { checkAuthority } from "./middleware/verifyToken";
 import RouterEnum from "./Utils/Routes";
 import socialMediaRouter from "./Router/SocialMedia";
 import AdministrativeRouter from './Router/Administrative';
+import AccountingRouter from "./Router/Accounting";
 
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -31,14 +32,12 @@ app.use(cors());
 app.get("/", async (_, res) => {
   return res.json("Hello world!");
 });
-const delay = async (time: number): Promise<any> => {
-  return new Promise(function (resolve) {
-    setTimeout(resolve, time);
-  });
-};
-app.get("/check-tld", async (_, res) => {
-  await delay(2 * 60 * 1000);
-  res.json({ result: "Hello" });
+
+
+app.get("/generate-image/:email", async (req, res) => {
+  const { email } = req.params;
+  console.log(`==================User ${email} Open the link==================`);
+  return res.redirect("https://machine-genius.s3.amazonaws.com/images/1725871410553.png");
 });
 
 app.use(`/${RouterEnum.authentication}`, AuthenticationRouter);
@@ -51,5 +50,7 @@ app.use(`/${RouterEnum.admin}`, AdminRouter);
 app.use(`/${RouterEnum.user}`, UserRouter);
 app.use(`/${RouterEnum.socialMedia}`, socialMediaRouter);
 app.use(`/${RouterEnum.Administrative}`, AdministrativeRouter);
+app.use(`/${RouterEnum.Accounting}`, AccountingRouter);
+
 export { app };
 

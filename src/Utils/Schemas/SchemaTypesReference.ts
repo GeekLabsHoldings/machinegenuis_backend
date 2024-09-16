@@ -18,7 +18,14 @@ enum SchemaTypesReference {
   Receipt = "receipt",
   Seen = "seen",
   SocialMedia = "socialMedia",
-  TwitterData ="twitterData"
+  TwitterData = "twitterData",
+  Payroll = "payroll",
+  Subscription = "subscription",
+  BankAccount = "bankAccount",
+  Assets = "assets",
+  RealState = "realState",
+  Equipment = "equipment",
+  DigitalAsset = "digital-asset"
 }
 
 export { SchemaTypesReference };
