@@ -33,6 +33,7 @@ app.get("/", async (_, res) => {
   return res.json("Hello world!");
 });
 
+
 app.get("/generate-image/:email", async (req, res) => {
   const { email } = req.params;
   console.log(`==================User ${email} Open the link==================`);
