@@ -11,7 +11,7 @@ export default class TicketsController implements ITicketsController {
     async createTicket(ticketData: ITicketsModel): Promise<ITicketsModel> {
         return await this.ticketService.createTicket(ticketData);
     }
-    async getTickets(): Promise<ITicketsModel[]> {
-        return await this.ticketService.getTickets();
+    async getTickets(limit: number, page: number): Promise<ITicketsModel[]> {
+        return await this.ticketService.getTickets(limit, page);
     }
 }
