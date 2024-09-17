@@ -1,39 +1,38 @@
 import { Schema, model } from "mongoose";
 
 const scrapedSchema = new Schema({
-  title:
-  {
+  url: {
+    type: String,
+    unique: false,
+    required: false,
+  },
+  title: {
     type: String,
     unique: false,
     required: true,
   },
-  content:
-  {
+  content: {
     type: String,
-    required: false
+    required: false,
   },
-  date:
-  {
+  date: {
     type: String,
-    required: false
+    required: false,
   },
-  time:
-  {
+  time: {
     type: Number,
-    required: false
+    required: false,
   },
-  brand:
-  {
+  brand: {
     type: String,
-    required: true
+    required: true,
   },
-  stock:
-  {
+  stock: {
     type: String,
-    required: false
-  }
+    required: false,
+  },
 });
 
-const scrapedModel = model('Scraped', scrapedSchema);
+const scrapedModel = model("Scraped", scrapedSchema);
 export default scrapedModel;
-export { scrapedSchema }
+export { scrapedSchema };
