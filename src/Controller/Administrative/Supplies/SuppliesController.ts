@@ -28,4 +28,9 @@ export default class SuppliesController implements ISuppliesController {
         });
         return result;
     }
+
+    async getSupplies(page: number, limit: number): Promise<ISuppliesModel[]> {
+        const supplies = await suppliesService.getAllSupplies(page, limit, null, null, null);
+        return supplies;
+    }
 }

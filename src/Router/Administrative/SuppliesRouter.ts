@@ -50,4 +50,16 @@ SuppliesRouter.get('/', async (req: Request, res: Response) => {
     }
 });
 
+SuppliesRouter.get('/all', async (req: Request, res: Response) => {
+    try {
+        const page = parseInt(req.query.page as string) || 0;
+        const limit = parseInt(req.query.limit as string) || 10;
+        const suppliesController = new SuppliesController();
+        const result = await suppliesController.getSupplies(page, limit);
+        return res.json({ result });
+    } catch (error) {
+        return systemError.sendError(res, error);
+    }
+});
+
 export default SuppliesRouter;

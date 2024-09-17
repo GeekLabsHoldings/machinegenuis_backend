@@ -9,11 +9,11 @@ class TicketsService implements ITicketsService {
         return result;
     }
 
-    async getTickets(): Promise<ITicketsModel[]> {
+    async getTickets(limit: number, page: number): Promise<ITicketsModel[]> {
         const result = await TicketsModel.find()
             .sort({ createdAt: -1 })
-            .skip(0)
-            .limit(10);
+            .skip(page * limit)
+            .limit(limit);
         return result;
     }
 
