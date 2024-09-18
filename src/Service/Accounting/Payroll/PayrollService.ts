@@ -1,4 +1,4 @@
-import { ClientSession } from "mongoose";
+import { ClientSession, Types } from "mongoose";
 import IPayrollModel from "../../../Model/Accounting/Payroll/IPayrollModel";
 import IPayrollService from "./IPayrollService";
 import PayrollModel from "../../../Model/Accounting/Payroll/PayrollModel";
@@ -10,7 +10,7 @@ class PayrollService implements IPayrollService {
         await payroll.save({ session });
     }
 
-    async getPayroll(page: number, limit: number): Promise<IPayrollModel[]> {
+    async getPayroll(page: number, limit: number): Promise<(IPayrollModel & { _id: Types.ObjectId | string })[]> {
         return await PayrollModel.find().populate({
             path: `${SchemaTypesReference.Employee}`,
             select: { _id: 1, firstName: 1, lastName: 1 }
