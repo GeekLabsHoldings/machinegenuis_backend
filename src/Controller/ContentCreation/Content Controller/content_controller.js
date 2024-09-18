@@ -6,13 +6,9 @@ import contentModel from '../../../Model/ContentCreation/Content/content_model'
 
 const get_all_content = async (req, res) => {
     const querying = req.query
-
-    console.log(querying)
-
     const LIMIT = querying.limit;
     const PAGE = querying.page;
     const SKIP = (PAGE - 1) * LIMIT;
-
     const userId = req.body.currentUser._id;
     try 
     {

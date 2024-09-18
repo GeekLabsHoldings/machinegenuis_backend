@@ -25,7 +25,12 @@ enum SchemaTypesReference {
   Assets = "assets",
   RealState = "realState",
   Equipment = "equipment",
-  DigitalAsset = "digital-asset"
+  DigitalAsset = "digital-asset",
+  BrandEmail = "brand-email",
+  UserEmailsSubscription = "user-emails-subscription",
+  NewsLetters = "news-letter",
+  Analytics = "analytics",
+  Prompt = "prompt",
 }
 
 export { SchemaTypesReference };

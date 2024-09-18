@@ -1,4 +1,4 @@
-enum ErrorMessages {
+enum ErrorMessages {  
   PHONE_NUMBER_NOT_VALID = "PHONE_NUMBER_NOT_VALID",
   JWT_ERROR = "JWT_ERROR",
   INVALID_CREDENTIALS = "invalid credentials",
@@ -50,6 +50,7 @@ enum ErrorMessages {
   CAN_NOT_CREATE_REDDIT_POST = "CAN_NOT_CREATE_REDDIT_POST",
   ISSING_ASSET_OR_UPLOAD__URL = "issing asset or upload URL",
   ASSET_TYPE_NOT_EXIST = "ASSET_TYPE_NOT_EXIST",
+  PROMPT_NOT_FOUND = "PROMPT_NOT_FOUND",
   NULL = "NULL"
 }
 export { ErrorMessages };
