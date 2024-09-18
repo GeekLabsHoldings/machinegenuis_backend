@@ -4,6 +4,7 @@ import messageModel from "../../Model/Chat/message.model";
 import seenModel from "../../Model/Chat/seen.model";
 import { create } from "domain";
 import offlineMembersModel from "../../Model/Chat/offline_messages.model";
+import path from "path";
 
 export const retrieveConversationsForMember = async (employee_Id) => {
   const conversations = await conversationModel.find({
@@ -16,23 +17,28 @@ export const createMessageInConversation = async (
   session,
   senderId,
   text,
-  mediaUrl,
+  media,
   conversationId,
   moment_time
 ) => {
-  const newMessage = await messageModel.create(
-    [
-      {
-        sender: senderId,
-        text,
-        mediaUrl,
-        chat: conversationId,
-        createdAt: moment_time,
-      },
-    ],
-    { session }
-  );
-  return newMessage;
+  const newMessage = new messageModel({
+    sender: senderId,
+    text,
+    media,
+    chat: conversationId,
+    createdAt: moment_time,
+  });
+  const message = await newMessage.save({ session });
+
+  const result = await message.populate({
+    path: "sender",
+    select: "firstName lastName theme",
+  });
+  result.populate({
+    path: "chat",
+    select: "groupName type",
+  });
+  return result;
 };
 
 export const setLastMessageForConversation = async (
@@ -144,7 +150,7 @@ export const fetchMessagesByAggregation = async (conversationId, user_id) => {
           lastName: "$senderDetails.lastName",
         },
         text: 1,
-        mediaUrl: 1,
+        media: 1,
         createdAt: 1,
         _id: 1,
       },
@@ -221,9 +227,18 @@ export const getConversationsByUserId = async (conversationId) => {
   return userConversations;
 };
 export const getOfflineMembers = async ({ userId }) => {
-  const offlineMembers = await offlineMembersModel.find({
-    userId,
-  });
+  const offlineMembers = await offlineMembersModel
+    .find({
+      userId,
+    })
+    .populate({
+      path: "message.sender",
+      select: "firstName lastName theme",
+    })
+    .populate({
+      path: "message.chat",
+      select: "groupName type",
+    });
   return offlineMembers;
 };
 export const createOfflineMembers = async (messageOfflineMembers, session) => {
