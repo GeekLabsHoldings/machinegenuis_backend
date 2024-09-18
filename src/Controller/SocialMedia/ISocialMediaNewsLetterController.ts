@@ -1,3 +1,5 @@
+import { Job } from "bull";
+
 export interface INewsLetter {
     title: string;
     subjectLine: string;
