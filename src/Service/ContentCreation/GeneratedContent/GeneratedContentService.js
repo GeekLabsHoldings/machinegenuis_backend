@@ -10,8 +10,9 @@ class GeneratedContentService {
   }
 
   async CreateGeneratedContent(data, session) {
-    const new_content = new generatedContentModel(data);
-    await new_content.save({ session });
+    const new_content = await generatedContentModel.insertMany(data, {
+      session,
+    });
     return new_content;
   }
 

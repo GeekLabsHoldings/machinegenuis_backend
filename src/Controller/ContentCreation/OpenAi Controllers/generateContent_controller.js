@@ -58,7 +58,6 @@ const generateTitleAndArticles = async (brandName, stockName) => {
     // Extract the response and format it
     const result = completion.choices[0].message.content.trim();
 
-    console.log("Results-->" + result);
     const sections = result
       .split(/\d+\.\s*General Title:\s*/)
       .map((section) => section.trim())
@@ -101,6 +100,7 @@ const generateTitleAndArticles = async (brandName, stockName) => {
       stockName,
       session
     );
+    console.log("Structured Results");
     await generatedContentService.CreateGeneratedContent(
       structuredResults,
       session
