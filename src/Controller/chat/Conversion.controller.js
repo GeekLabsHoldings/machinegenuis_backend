@@ -8,6 +8,7 @@ import { Types } from "mongoose";
 import moment from "../../Utils/DateAndTime";
 import * as conversation_chat from "../../Service/Chat_system/Chat.service";
 import systemError from "../../Utils/Error/SystemError";
+import S3_services from "../../Service/AWS/S3_Bucket/presinedURL";
 const addMemberJoin = (conversation_id, members) => {
   for (const item of members) {
     const socket = onlineUser.get(item);
@@ -101,7 +102,7 @@ export const getAllMessagesWithConversations = async (req, res) => {
     const { conversationId } = req.params;
     const user_id = req.body.currentUser._id;
     const createdAt = moment().valueOf();
-    
+
     await handleSeenMessage(conversationId, user_id);
 
     const messages = await conversation_chat.fetchMessagesByAggregation(
@@ -217,4 +218,17 @@ export const updateGroupAdmin = async (req, res, next) => {
 
   if (!conversation) return res.json({ success: false, message: "Error" });
   return res.json({ success: true, message: "Done", result: conversation });
+};
+
+export const getPresignedUrl = async (req, res) => {
+  const s3Service = new S3_services();
+  const region = process.env.AWS_REGION;
+  const bucket = process.env.BUCKET_NAME;
+  const key = `chat/${req.body.currentUser._id}-${Date.now()}`;
+  const url = await s3Service.createPresignedUrlWithClient({
+    region,
+    bucket,
+    key,
+  });
+  return res.json({ presignedURL: url, mediaUrl: url.split("?")[0] });
 };
