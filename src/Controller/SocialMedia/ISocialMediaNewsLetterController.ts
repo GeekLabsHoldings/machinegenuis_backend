@@ -32,5 +32,6 @@ export default interface ISocialMediaNewsLetterController {
     getGeneratedNewsLetter(brand: string, stockName: string): Promise<IGeneratedContentResponse[]>;
     generateNewsLetterTitle(articles: string[]): Promise<string[]>;
     generateSubjectLineAndOpeningLine(title: string): Promise<string[]>;
-    sendNewsLetterToSubscribers(newsData: INewsLetter): Promise<any>;
+    scheduleSendEmails(newsData: INewsLetter): Promise<string>;
+    sendNewsLetter(job: Job<INewsLetter>): Promise<void>
 }

@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
-import systemError from '../../../../Utils/Error/SystemError';
-import { ErrorMessages } from '../../../../Utils/Error/ErrorsEnum';
+import systemError from '../../Utils/Error/SystemError';
+import { ErrorMessages } from '../../Utils/Error/ErrorsEnum';
 export interface MailOptions {
     to: string;
     subject: string;
@@ -39,4 +39,5 @@ export default class EmailService {
             return systemError.setStatus(402).setMessage(ErrorMessages.CAN_NOT_SEND_EMAIL).setData({ error }).throw();
         }
     }
+
 }
