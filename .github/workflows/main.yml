@@ -27,7 +27,7 @@ jobs:
 
 
     - name: Create ZIP file
-      run: zip -r ../deployment-package.zip package.json .platform dist
+      run: zip -r deployment-package.zip package.json .platform dist
     
     - name: List files
       run: ls -la
