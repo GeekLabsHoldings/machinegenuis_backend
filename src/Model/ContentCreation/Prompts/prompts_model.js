@@ -1,33 +1,13 @@
 import { Schema, model } from "mongoose";
+import { NotRequiredString, RequiredString } from "../../../Utils/Schemas";
+import { SchemaTypesReference } from "../../../Utils/Schemas/SchemaTypesReference";
 
 const promptsSchema = new Schema({
-  brand:
-  {
-    type: String,
-    required: true
-  },
-  article_prompt:
-  {
-    type: String,
-    required: false
-  },
-  script_prompt:
-  {
-    type: String,
-    required: true
-  },
-  title_prompt:
-  {
-    type: String,
-    required: true
-  },
-  thumnail_prompt:
-  {
-    type: String,
-    required: false
-  },
+  service: RequiredString,
+  brand: NotRequiredString,
+  prompt: RequiredString,
 });
 
-const promptsModel = model('Prompts', promptsSchema);
+const promptsModel = model(SchemaTypesReference.Prompt, promptsSchema);
 export default promptsModel;
-export { promptsSchema }
+export { promptsSchema } 

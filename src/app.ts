@@ -4,7 +4,7 @@ import AuthenticationRouter from "./Router/Authentication";
 import HR_Router from "./Router/HR";
 import AdminRouter from "./Router/Admin";
 import UserRouter from "./Router/User";
-import unAuthorizerApis from "./Router/Candidate";
+import unAuthorizerApis from "./Router/UnAuthorizer";
 import CalendlyRouter from "./Router/Calendly";
 
 const app: Application = express();

@@ -1,4 +1,4 @@
-enum ErrorMessages {
+enum ErrorMessages {  
   PHONE_NUMBER_NOT_VALID = "PHONE_NUMBER_NOT_VALID",
   JWT_ERROR = "JWT_ERROR",
   INVALID_CREDENTIALS = "invalid credentials",
@@ -54,6 +54,7 @@ enum ErrorMessages {
   ACCOUNT_ALREADY_EXIST = "ACCOUNT_ALREADY_EXIST",
   ACCOUNT_NOT_FOUND = "ACCOUNT_NOT_FOUND",
   INVALID_SOCIAL_MEDIA_TYPE = "INVALID_SOCIAL_MEDIA_TYPE",
+  PROMPT_NOT_FOUND = "PROMPT_NOT_FOUND",
   NULL = "NULL"
 }
 export { ErrorMessages };

@@ -22,10 +22,12 @@ TicketsRouter.post('/create-ticket', async (req: Request, res: Response) => {
     }
 });
 
-TicketsRouter.get('/get-tickets', async (_, res) => {
+TicketsRouter.get('/get-tickets', async (req: Request, res: Response) => {
     try {
+        const limit = parseInt(req.query.limit as string) || 10;
+        const page = parseInt(req.query.page as string) || 0;
         const ticketController = new TicketsController();
-        const result = await ticketController.getTickets();
+        const result = await ticketController.getTickets(limit, page);
         return res.status(200).json(result);
     } catch (error) {
         return systemError.sendError(res, error);

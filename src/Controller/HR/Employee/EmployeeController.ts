@@ -9,7 +9,7 @@ import { ErrorMessages } from "../../../Utils/Error/ErrorsEnum";
 import { EmployeeTypeEnum } from "../../../Utils/employeeType";
 import moment from "moment-timezone";
 import employeePaperService from "../../../Service/HR/EmployeePaper/EmployeePaperService";
-import EmailController from "../Messages/EmailController";
+import EmailController from "../../Messages/EmailController";
 import { generateWelcomeEmail, HiringEmailEnum } from "../../../Utils/Message";
 import authenticationService from "../../../Service/Authentication/AuthenticationService";
 import IPayrollModel from "../../../Model/Accounting/Payroll/IPayrollModel";

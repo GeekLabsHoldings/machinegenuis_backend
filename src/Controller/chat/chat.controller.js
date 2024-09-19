@@ -8,6 +8,9 @@ export const msgHandler = async (io, socket) => {
   // create a room
   try {
     const user = socket.handshake.user;
+    if (onlineUser.has(user._id.toString())) {
+      onlineUser.get(user._id.toString()).disconnect();
+    }
     onlineUser.set(user?._id?.toString(), socket);
     const conversations =
       await conversation_chat.retrieveConversationsForMember(user._id);
@@ -39,6 +42,7 @@ export const msgHandler = async (io, socket) => {
     // Handle socket disconnection
     socket.on("disconnect", () => {
       onlineUser.delete(user._id.toString());
+      console.log(`Client disconnected: ${socket.id}`);
     });
   } catch (error) {
     console.log(error);
@@ -50,9 +54,7 @@ export const handleMessage = async (io, socket, msgData) => {
   session.startTransaction();
   const senderId = socket.handshake.user._id;
   try {
-    const { conversationId, text, mediaUrl } = msgData;
-    console.log({ conversationId, text, mediaUrl, senderId });
-    console.log("Received message:", msgData);
+    const { conversationId, text, media } = msgData;
 
     // Create a new message document
     const checkSenderAvailability =
@@ -68,7 +70,7 @@ export const handleMessage = async (io, socket, msgData) => {
       session,
       senderId,
       text,
-      mediaUrl,
+      media,
       conversationId,
       moment_time
     );
@@ -82,12 +84,12 @@ export const handleMessage = async (io, socket, msgData) => {
       conversationId
     );
     const offlineMembers = userConversations.members.filter((member) => {
-      return !onlineUser.has(member.toString());
+      return !onlineUser.has(member._id.toString());
     });
     const messageOfflineMembers = offlineMembers.map((member) => {
       return {
-        userId: member,
-        message: newMessage[0],
+        userId: member._id,
+        message: newMessage,
       };
     });
     await conversation_chat.createOfflineMembers(
@@ -114,12 +116,10 @@ export const handleUserTyping = async (io, socket, msgData) => {
   try {
     const { conversationId } = msgData;
     const { _id, firstName, lastName, theme } = socket.handshake.user;
-    socket
-      .to(conversationId)
-      .emit("userTyping", {
-        user: { _id, firstName, lastName, theme },
-        conversationId,
-      });
+    socket.to(conversationId).emit("userTyping", {
+      user: { _id, firstName, lastName, theme },
+      conversationId,
+    });
   } catch (error) {
     console.error("Error handling user typing:", error);
   }
