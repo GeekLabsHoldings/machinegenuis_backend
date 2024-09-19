@@ -1,18 +1,29 @@
 import { TwitterApi } from "twitter-api-v2";
-import { socialMediaModel } from "../../Model/SocialMedia/SocialMedia.model";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
-import twitterModel from "../../Model/SocialMedia/TwitterData.model";
-import { TwitterSocialMedia } from "../../Service/SocialMedia/twitter.api";
+import {
+  getUserByUsername,
+  TwitterSocialMedia,
+} from "../../Service/SocialMedia/twitter.api";
 import systemError from "../../Utils/Error/SystemError";
 import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
 import { PlatformEnum } from "../../Utils/SocialMedia/Platform";
 import {
   createAccountSocialMedia,
+  createSocialAccount,
   createSocialMediaPostTwitter,
   createTwitterAccountSecret,
   getTwitterData,
 } from "../../Service/SocialMedia/socialMedia.service";
+import {
+  deleteAccountTwitter,
+  existAccount,
+  getTwitterAccount,
+  getTwitterAccounts,
+} from "../../Service/SocialMedia/twitter.service";
+import socialAccountModel from "../../Model/SocialMedia/SocialMediaAccount.model";
+import { log } from "console";
+import exp from "constants";
 
 function decrypt(encryptedText) {
   const algorithm = "aes-256-cbc";
@@ -32,7 +43,6 @@ function decrypt(encryptedText) {
   decrypted += decipher.final("utf8");
   return decrypted;
 }
-
 export const addPostSocialMediaTwitter = async (req, res) => {
   try {
     const { brand, content, mediaId } = req.body;
@@ -79,7 +89,6 @@ export const addPostSocialMediaTwitter = async (req, res) => {
     return systemError.sendError(res, error);
   }
 };
-
 export const addNewAccountTwitter = async (req, res) => {
   try {
     const algorithm = "aes-256-cbc";
@@ -106,12 +115,21 @@ export const addNewAccountTwitter = async (req, res) => {
       return iv.toString("hex") + ":" + encrypted;
     }
 
-    const { brand, appKey, appSecret, accessToken, accessSecret } = req.body;
+    const { brand, appKey, appSecret, accessToken, accessSecret, bearerToken } =
+      req.body;
 
+    const checkBrand = await getTwitterData(brand);
+    if (checkBrand) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.BRAND_EXIST)
+        .throw();
+    }
     const encryptedAppKey = encrypt(appKey);
     const encryptedAppSecret = encrypt(appSecret);
     const encryptedAccessToken = encrypt(accessToken);
     const encryptedAccessSecret = encrypt(accessSecret);
+    const encryptedBearerToken = encrypt(bearerToken);
 
     const token = jwt.sign(
       {
@@ -119,6 +137,7 @@ export const addNewAccountTwitter = async (req, res) => {
         appSecret: encryptedAppSecret,
         accessToken: encryptedAccessToken,
         accessSecret: encryptedAccessSecret,
+        bearerToken: encryptedBearerToken,
       },
       process.env.JWT_SECRET
     );
@@ -132,7 +151,6 @@ export const addNewAccountTwitter = async (req, res) => {
       .json({ message: "Error encrypting data", error: error.message });
   }
 };
-
 export const getTwitterAccountSecretData = async (req, res) => {
   try {
     const { brand } = req.body;
@@ -156,6 +174,7 @@ export const getTwitterAccountSecretData = async (req, res) => {
     const decryptedAppSecret = decrypt(decodedToken.appSecret);
     const decryptedAccessToken = decrypt(decodedToken.accessToken);
     const decryptedAccessSecret = decrypt(decodedToken.accessSecret);
+    const decryptedBearerToken = decrypt(decodedToken.bearerToken);
     return res.status(200).json({
       message: "Success",
       Data: {
@@ -163,9 +182,164 @@ export const getTwitterAccountSecretData = async (req, res) => {
         ConsumerSecret: decryptedAccessSecret,
         AccessToken: decryptedAccessToken,
         TokenSecret: decryptedAccessSecret,
+        BearerToken: decryptedBearerToken,
       },
     });
   } catch (error) {
     return systemError.sendError(res, error);
+  }
+};
+export const addSocialAccountTwitter = async (req, res) => {
+  try {
+    const {
+      sharingList,
+      brand,
+      accountName,
+      userName,
+      accountLink,
+      campaignType,
+    } = req.body;
+    const employeeId = req.body.currentUser._id;
+    if (
+      !sharingList ||
+      !brand ||
+      !accountName ||
+      !userName ||
+      !accountLink ||
+      !campaignType
+    ) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.DATA_IS_REQUIRED)
+        .throw();
+    }
+    if (sharingList !== "TWITTER") {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.INVALID_SOCIAL_MEDIA_TYPE)
+        .throw();
+    }
+    const twitterData = await getTwitterData(brand);
+    if (!twitterData) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.BRAND_NOT_FOUND)
+        .throw();
+    }
+    const { token } = twitterData;
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const BearerToken = decrypt(decodedToken.bearerToken);
+    const response = await getUserByUsername(userName, BearerToken);
+    const account_id = response.data.id;
+
+    const socialAccount = await createSocialAccount(
+      PlatformEnum.TWITTER,
+      brand,
+      accountName,
+      userName,
+      accountLink,
+      account_id,
+      campaignType,
+      employeeId
+    );
+    return res.status(200).json({ result: socialAccount });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "Account name already exists" });
+    }
+    console.log(error);
+  }
+};
+export const editTwitterAccount = async (req, res) => {
+  try {
+    const { _id } = req.params;
+    const twitterAccount = await getTwitterAccount(_id);
+
+    if (!twitterAccount) {
+      return res.json({ message: "Twitter account not found" });
+    }
+    const {
+      accountName,
+      brand,
+      sharingList,
+      userName,
+      accountLink,
+      campaignType,
+    } = req.body;
+    if (userName && twitterAccount.userName !== userName) {
+      const twitterData = await getTwitterData(brand);
+
+      if (!twitterData) {
+        return systemError
+          .setStatus(400)
+          .setMessage(ErrorMessages.BRAND_NOT_FOUND)
+          .throw();
+      }
+      const decodedToken = jwt.verify(
+        twitterData.token,
+        process.env.JWT_SECRET
+      );
+      const BearerToken = decrypt(decodedToken.bearerToken);
+      const response = await getUserByUsername(userName, BearerToken);
+      twitterAccount.account_id = response.data.id;
+      twitterAccount.userName = userName;
+    }
+    twitterAccount.brand = brand || twitterAccount.brand;
+    twitterAccount.accountName = accountName || twitterAccount.accountName;
+    twitterAccount.accountLink = accountLink || twitterAccount.accountLink;
+    twitterAccount.campaignType = campaignType || twitterAccount.campaignType;
+    await twitterAccount.save();
+    return res.status(200).json({ result: twitterAccount });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "Account name already exists" });
+    }
+    console.log(error);
+  }
+};
+export const editCampaignTwitterAccount = async (req, res) => {
+  try {
+    const { _id } = req.params;
+    const twitterAccount = await getTwitterAccount(_id);
+    if (!twitterAccount) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.ACCOUNT_NOT_FOUND)
+        .throw();
+    }
+    twitterAccount.campaignType =
+      req.body.campaignType || twitterAccount.campaignType;
+    await twitterAccount.save();
+    return res.status(200).json({ result: twitterAccount });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "Account name already exists" });
+    }
+    console.log(error);
+  }
+};
+export const deleteTwitterAccount = async (req, res) => {
+  try {
+    const { _id } = req.params;
+    const twitterAccount = await deleteAccountTwitter(_id);
+    if (twitterAccount.deletedCount === 0) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.ACCOUNT_NOT_FOUND)
+        .throw();
+    }
+    return res
+      .status(200)
+      .json({ message: "Twitter account deleted successfully" });
+  } catch (error) {
+    return systemError.sendError(res, error);
+  }
+};
+export const getAllAccountTwitter = async (req, res) => {
+  try {
+    const twitterAccounts = await getTwitterAccounts(req.params.sharingList);
+    return res.status(200).json({ result: twitterAccounts });
+  } catch (error) {
+    console.log(error);
   }
 };
