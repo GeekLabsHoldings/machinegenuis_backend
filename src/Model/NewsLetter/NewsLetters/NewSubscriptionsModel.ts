@@ -1,17 +1,21 @@
 import { model, Schema } from 'mongoose';
-import INewsLetters from './INewsLettersModel';
 import { RequiredNumber, RequiredString } from '../../../Utils/Schemas';
 import { SchemaTypesReference } from '../../../Utils/Schemas/SchemaTypesReference';
+import INewsLettersModel from './INewsLettersModel';
 
-const NewsLettersSchema = new Schema<INewsLetters>({
+const NewsLettersSchema = new Schema<INewsLettersModel>({
     brand: RequiredString,
-    content: RequiredString,
-    createdAt: RequiredNumber,
+    title: RequiredString,
+    subjectLine: RequiredString,
     openingLine: RequiredString,
-    subject: RequiredString,
-    subjectLine: RequiredString
+    content: RequiredString,
+    userSubscriptionCount: RequiredNumber,
+    uploadTime: RequiredNumber,
+    createdAt: RequiredNumber
+}, {
+    timestamps: true
 });
 
-const NewsLettersModel = model<INewsLetters>(SchemaTypesReference.NewsLetters, NewsLettersSchema);
+const NewsLettersModel = model<INewsLettersModel>(SchemaTypesReference.NewsLetters, NewsLettersSchema);
 
 export default NewsLettersModel;

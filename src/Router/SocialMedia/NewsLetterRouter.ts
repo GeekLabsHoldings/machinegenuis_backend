@@ -1,8 +1,8 @@
 import { Router, Request, Response } from "express";
-import SocialMediaNewsLetterController from "../../Controller/SocialMedia/SocialMediaNewsLetterController";
+import SocialMediaNewsLetterController from "../../Controller/SocialMedia/NewsLetter/SendNewsLetterStep/SocialMediaNewsLetterController";
 import systemError from "../../Utils/Error/SystemError";
-import { INewsLetter } from "../../Controller/SocialMedia/ISocialMediaNewsLetterController";
-
+import { INewsLetterRequestBody } from "../../Controller/SocialMedia/NewsLetter/SendNewsLetterStep/ISocialMediaNewsLetterController";
+import AnalysisNewsLetterController from "../../Controller/SocialMedia/NewsLetter/AnalysisNewsLetter/AnalysisNewsLetterController";
 const NewsLetterRouter = Router();
 
 NewsLetterRouter.get('/get-generated-news-letter', async (req: Request, res: Response) => {
@@ -43,17 +43,28 @@ NewsLetterRouter.post('/generate-subject-line-opening-line', async (req: Request
 
 NewsLetterRouter.post('/send-newsletter', async (req: Request, res: Response) => {
     try {
-        const newsLetter: INewsLetter = {
+        const newsLetter: INewsLetterRequestBody = {
             title: req.body.title,
             subjectLine: req.body.subjectLine,
             openingLine: req.body.openingLine,
             articles: req.body.articles,
             brand: req.body.brand,
-            stockName: req.body.stockName,
-            uploadTime: req.body.uploadTime
+            uploadTime: req.body.uploadTime,
         };
         const newsLetterController = new SocialMediaNewsLetterController();
         const result = await newsLetterController.scheduleSendEmails(newsLetter);
+        return res.status(200).json(result);
+    } catch (error) {
+        return systemError.sendError(res, error);
+    }
+});
+
+
+NewsLetterRouter.get('/analysis/:brand', async (req: Request, res: Response) => {
+    try {
+        const brand = req.params.brand;
+        const analysisNewsLetterController = new AnalysisNewsLetterController();
+        const result = await analysisNewsLetterController.getNewsLetterAnalysis(brand);
         return res.status(200).json(result);
     } catch (error) {
         return systemError.sendError(res, error);

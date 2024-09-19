@@ -1,5 +1,5 @@
 import Queue from 'bull';
-import SocialMediaNewsLetterController from '../../../Controller/SocialMedia/SocialMediaNewsLetterController';
+import SocialMediaNewsLetterController from '../../../Controller/SocialMedia/NewsLetter/SendNewsLetterStep/SocialMediaNewsLetterController';
 import "dotenv/config";
 
 const redisOptions = {

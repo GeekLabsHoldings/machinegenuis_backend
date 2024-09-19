@@ -1,16 +1,22 @@
 import { Job } from "bull";
+import { Types } from "mongoose";
+import INewsLettersModel from "../../../../Model/NewsLetter/NewsLetters/INewsLettersModel";
 
-export interface INewsLetter {
+export interface INewsLetterArticle {
+    generalTitle: string,
+    content: [{
+        title: string,
+        article_id: string,
+    }]
+}
+export interface INewsLetterRequestBody {
+    brand: string;
     title: string;
     subjectLine: string;
     openingLine: string;
-    articles: string[];
-    brand: string;
-    stockName: string;
-    uploadTime: number
+    articles: [INewsLetterArticle];
+    uploadTime: number;
 }
-
-
 export interface IGeneratedContentResponse {
     _id: string;
     generalTitle: string,
@@ -34,6 +40,6 @@ export default interface ISocialMediaNewsLetterController {
     getGeneratedNewsLetter(brand: string, stockName: string): Promise<IGeneratedContentResponse[]>;
     generateNewsLetterTitle(articles: string[]): Promise<string[]>;
     generateSubjectLineAndOpeningLine(title: string): Promise<string[]>;
-    scheduleSendEmails(newsData: INewsLetter): Promise<string>;
-    sendNewsLetter(job: Job<INewsLetter>): Promise<void>
+    scheduleSendEmails(newsData: INewsLetterRequestBody): Promise<string>;
+    sendNewsLetter(job: Job<INewsLettersModel & { _id: Types.ObjectId | string }>): Promise<void>
 }

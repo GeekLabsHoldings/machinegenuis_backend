@@ -9,6 +9,11 @@ export default class UserSubscriptionService implements IUserSubscriptionService
         return result;
     }
     async getUsersSubscriptionByBrand(brand: string): Promise<IUserSubscriptionModel[]> {
-        return await UserSubscriptionModel.find({ brand });
+        return await UserSubscriptionModel.find({ brand, subscriptionStatus: true });
     }
+
+    async countUsersSubscriptionByBrand(brand: string): Promise<number> {
+        return await UserSubscriptionModel.countDocuments({ brand, subscriptionStatus: true });
+    }
+
 }
