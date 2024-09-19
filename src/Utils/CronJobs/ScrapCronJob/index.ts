@@ -3,7 +3,7 @@ import moment from '../../DateAndTime/index';
 import 'dotenv/config';
 import ScrapeController from '../../../Controller/ContentCreation/AutomaticScrape/ScrapeController';
 import Ec2Service from '../../../Service/AWS/EC2';
-import EmailService from '../../../Service/HR/Template/Message/EmailService';
+import EmailService from '../../../Service/Message/EmailService';
 
 const delay = async (time: number): Promise<any> => {
     return new Promise(function (resolve) {

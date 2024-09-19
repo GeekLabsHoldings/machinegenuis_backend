@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import systemError from '../../Utils/Error/SystemError';
 import mongoose from 'mongoose';
-import EmailController from '../../Controller/HR/Messages/EmailController';
+import EmailController from '../../Controller/Messages/EmailController';
 
 const MessageRouter = Router();
 

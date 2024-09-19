@@ -1,10 +1,10 @@
 import { ClientSession } from "mongoose";
-import candidateService from "../../../Service/HR/Candidate/CandidateService";
-import EmailService, { MailOptions } from "../../../Service/HR/Template/Message/EmailService";
-import { ErrorMessages } from "../../../Utils/Error/ErrorsEnum";
-import systemError from "../../../Utils/Error/SystemError";
-import CandidateController from "../Candidate/CandidateController";
-import SuccessMessage from "../../../Utils/SuccessMessages";
+import candidateService from "../../Service/HR/Candidate/CandidateService";
+import EmailService, { MailOptions } from "../../Service/Message/EmailService";
+import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
+import systemError from "../../Utils/Error/SystemError";
+import CandidateController from "../HR/Candidate/CandidateController";
+import SuccessMessage from "../../Utils/SuccessMessages";
 
 export default class EmailController {
     session: ClientSession
