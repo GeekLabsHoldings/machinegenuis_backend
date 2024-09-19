@@ -3,8 +3,9 @@ import INewsLettersModel from "../NewsLetters/INewsLettersModel";
 import IUserSubscriptionModel from "../UsersSubscriptions/IUserSubscriptionModel";
 
 export default interface IAnalyticsModel {
-    email_id: Types.ObjectId | string | INewsLettersModel;
-    user_id: Types.ObjectId | string | IUserSubscriptionModel;
+    email: Types.ObjectId | string | INewsLettersModel;
+    userEmail: string;
+    article_id: string;
     type: string;
     createdAt: number;
 }

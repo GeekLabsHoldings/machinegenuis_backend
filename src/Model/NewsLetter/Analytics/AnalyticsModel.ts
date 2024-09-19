@@ -1,12 +1,13 @@
 import { model, Schema } from 'mongoose';
-import { EnumStringNotRequired, RefType, RequiredNumber, RequiredString } from '../../../Utils/Schemas';
+import { EnumStringNotRequired, NotRequiredString, RefType, RequiredNumber, RequiredString } from '../../../Utils/Schemas';
 import { SchemaTypesReference } from '../../../Utils/Schemas/SchemaTypesReference';
 import { AnalyticsTypeArray } from '../../../Utils/NewsLetter';
-import IAnalyticsModel from './IAnalyticsModel';
+import IAnalyticsModel from './Analytics';
 
 const AnalyticsSchema = new Schema<IAnalyticsModel>({
-    email_id: RefType(SchemaTypesReference.NewsLetters, true),
-    user_id: RefType(SchemaTypesReference.UserEmailsSubscription, true),
+    email: RefType(SchemaTypesReference.NewsLetters, true),
+    userEmail: RequiredString,
+    article_id: NotRequiredString,
     type: EnumStringNotRequired(AnalyticsTypeArray),
     createdAt: RequiredNumber
 });
