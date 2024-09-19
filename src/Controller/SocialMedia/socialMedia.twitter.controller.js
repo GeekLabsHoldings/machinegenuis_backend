@@ -22,8 +22,7 @@ import {
   getTwitterAccounts,
 } from "../../Service/SocialMedia/twitter.service";
 import socialAccountModel from "../../Model/SocialMedia/SocialMediaAccount.model";
-import { log } from "console";
-import exp from "constants";
+
 
 function decrypt(encryptedText) {
   const algorithm = "aes-256-cbc";
