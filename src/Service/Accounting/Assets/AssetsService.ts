@@ -12,7 +12,6 @@ class AssetsService implements IAssetsService {
     }
     async createAsset(data: Partial<AssetsTypes>): Promise<AssetsTypes> {
         const asset = new this.assetModel(data);
-        console.log({ asset });
         const result = await asset.save();
         return result;
     }

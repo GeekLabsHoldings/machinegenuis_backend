@@ -10,6 +10,7 @@ const AssetsSchema = new Schema<IAssetsModel>({
     propertyType: RequiredString,
     amountPaid: RequiredNumber,
     sellerPhoneNumber: StringValidation(phoneRegex, ErrorMessages.PHONE_NUMBER_NOT_VALID),
+    dateAcquired: RequiredNumber,
 }, { discriminatorKey: 'assetType', timestamps: true });
 
 const RealEstateSchema = new Schema<IRealEstateModel>({
