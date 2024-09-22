@@ -1,4 +1,5 @@
 import { socialMediaModel } from "../../Model/SocialMedia/SocialMedia.model";
+import socialAccountModel from "../../Model/SocialMedia/SocialMediaAccount.model";
 import twitterModel from "../../Model/SocialMedia/TwitterData.model";
 
 export const createAccountTwitter = async (
@@ -28,4 +29,24 @@ export const createTwitterAccountSecret = async (brand, token) => {
     brand,
     token,
   });
+};
+export const existAccount = async (accountName) => {
+  const Exist = await socialAccountModel.findOne({
+    accountName,
+  });
+  return Exist;
+};
+export const getTwitterAccount = async (_id) => {
+  const twitterAccount = await socialAccountModel.findById(_id);
+  return twitterAccount;
+};
+export const deleteAccountTwitter = async (_id) => {
+  const twitterAccount = await socialAccountModel.deleteOne({ _id });
+  return twitterAccount;
+};
+export const getTwitterAccounts = async (sharingList) => {
+  const twitterAccounts = await socialAccountModel.find({
+    sharingList,
+  });
+  return twitterAccounts;
 };

@@ -1,5 +1,7 @@
+import { platform } from "os";
 import { socialMediaModel } from "../../Model/SocialMedia/SocialMedia.model";
 import twitterModel from "../../Model/SocialMedia/TwitterData.model";
+import socialAccountModel from "../../Model/SocialMedia/SocialMediaAccount.model";
 
 export const createAccountSocialMedia = async (
   platform,
@@ -30,4 +32,26 @@ export const createTwitterAccountSecret = async (brand, token) => {
 export const getTwitterData = async (brand) => {
   const twitterData = await twitterModel.findOne({ brand });
   return twitterData;
-}
+};
+export const createSocialAccount = async (
+  sharingList,
+  brand,
+  accountName,
+  userName,
+  accountLink,
+  account_id,
+  campaignType,
+  employeeId
+) => {
+  const socialAccount = await socialAccountModel.create({
+    sharingList,
+    brand,
+    accountName,
+    userName,
+    accountLink,
+    account_id,
+    campaignType,
+    employeeId
+  });
+  return socialAccount;
+};
