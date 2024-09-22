@@ -18,6 +18,10 @@ const StartOfMonth = (now: Moment): number => now.clone().startOf('month').value
 
 const EndOfMonth = (now: Moment): number => now.clone().endOf('month').valueOf();
 
+const StartOfLastMonth = (now: Moment): number => now.subtract(1, 'months').startOf('month').valueOf();
+
+const EndOfLastMonth = (now: Moment): number => now.subtract(1, 'months').endOf('month').valueOf();
+
 const CheckIsLateTime = (now: Moment) => {
     const day = now.day();
     if (day === 5 || day === 6)
@@ -32,5 +36,5 @@ const AfterDays = (now: Moment, days: number): number => now.clone().set({ hour:
 export default moment;
 export {
     StartOfDay, EndOfDay, StartOfMonth, EndOfMonth, CheckIsLateTime, AfterDays, StartOfWorkDay
-    , EndOfWorkDay, StartOfInterviewHour, EndOfInterviewHour
+    , EndOfWorkDay, StartOfInterviewHour, EndOfInterviewHour, StartOfLastMonth, EndOfLastMonth
 }
