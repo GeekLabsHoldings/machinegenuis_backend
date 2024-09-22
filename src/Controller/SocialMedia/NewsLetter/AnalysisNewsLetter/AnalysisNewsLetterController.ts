@@ -19,8 +19,9 @@ export default class AnalysisNewsLetterController implements IAnalysisNewsLetter
         const analysisService = new AnalysisNewsLetterService();
         const analysisData = await analysisService.getNewsLetterAnalysis(brand);
         const result = analysisData.map((data) => {
+            const percentage = parseFloat(((data.openingCount / data.userSubscriptionCount) * 100).toFixed(2));
             return {
-                openingCount: `${(data.openingCount / data.userSubscriptionCount) * 100} %`,
+                openingCount: `${percentage}%`,
                 clickCount: data.clickCount,
                 createdAt: data.createdAt,
                 userSubscriptionCount: data.userSubscriptionCount,
