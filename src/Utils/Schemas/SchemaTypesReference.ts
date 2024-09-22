@@ -33,6 +33,7 @@ enum SchemaTypesReference {
   NewsLetters = "news-letter",
   Analytics = "analytics",
   Prompt = "prompt",
+  Audiences = "audiences",
 }
 
 export { SchemaTypesReference };
