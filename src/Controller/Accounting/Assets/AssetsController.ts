@@ -12,7 +12,6 @@ export default class AssetsController implements IAssetsController {
         if (!assetModel) {
             return systemError.setStatus(400).setMessage(ErrorMessages.ASSET_TYPE_NOT_EXIST).throw();
         }
-        console.log({ assetType, assetModel });
         const assetService = new AssetTypeService(assetModel as Model<AssetsTypes>);
         return await assetService.createAsset(data);
     }
