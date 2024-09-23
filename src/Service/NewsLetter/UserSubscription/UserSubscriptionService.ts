@@ -113,5 +113,12 @@ export default class UserSubscriptionService implements IUserSubscriptionService
         return result;
     }
 
+    async addReceivedEmails(email: string, brand: string): Promise<void> {
+        await UserSubscriptionModel.updateOne({ email, brand }, { $inc: { receivedEmails: 1 } });
+    }
+
+    async getUsersReceivedEmails(brand: string): Promise<IUserSubscriptionModel[]> {
+        return await UserSubscriptionModel.find({ brand });
+    }
 
 }

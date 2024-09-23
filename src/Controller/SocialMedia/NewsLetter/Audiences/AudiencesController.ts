@@ -1,9 +1,12 @@
+import IAnalyticsModel from "../../../../Model/NewsLetter/Analytics/Analytics";
 import IUserSubscriptionModel from "../../../../Model/NewsLetter/UsersSubscriptions/IUserSubscriptionModel";
+import AnalysisNewsLetterService from "../../../../Service/NewsLetter/Analysis/AnalysisService";
 import AudiencesService from "../../../../Service/NewsLetter/Audiences/AudiencesService";
 import NewsLetterService from "../../../../Service/NewsLetter/NewsLetterService/NewsLetterService";
 import UserSubscriptionService from "../../../../Service/NewsLetter/UserSubscription/UserSubscriptionService";
-import moment, {StartOfLastMonth, StartOfMonth } from "../../../../Utils/DateAndTime";
-import IAudienceController, { IAudienceResponse } from "./IAudiencesController";
+import moment, { StartOfLastMonth, StartOfMonth } from "../../../../Utils/DateAndTime";
+import { AnalyticsType, UserSubscriptionClass } from "../../../../Utils/NewsLetter";
+import IAudienceController, { IAudienceAnalysisResponse, IAudienceResponse } from "./IAudiencesController";
 export default class AudienceController implements IAudienceController {
 
     async addNewUser(email: string, brand: string): Promise<void> {
@@ -15,6 +18,7 @@ export default class AudienceController implements IAudienceController {
             email: email,
             subscriptionDate: dateNow.valueOf(),
             subscriptionStatus: true,
+            receivedEmails: 0,
             updatedAt: dateNow.valueOf()
         };
         await userSubscriptionService.createUserSubscription(userSubscribeData);
@@ -95,6 +99,66 @@ export default class AudienceController implements IAudienceController {
                 }
             }
         };
+    }
+
+    async getAudiencesEmails(brand: string, queryType: string): Promise<IAudienceAnalysisResponse[]> {
+        const userSubscriptionService = new UserSubscriptionService();
+        const analysisService = new AnalysisNewsLetterService();
+        const getUserFun = userSubscriptionService.getUsersReceivedEmails(brand);
+        const getAnalysisFun = analysisService.getUsersEmailsAnalysis(brand);
+        const [users, analysis] = await Promise.all([getUserFun, getAnalysisFun]);
+        const userNumberReceivedEmails: Map<string, IUserSubscriptionModel> = new Map();
+        users.forEach(user => {
+            userNumberReceivedEmails.set(user.email, user);
+        });
+
+        const userEmailsAction: Record<string, { openingCount: number, clickCount: number }> = {};
+        const oneClickOpening: Set<string> = new Set();
+        analysis.forEach((user: IAnalyticsModel) => {
+            if (!userEmailsAction[user.userEmail]) {
+                userEmailsAction[user.userEmail] = {
+                    openingCount: 0,
+                    clickCount: 0
+                };
+            }
+            if (user.type === AnalyticsType.OPEN) {
+                userEmailsAction[user.userEmail].openingCount++;
+            } else {
+                const key = `${user.userEmail}-${user.article_id}`;
+                if (!oneClickOpening.has(key)) {
+                    oneClickOpening.add(key);
+                    userEmailsAction[user.userEmail].clickCount++;
+                }
+            }
+        });
+
+
+        const result: IAudienceAnalysisResponse[] = [];
+        userNumberReceivedEmails.forEach((value: IUserSubscriptionModel, key: string) => {
+            const mid = Math.floor(value.receivedEmails / 2);
+            const userAction = userEmailsAction[key] ? userEmailsAction[key] : { openingCount: 0, clickCount: 0 }
+
+            const interactivity = (userAction.openingCount + userAction.clickCount) / 2;
+            const contactRating = parseFloat(((interactivity * 5) / value.receivedEmails).toFixed(2));
+
+            const firstClassCondition = queryType === UserSubscriptionClass.FirstClass && userAction.openingCount >= mid && userAction.clickCount >= mid;
+            const secondClassCondition = queryType === UserSubscriptionClass.SecondClass && userAction.openingCount >= mid && userAction.clickCount < mid;
+            const thirdClassCondition = queryType === UserSubscriptionClass.ThirdClass && userAction.openingCount < mid && userAction.clickCount < mid;
+
+
+            if (firstClassCondition || secondClassCondition || thirdClassCondition) {
+                result.push({
+                    email: key,
+                    contactRating,
+                    brand,
+                    subscription: value.subscriptionStatus,
+                    createdAt: value.subscriptionDate
+                });
+            }
+        });
+        return result;
+
+
     }
 
 }

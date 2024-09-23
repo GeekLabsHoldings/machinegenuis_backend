@@ -8,6 +8,7 @@ const UserSubscriptionSchema = new Schema<IUserSubscription>({
     brand: RequiredString,
     subscriptionDate: RequiredNumber,
     subscriptionStatus: RequiredBoolean,
+    receivedEmails: RequiredNumber,
     updatedAt: RequiredNumber
 });
 
