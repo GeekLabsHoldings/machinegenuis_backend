@@ -1,3 +1,4 @@
+import { channel } from "diagnostics_channel";
 import telegramModel from "../../Model/SocialMedia/Telegram.socialMedia.model";
 import TelegramMessage from "../../Model/SocialMedia/telegramMessage.model";
 
@@ -66,15 +67,49 @@ export const AddTelegramMessage = async (
   const newMessage = new TelegramMessage({
     message_id: message_id,
     text: text,
-    channel_id: channel_id, // Example ObjectId
+    channel_id: String(channel_id), 
     timestamp: timestamp,
   });
 
-  newMessage.save((err) => {
-    if (err) {
-      console.error('Error saving the message:', err);
-    } else {
-      console.log('Message saved successfully!');
-    }
-  });
+  await newMessage.save();
 }  
+
+
+export const DeleteTelegramMessage = async(
+  channelId,
+  messageId
+) =>{
+  try {
+    const result = await TelegramMessage.deleteOne({ channel_id:channelId, message_id:messageId });
+    
+    if (result.deletedCount === 1) {
+      console.log('Message deleted successfully!');
+    } else {
+      console.log('Message not found.');
+    }
+  } catch (error) {
+    console.error('Error deleting message:', error);
+  }
+}
+
+
+export const GetSubCount = async(
+brand
+)=>{
+    const channels = await telegramModel.find({brand:brand})
+
+    let sum=0
+    console.log(channels, brand)
+    channels.forEach(channel=>{
+      console.log(channel)
+      sum+=channel.subscribers})
+    
+    const result = await telegramModel.aggregate([
+      { $match: { brand: brand } },
+      { $group: { _id: null, totalSubscribers: { $sum: "$subscribers" } } }
+  ]);
+  
+    return sum;
+
+}
+

@@ -1,20 +1,35 @@
 import { Router } from "express";
-import { get_channels, add_channel, campaign } from "../../Controller/SocialMedia/socialMedia.telegram.controller";
+import { get_channels, add_channel, campaign, campaignByBrand, deleteMessage, get_channels_brand, get_subscripers } from "../../Controller/SocialMedia/socialMedia.telegram.controller";
 import { AddTwitterChannel,getChannels } from "../../Service/SocialMedia/telegram.service";
 import multer from "multer";
 
-const telegramRouter = Router();
-const upload = multer({ dest: 'uploads/' });
+const TelegramRouter = Router();
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, 'uploads/'); // Destination folder
+    },
+    filename: (req, file, cb) => {
+      cb(null, Date.now()+"__"+file.originalname); // Use the original name
+    }
+  });
+  
+  const upload = multer({ storage });
+  
 
 
+TelegramRouter.post("/add-telegram-channel",add_channel);
 
-telegramRouter.post("/add-telegram-channel",add_channel);
 
+TelegramRouter.get("/list-telegram-channels", get_channels);
+TelegramRouter.get("/list-telegram-channels-brand", get_channels_brand);
 
-telegramRouter.get("/list-telegram-channels", get_channels);
+TelegramRouter.post("/campaign-broadcast", upload.single('file'),campaign)
 
-telegramRouter.get("/campaign", upload.single('file'),campaign)
+TelegramRouter.post("/campaign-brand", upload.single('file'),campaignByBrand)
 
+TelegramRouter.post("/delete-message", deleteMessage)
+
+TelegramRouter.get("/subscripers", get_subscripers);
 
 // telegramRouter.post("/tmp",
 //     async (req , res)=>{
@@ -43,4 +58,4 @@ telegramRouter.get("/campaign", upload.single('file'),campaign)
 //     }
 // );
 
-export default telegramRouter;
+export default TelegramRouter;

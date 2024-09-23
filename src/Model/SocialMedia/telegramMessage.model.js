@@ -15,12 +15,13 @@ const mongoose = require("mongoose");
 const TelegramMSchema = new mongoose.Schema({
   message_id: {
     type: String,
-    required: true,
+    required: false,
     trim: true,
   },
-  text: {type: String, required: true},
 
-  channel_id:  { type: Schema.Types.ObjectId, ref: SchemaTypesReference.TelegramMessage }
+  text: {type: String, required: false},
+
+  channel_id:  { type:  String, ref: SchemaTypesReference.TelegramMessage }
   ,
   timestamp: {
     type: Number,
@@ -31,6 +32,6 @@ const TelegramMSchema = new mongoose.Schema({
 });
 
 // Create the model
-const TelegramMessage = mongoose.model(SchemaTypesReference.TelegramMessage, TelegramSchema);
+const TelegramMessage = mongoose.model(SchemaTypesReference.TelegramMessage, TelegramMSchema);
 
 export default TelegramMessage;
