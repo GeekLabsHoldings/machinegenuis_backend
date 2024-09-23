@@ -16,11 +16,42 @@ export default class AnalysisNewsLetterService implements IAnalysisNewsLetterSer
         }, data, { upsert: true, new: true })
     }
 
+    async getUsersEmailsAnalysis(brand: string): Promise<IAnalyticsModel[]> {
+        const pipeline: PipelineStage[] = [
+            {
+                $lookup: {
+                    from: `${SchemaTypesReference.NewsLetters}s`,
+                    localField: 'email',
+                    foreignField: '_id',
+                    as: 'newsletterDetails'
+                }
+            },
+            {
+                $unwind: '$newsletterDetails'
+            },
+            {
+                $match: {
+                    'newsletterDetails.brand': brand
+                }
+            },
+            {
+                $project: {
+                    email: 1,
+                    userEmail: 1,
+                    article_id: 1,
+                    type: 1,
+                }
+            }
+        ];
+        const result = await AnalyticsModel.aggregate(pipeline);
+        return result;
+
+    }
     async getNewsLetterAnalysis(brand: string): Promise<IAnalysisNewsLetterServiceResponseService[]> {
         const pipeline: PipelineStage[] = [
             {
                 $lookup: {
-                    from: `${SchemaTypesReference.NewsLetters}s`, 
+                    from: `${SchemaTypesReference.NewsLetters}s`,
                     localField: 'email',
                     foreignField: '_id',
                     as: 'newsletterDetails'
@@ -36,7 +67,7 @@ export default class AnalysisNewsLetterService implements IAnalysisNewsLetterSer
             },
             {
                 $group: {
-                    _id: '$email', 
+                    _id: '$email',
                     openingCount: {
                         $sum: {
                             $cond: [{ $eq: ['$type', AnalyticsType.OPEN] }, 1, 0]
@@ -47,17 +78,17 @@ export default class AnalysisNewsLetterService implements IAnalysisNewsLetterSer
                             $cond: [{ $eq: ['$type', AnalyticsType.CLICK] }, 1, 0]
                         }
                     },
-                    title: { $first: '$newsletterDetails.title' }, 
-                    brand: { $first: '$newsletterDetails.brand' }, 
-                    createdAt: { $first: '$newsletterDetails.createdAt' }, 
-                    userSubscriptionCount: { $first: '$newsletterDetails.userSubscriptionCount' } 
+                    title: { $first: '$newsletterDetails.title' },
+                    brand: { $first: '$newsletterDetails.brand' },
+                    createdAt: { $first: '$newsletterDetails.createdAt' },
+                    userSubscriptionCount: { $first: '$newsletterDetails.userSubscriptionCount' }
                 }
             },
             {
                 $project: {
                     _id: 0,
                     email: {
-                        _id: '$_id', 
+                        _id: '$_id',
                         title: '$title',
                         brand: '$brand'
                     },
@@ -69,14 +100,14 @@ export default class AnalysisNewsLetterService implements IAnalysisNewsLetterSer
             },
             {
                 $sort: {
-                    createdAt: -1 
+                    createdAt: -1
                 }
             }
         ];
-        
+
         const result = await AnalyticsModel.aggregate(pipeline);
         return result;
-        
+
     }
 
 }

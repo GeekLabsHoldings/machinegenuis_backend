@@ -8,5 +8,6 @@ export interface IAnalysisNewsLetterServiceResponseService {
 }
 export default interface IAnalysisNewsLetterService {
     createNewsLetterAnalysis(data: IAnalyticsModel): Promise<void>;
+    getUsersEmailsAnalysis(brand: string): Promise<IAnalyticsModel[]>
     getNewsLetterAnalysis(brand: string): Promise<IAnalysisNewsLetterServiceResponseService[]>
 }
