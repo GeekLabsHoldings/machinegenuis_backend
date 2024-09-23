@@ -35,6 +35,7 @@ enum SchemaTypesReference {
   Prompt = "prompt",
   Audiences = "audiences",
   Telegram = "telegram",
+  TelegramMessage = "telegram_message",
 }
 
 export { SchemaTypesReference };

@@ -12,46 +12,25 @@ import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
 const mongoose = require("mongoose");
 
 // Define the schema
-const TelegramSchema = new mongoose.Schema({
-  group_name: {
+const TelegramMSchema = new mongoose.Schema({
+  message_id: {
     type: String,
     required: true,
     trim: true,
   },
-  link: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  group_id: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-  },
-  subscribers: {
+  text: {type: String, required: true},
+
+  channel_id:  { type: Schema.Types.ObjectId, ref: SchemaTypesReference.TelegramMessage }
+  ,
+  timestamp: {
     type: Number,
     required: true,
     default: 0,
   },
-  niche: {
-    type: String,
-    required: false,
-    trim: true,
-  },
 
-  platform: EnumStringRequired(PlatformArr),
-
-  brand: EnumStringRequired(brandArr),
-
-  engagement: {
-    type: Number,
-    required: false,
-    default: 0,
-  },
 });
 
 // Create the model
-const telegramModel = mongoose.model(SchemaTypesReference.Telegram, TelegramSchema);
+const TelegramMessage = mongoose.model(SchemaTypesReference.TelegramMessage, TelegramSchema);
 
-export default telegramModel;
+export default TelegramMessage;

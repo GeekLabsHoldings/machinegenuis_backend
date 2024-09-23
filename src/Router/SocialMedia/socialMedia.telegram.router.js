@@ -1,8 +1,10 @@
 import { Router } from "express";
 import { get_channels, add_channel, campaign } from "../../Controller/SocialMedia/socialMedia.telegram.controller";
 import { AddTwitterChannel,getChannels } from "../../Service/SocialMedia/telegram.service";
-const telegramRouter = Router();
+import multer from "multer";
 
+const telegramRouter = Router();
+const upload = multer({ dest: 'uploads/' });
 
 
 
@@ -11,7 +13,7 @@ telegramRouter.post("/add-telegram-channel",add_channel);
 
 telegramRouter.get("/list-telegram-channels", get_channels);
 
-telegramRouter.get("/campaign",campaign)
+telegramRouter.get("/campaign", upload.single('file'),campaign)
 
 
 // telegramRouter.post("/tmp",
