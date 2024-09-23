@@ -83,5 +83,17 @@ NewsLetterRouter.get('/audience-analysis/:brand', async (req: Request, res: Resp
     }
 });
 
+NewsLetterRouter.get('/audience-emails/:brand/:queryType', async (req: Request, res: Response) => {
+    try {
+        const brand = req.params.brand;
+        const queryType = req.params.queryType;
+        const audienceController = new AudienceController();
+        const result = await audienceController.getAudiencesEmails(brand, queryType);
+        return res.status(200).json(result);
+    } catch (error) {
+        return systemError.sendError(res, error);
+    }
+});
+
 
 export default NewsLetterRouter;
