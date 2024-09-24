@@ -11,7 +11,7 @@ export default class AudiencesService implements IAudiencesService {
         }, { upsert: true, new: true });
     }
 
-    async getAudience(brand: string): Promise<IAudienceModel[]> {
-        return await AudienceModel.find({ brand });
+    async getAudience(brand: string, date: number): Promise<IAudienceModel[]> {
+        return await AudienceModel.find({ brand: brand, date: { $gte: date } });
     }
 }

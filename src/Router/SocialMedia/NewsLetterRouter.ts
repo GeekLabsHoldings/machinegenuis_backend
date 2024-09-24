@@ -4,6 +4,7 @@ import systemError from "../../Utils/Error/SystemError";
 import { INewsLetterRequestBody } from "../../Controller/SocialMedia/NewsLetter/SendNewsLetterStep/ISocialMediaNewsLetterController";
 import AnalysisNewsLetterController from "../../Controller/SocialMedia/NewsLetter/AnalysisNewsLetter/AnalysisNewsLetterController";
 import AudienceController from "../../Controller/SocialMedia/NewsLetter/Audiences/AudiencesController";
+import moment from "../../Utils/DateAndTime";
 const NewsLetterRouter = Router();
 
 NewsLetterRouter.get('/get-generated-news-letter', async (req: Request, res: Response) => {
@@ -75,8 +76,20 @@ NewsLetterRouter.get('/analysis/:brand', async (req: Request, res: Response) => 
 NewsLetterRouter.get('/audience-analysis/:brand', async (req: Request, res: Response) => {
     try {
         const brand = req.params.brand;
+        const year = parseInt(req.query.year as string) || moment().valueOf();
         const audienceController = new AudienceController();
-        const result = await audienceController.getAudiencesAnalysis(brand);
+        const result = await audienceController.getAudiencesAnalysisChart(brand, year);
+        return res.status(200).json(result);
+    } catch (error) {
+        return systemError.sendError(res, error);
+    }
+});
+
+NewsLetterRouter.get('/growth-percentage/:brand', async (req: Request, res: Response) => {
+    try {
+        const brand = req.params.brand;
+        const audienceController = new AudienceController();
+        const result = await audienceController.getGrowthPercentage(brand);
         return res.status(200).json(result);
     } catch (error) {
         return systemError.sendError(res, error);
