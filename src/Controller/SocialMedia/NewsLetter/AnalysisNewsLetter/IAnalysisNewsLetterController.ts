@@ -1,12 +1,16 @@
 export interface IAnalysisNewsLetterServiceResponse {
-    openingCount: string;
-    clickCount: number;
-    createdAt: number;
-    email: {
-        _id: string;
-        title: string;
-        brand: string;
-    }
+    MonthAnalysis: string;
+    result: {
+        openingCount: string;
+        clickCount: number;
+        createdAt: number;
+        userSubscriptionCount: number;
+        email: {
+            _id: string;
+            title: string;
+            brand: string;
+        }
+    }[];
 }
 
 export default interface IAnalysisNewsLetterController {
