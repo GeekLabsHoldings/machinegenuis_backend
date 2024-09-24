@@ -4,9 +4,9 @@ import AnalysisNewsLetterService from "../../../../Service/NewsLetter/Analysis/A
 import AudiencesService from "../../../../Service/NewsLetter/Audiences/AudiencesService";
 import NewsLetterService from "../../../../Service/NewsLetter/NewsLetterService/NewsLetterService";
 import UserSubscriptionService from "../../../../Service/NewsLetter/UserSubscription/UserSubscriptionService";
-import moment, { StartOfLastMonth, StartOfMonth } from "../../../../Utils/DateAndTime";
+import moment, { EndOfYear, StartOfLastMonth, StartOfMonth, StartOfYear } from "../../../../Utils/DateAndTime";
 import { AnalyticsType, UserSubscriptionClass } from "../../../../Utils/NewsLetter";
-import IAudienceController, { IAudienceAnalysisResponse, IAudienceResponse } from "./IAudiencesController";
+import IAudienceController, { IAudienceAnalysisResponse, IGrowthPercentage } from "./IAudiencesController";
 export default class AudienceController implements IAudienceController {
 
     async addNewUser(email: string, brand: string): Promise<void> {
@@ -46,59 +46,75 @@ export default class AudienceController implements IAudienceController {
     getAllUsers(brand: string): Promise<string[]> {
         throw new Error("Method not implemented.");
     }
-    async getAudiencesAnalysis(brand: string): Promise<IAudienceResponse> {
+    async getAudiencesAnalysisChart(brand: string, year: number): Promise<Array<number>> {
         const audienceService = new AudiencesService();
-        const newsLetter = new NewsLetterService();
-        const userSubscription = new UserSubscriptionService();
 
-        const dateNow = moment();
-        const startOfLastMonth = StartOfLastMonth(dateNow);
+        const yearMoment = moment(year);
+        const startOfYear = StartOfYear(yearMoment);
+        const endOfYear = EndOfYear(yearMoment);
 
-        const allAudiencesFun = audienceService.getAudience(brand);
-        const countNewsLetterFun = newsLetter.countNewsLetterByBrandAndDate(brand, startOfLastMonth);
-        const countUsersFun = userSubscription.countUsersByBrandAndDate(brand, startOfLastMonth)
+        const allAudiencesResult = await audienceService.getAudience(brand, startOfYear);
 
-        const [allAudiencesResult, countNewsLetterResult, countUsersResult] = await Promise.all([allAudiencesFun, countNewsLetterFun, countUsersFun]);
-
-        let firstMonth = allAudiencesResult[0].date;
+        const lastMonth = Math.min(moment().valueOf(), endOfYear);
+        let firstMonth = startOfYear;
         let index = 0;
         let count = 0;
-        const result: { year: string, month: string, count: number }[] = [];
-        while (firstMonth <= moment().valueOf()) {
+        const result: Array<number> = [];
+
+        while (firstMonth <= lastMonth) {
             if (allAudiencesResult[index].date === firstMonth) {
                 count += allAudiencesResult[index].count;
                 index++;
             }
-            result.push({
-                year: moment(firstMonth).format("YYYY"),
-                month: moment(firstMonth).format("MMMM"),
-                count: count
-            });
+            result.push(count);
             firstMonth = moment(firstMonth).add(1, "month").valueOf();
         }
-        const growthPercentageLastMessage = result[result.length - 2].count === 0 ? 0 : parseFloat(((countUsersResult[2].totalCount * 100) / (result[result.length - 2].count)).toFixed(2));
-        const growthPercentageThisMessage = parseFloat(((countUsersResult[3].totalCount * 100) / count).toFixed(2));
+        return result;
+    }
+
+    async getGrowthPercentage(brand: string): Promise<IGrowthPercentage> {
+        const newsLetter = new NewsLetterService();
+        const userSubscription = new UserSubscriptionService();
+        const dateNow = moment();
+        const startOfLastMonth = StartOfLastMonth(dateNow);
+        const startOfPreviousLastMonth = StartOfLastMonth(moment(startOfLastMonth));
+        const countNewsLetterFun = newsLetter.countNewsLetterByBrandAndDate(brand, startOfLastMonth);
+        const countUsersFun = userSubscription.countUsersByBrandAndDate(brand, startOfPreviousLastMonth);
+        const [countNewsLetterResult, countUsersResult] = await Promise.all([countNewsLetterFun, countUsersFun]);
+
+        const countNewUsers = await this.getAudiencesAnalysisChart(brand, dateNow.valueOf());
+     
+        const [NewSubscribersThisMonth, NewSubscribersLastMonth, UnSubscribersThisMonth, UnSubscribersLastMonth] = [
+            countUsersResult[3].totalCount,
+            countUsersResult[2].totalCount,
+            countUsersResult[1].totalCount,
+            countUsersResult[0].totalCount
+        ]
+        const growthPercentageLastMessage =
+            countNewUsers[countNewUsers.length - 2] === 0 ?
+                0 : parseFloat((((NewSubscribersLastMonth - UnSubscribersLastMonth) * 100) / countNewUsers[countNewUsers.length - 2]).toFixed(2));
+        const growthPercentageThisMessage =
+            countNewUsers[countNewUsers.length - 1] === 0 ?
+                0 : parseFloat((((NewSubscribersThisMonth - UnSubscribersThisMonth) * 100) / countNewUsers[countNewUsers.length - 1]).toFixed(2));
         return {
-            result,
-            analysis: {
-                PublishedNewsLetter: {
-                    this_month: countNewsLetterResult[1].totalEmails,
-                    last_month: countNewsLetterResult[0].totalEmails,
-                },
-                GrowthPercentage: {
-                    this_month: growthPercentageThisMessage,
-                    last_month: growthPercentageLastMessage
-                },
-                NewSubscribers: {
-                    this_month: countUsersResult[3].totalCount,
-                    last_month: countUsersResult[2].totalCount
-                },
-                UnSubscribers: {
-                    this_month: countUsersResult[1].totalCount,
-                    last_month: countUsersResult[0].totalCount
-                }
+            PublishedNewsLetter: {
+                this_month: countNewsLetterResult[1].totalEmails,
+                last_month: countNewsLetterResult[0].totalEmails,
+            },
+            GrowthPercentage: {
+                this_month: `${growthPercentageThisMessage}%`,
+                last_month: `${growthPercentageLastMessage}%`
+            },
+            NewSubscribers: {
+                this_month: NewSubscribersThisMonth,
+                last_month: NewSubscribersLastMonth,
+            },
+            UnSubscribers: {
+                this_month: UnSubscribersThisMonth,
+                last_month: UnSubscribersLastMonth
             }
         };
+
     }
 
     async getAudiencesEmails(brand: string, queryType: string): Promise<IAudienceAnalysisResponse[]> {

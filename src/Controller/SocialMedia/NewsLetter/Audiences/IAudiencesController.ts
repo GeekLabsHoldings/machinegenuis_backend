@@ -1,11 +1,8 @@
-export interface IAudienceResponse {
-    result: { year: string, month: string, count: number }[],
-    analysis: {
-        PublishedNewsLetter: { this_month: number, last_month: number },
-        GrowthPercentage: { this_month: number, last_month: number },
-        NewSubscribers: { this_month: number, last_month: number },
-        UnSubscribers: { this_month: number, last_month: number }
-    }
+export interface IGrowthPercentage {
+    PublishedNewsLetter: { this_month: number, last_month: number },
+    GrowthPercentage: { this_month: string, last_month: string },
+    NewSubscribers: { this_month: number, last_month: number },
+    UnSubscribers: { this_month: number, last_month: number }
 }
 
 export interface IAudienceAnalysisResponse {
@@ -19,6 +16,7 @@ export default interface IAudienceController {
     addNewUser(email: string, brand: string): Promise<void>;
     unSubscribeUser(email: string, brand: string): Promise<void>;
     getAllUsers(brand: string): Promise<string[]>;
-    getAudiencesAnalysis(brand: string): Promise<IAudienceResponse>;
+    getAudiencesAnalysisChart(brand: string, year: number): Promise<Array<number>>;
+    getGrowthPercentage(brand: string): Promise<IGrowthPercentage>;
     getAudiencesEmails(brand: string, queryType: string): Promise<IAudienceAnalysisResponse[]>;
 }
