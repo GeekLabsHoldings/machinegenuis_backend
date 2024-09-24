@@ -81,7 +81,7 @@ export default class AudienceController implements IAudienceController {
         return {
             result,
             analysis: {
-                New_Subscribers: {
+                PublishedNewsLetter: {
                     this_month: countNewsLetterResult[1].totalEmails,
                     last_month: countNewsLetterResult[0].totalEmails,
                 },
