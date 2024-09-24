@@ -1,9 +1,9 @@
 import { channel } from "diagnostics_channel";
-import telegramModel from "../../Model/SocialMedia/Telegram.socialMedia.model";
-import TelegramMessage from "../../Model/SocialMedia/telegramMessage.model";
+import SocialMediaGroups from "../../Model/SocialMedia/SocialMediaGroups.model";
+import SocialMediaPosts from "../../Model/SocialMedia/SocialMediaPosts.models";
 
 
-export const AddTwitterChannel = async (
+export const AddTelegramChannel = async (
     group_name,
     link,
     group_id,
@@ -15,7 +15,7 @@ export const AddTwitterChannel = async (
   ) => {
     try {
         // Create a new group record
-        const newGroup = new telegramModel({
+        const newGroup = new SocialMediaGroups({
             group_name: group_name,
             link: link,
             group_id: group_id,
@@ -39,7 +39,7 @@ export const AddTwitterChannel = async (
 
 export const getChannels = async ()=>{
   try {
-    const groups = await telegramModel.find();
+    const groups = await SocialMediaGroups.find({platform:"TELEGRAM"});
     return groups
   } catch (error) {
     console.error('Error fetching telegram channels:', error);
@@ -49,7 +49,7 @@ export const getChannels = async ()=>{
 
 export const getChannelsByBrand = async (brandName)=>{
   try {
-    const groups = await telegramModel.find({ brand: brandName });
+    const groups = await SocialMediaGroups.find({ brand: brandName, platform:"TELEGRAM" });
     return groups
   } catch (error) {
     console.error('Error fetching telegram channels:', error);
@@ -59,15 +59,15 @@ export const getChannelsByBrand = async (brandName)=>{
 
 
 export const AddTelegramMessage = async (
-  message_id,
-  text,
-  channel_id,
+  post_id,
+  group_name,
+  group_id,
   timestamp,
 ) => {
-  const newMessage = new TelegramMessage({
-    message_id: message_id,
-    text: text,
-    channel_id: String(channel_id), 
+  const newMessage = new SocialMediaPosts({
+    post_id: post_id,
+    group_name: group_name,
+    group_id: String(group_id), 
     timestamp: timestamp,
   });
 
@@ -80,7 +80,7 @@ export const DeleteTelegramMessage = async(
   messageId
 ) =>{
   try {
-    const result = await TelegramMessage.deleteOne({ channel_id:channelId, message_id:messageId });
+    const result = await SocialMediaPosts.deleteOne({ platform:"TELEGRAM",channel_id:channelId, message_id:messageId });
     
     if (result.deletedCount === 1) {
       console.log('Message deleted successfully!');
@@ -96,18 +96,13 @@ export const DeleteTelegramMessage = async(
 export const GetSubCount = async(
 brand
 )=>{
-    const channels = await telegramModel.find({brand:brand})
+    const channels = await SocialMediaGroups.find({brand:brand, platform:"TELEGRAM"})
 
     let sum=0
     console.log(channels, brand)
     channels.forEach(channel=>{
       console.log(channel)
       sum+=channel.subscribers})
-    
-    const result = await telegramModel.aggregate([
-      { $match: { brand: brand } },
-      { $group: { _id: null, totalSubscribers: { $sum: "$subscribers" } } }
-  ]);
   
     return sum;
 

@@ -1,6 +1,6 @@
 const TelegramBot = require("node-telegram-bot-api");
 import {
-  AddTwitterChannel,
+  AddTelegramChannel,
   getChannels,
   AddTelegramMessage,
   getChannelsByBrand,
@@ -19,7 +19,7 @@ export async function add_channel(req, res) {
       req.body;
     const subscribers = await bot.getChatMemberCount(group_id);
 
-    const newGroup = await AddTwitterChannel(
+    const newGroup = await AddTelegramChannel(
       group_name,
       link,
       group_id,
@@ -65,7 +65,7 @@ const sendMessageToAll = (
         .then((messageData) => {
           AddTelegramMessage(
             messageData.message_id,
-            message,
+            messageData.chat.title,
             messageData.chat.id,
             messageData.date
           );
@@ -86,7 +86,7 @@ const sendMessageToAll = (
           .then((messageData) => {
             AddTelegramMessage(
               messageData.message_id,
-              captionText,
+              messageData.chat.title,
               messageData.chat.id,
               messageData.date
             );
@@ -104,7 +104,7 @@ const sendMessageToAll = (
           .then((messageData) => {
             AddTelegramMessage(
               messageData.message_id,
-              captionText,
+              messageData.chat.title,
               messageData.chat.id,
               messageData.date
             );
@@ -123,7 +123,7 @@ const sendMessageToAll = (
           .then((messageData) => {
             AddTelegramMessage(
               messageData.message_id,
-              captionText,
+              messageData.chat.title,
               messageData.chat.id,
               messageData.date
             );
@@ -141,7 +141,7 @@ const sendMessageToAll = (
           .then((messageData) => {
             AddTelegramMessage(
               messageData.message_id,
-              captionText,
+              messageData.chat.title,
               messageData.chat.id,
               messageData.date
             );

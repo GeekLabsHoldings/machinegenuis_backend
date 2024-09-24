@@ -12,16 +12,16 @@ import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
 const mongoose = require("mongoose");
 
 // Define the schema
-const TelegramMSchema = new mongoose.Schema({
-  message_id: {
+const SocialMediaPostsSchema = new mongoose.Schema({
+  post_id: {
     type: String,
     required: false,
     trim: true,
   },
 
-  text: {type: String, required: false},
+  group_name: {type: String, required: false},
 
-  channel_id:  { type:  String, ref: SchemaTypesReference.TelegramMessage }
+  group_id:  { type:  String, ref: SchemaTypesReference.SocialMediaGroups }
   ,
   timestamp: {
     type: Number,
@@ -32,6 +32,6 @@ const TelegramMSchema = new mongoose.Schema({
 });
 
 // Create the model
-const TelegramMessage = mongoose.model(SchemaTypesReference.TelegramMessage, TelegramMSchema);
+const SocialMediaPosts = mongoose.model(SchemaTypesReference.SocialMediaPosts, SocialMediaPostsSchema);
 
-export default TelegramMessage;
+export default SocialMediaPosts;
