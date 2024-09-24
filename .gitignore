@@ -4,3 +4,4 @@
 /.wwebjs_*
 /.env
 /yarn.lock
+/package-lock.json
