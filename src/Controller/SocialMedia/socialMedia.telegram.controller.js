@@ -6,19 +6,36 @@ import {
   getChannelsByBrand,
   DeleteTelegramMessage,
   GetSubCount,
+  CleanUp
 } from "../../Service/SocialMedia/telegram.service";
 import systemError from "../../Utils/Error/SystemError";
 
-const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN_SECRET, {
-  polling: true,
-});
+
+
+class TelegramB { 
+  constructor(){
+    this.bot= new TelegramBot(process.env.TELEGRAM_BOT_TOKEN_SECRET, {
+      polling: true,
+    });
+    
+    this.bot.on('polling_error', () => {
+      // Do nothing, prevent logging
+    });
+  }
+  async cleanUp(){
+    await CleanUp()
+  }
+    
+}
+
 
 export async function add_channel(req, res) {
   try {
     const { group_name, link, group_id, niche, brand, platform, engagement } =
       req.body;
-    const subscribers = await bot.getChatMemberCount(group_id);
-
+    const tb =  new TelegramB()
+    const subscribers = await tb.bot.getChatMemberCount(group_id);
+    tb.cleanUp()
     const newGroup = await AddTelegramChannel(
       group_name,
       link,
@@ -50,18 +67,19 @@ export async function get_channels(req, res) {
 
 const sendMessageToAll = (
   message,
-  bot,
   chatIds,
   file_type,
   file_url,
   captionText
 ) => {
+  const tb =  new TelegramB()
   chatIds.forEach((chatId) => {
     console.log("group_id  ", chatId.group_id);
+    
     if (message) {
       console.log("message\n", message.chat, message.date);
-      bot
-        .sendMessage(chatId.group_id, message)
+      
+        tb.bot.sendMessage(chatId.group_id, message)
         .then((messageData) => {
           AddTelegramMessage(
             messageData.message_id,
@@ -81,7 +99,7 @@ const sendMessageToAll = (
     if (file_url !== "") {
       if (file_type == "photo") {
         console.log("sending a photo \n\n");
-        bot
+        tb.bot
           .sendPhoto(chatId.group_id, file_url, { caption: captionText })
           .then((messageData) => {
             AddTelegramMessage(
@@ -90,6 +108,7 @@ const sendMessageToAll = (
               messageData.chat.id,
               messageData.date
             );
+
             console.log(`file sent to chat ID: ${chatId}`);
           })
           .catch((err) => {
@@ -99,7 +118,8 @@ const sendMessageToAll = (
             );
           });
       } else if (file_type == "video") {
-        bot
+
+        tb.bot
           .sendVideo(chatId.group_id, file_url, { caption: captionText })
           .then((messageData) => {
             AddTelegramMessage(
@@ -108,6 +128,7 @@ const sendMessageToAll = (
               messageData.chat.id,
               messageData.date
             );
+
             console.log(`file sent to chat ID: ${chatId}`);
           })
           .catch((err) => {
@@ -118,7 +139,8 @@ const sendMessageToAll = (
           });
       } else if (file_type == "voice") {
         console.log("sending a voice \n\n");
-        bot
+
+        tb.bot
           .sendVoice(chatId.group_id, file_url, { caption: captionText })
           .then((messageData) => {
             AddTelegramMessage(
@@ -127,6 +149,7 @@ const sendMessageToAll = (
               messageData.chat.id,
               messageData.date
             );
+
             console.log(`file sent to chat ID: ${chatId}`);
           })
           .catch((err) => {
@@ -136,7 +159,8 @@ const sendMessageToAll = (
             );
           });
       } else {
-        bot
+
+        tb.bot
           .sendDocument(chatId.group_id, file_url, { caption: captionText })
           .then((messageData) => {
             AddTelegramMessage(
@@ -145,6 +169,7 @@ const sendMessageToAll = (
               messageData.chat.id,
               messageData.date
             );
+            
             console.log(`file sent to chat ID: ${chatId}`);
           })
           .catch((err) => {
@@ -153,9 +178,13 @@ const sendMessageToAll = (
               err
             );
           });
+
       }
     }
   });
+
+  tb.cleanUp()
+   
 };
 
 export async function campaign(req, res) {
@@ -167,7 +196,6 @@ export async function campaign(req, res) {
     const file_type = req.body.file_type;
     await sendMessageToAll(
       message,
-      bot,
       chatIds,
       file_type,
       file_url,
@@ -193,7 +221,6 @@ export async function campaignByBrand(req, res) {
     const file_type = req.body.file_type;
     await sendMessageToAll(
       message,
-      bot,
       chatIds,
       file_type,
       file_url,
@@ -246,3 +273,18 @@ export async function get_subscripers(req, res) {
     return systemError.sendError(res, error);
   }
 }
+
+export const GetSubCount = async(
+  brand
+  )=>{
+      const channels = await SocialMediaGroups.find({brand:brand, platform:"TELEGRAM"})
+  
+      let sum=0
+      console.log(channels, brand)
+      channels.forEach(channel=>{
+        console.log(channel)
+        sum+=channel.subscribers})
+    
+      return sum;
+  
+  }

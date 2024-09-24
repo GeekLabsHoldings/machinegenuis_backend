@@ -7,19 +7,28 @@ export const isAuthenticated = async (socket, next) => {
     let token =
       socket.handshake.auth.token || socket.handshake.headers.authorization;
 
-    if (!token) return next(new Error("Token is required!"));
+    if (!token) {
+      socket.emit("checkAuth", "Authentication failed: Token is required!");
+      return next(new Error("Authentication failed: Token is required!"));
+    }
 
     token = token.split(" ")[1];
     const decoded = await authenticationService.verifyToken(token);
     const user = await employeeModel.findById(decoded._id);
     if (!user || !(user.token === token)) {
-      throw 'Authentication failed';
+      socket.emit(
+        "checkAuth",
+        "Authentication failed: Invalid token or user not found!"
+      );
+      return next(
+        new Error("Authentication failed: Invalid token or user not found!")
+      );
     }
-    socket.handshake.user = user;
 
+    socket.handshake.user = user;
     return next();
   } catch (error) {
     socket.emit("checkAuth", "Authentication failed");
-    return;
+    return next(new Error("Authentication failed"));
   }
 };
