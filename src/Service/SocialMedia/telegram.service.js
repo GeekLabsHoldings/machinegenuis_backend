@@ -1,6 +1,7 @@
 import { channel } from "diagnostics_channel";
 import SocialMediaGroups from "../../Model/SocialMedia/SocialMediaGroups.model";
 import SocialMediaPosts from "../../Model/SocialMedia/SocialMediaPosts.models";
+import axios from 'axios';
 
 
 export const AddTelegramChannel = async (
@@ -107,4 +108,24 @@ brand
     return sum;
 
 }
+
+export const CleanUp = async()=>{
+  const url = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN_SECRET}/deleteWebhook`
+  try {
+    const response = await axios.post(url, {});
+
+    const responseData = response.data
+    return {
+      ...responseData
+      
+    };
+  } catch (error) {
+    console.error('Error submitting to Reddit:', error.response?.data || error.message);
+    // Return error details if needed or rethrow
+    return {
+      error: error.response?.data || error.message
+    };
+  }
+}
+
 
