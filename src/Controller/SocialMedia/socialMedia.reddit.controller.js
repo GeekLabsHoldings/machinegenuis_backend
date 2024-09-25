@@ -1,64 +1,32 @@
+import { subscribe } from "diagnostics_channel";
 import * as RedditServices from "../../Service/SocialMedia/reddit.Service";
 import { createAccountSocialMedia } from "../../Service/SocialMedia/socialMedia.service";
 import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
 import systemError from "../../Utils/Error/SystemError";
 import { PlatformEnum } from "../../Utils/SocialMedia/Platform";
-
-export const addPostSocialMediaRedditText = async (req, res, next) => {
-  const { brand, content, title, token } = req.body;
-  const userId = req.body.currentUser._id;
-  if ((!content || !brand, !title, !token)) {
-    return systemError
-      .setStatus(400)
-      .setMessage(ErrorMessages.DATA_IS_REQUIRED)
-      .throw();
-  }
-  try {
-    const response = await submitRedditPost({
-      title,
-      token,
-      subreddit: brand,
-      text: content,
-    });
-    if (!response) {
-      return systemError
-        .setStatus(400)
-        .setMessage(ErrorMessages.INVALID_REDDIT_API)
-        .throw();
-    }
-    const postId = response.json.data.id;
-    const createPost = await createAccountSocialMedia(
-      PlatformEnum.REDDIT,
-      brand,
-      content,
-      userId,
-      postId
-    );
-    if (!createPost) {
-      return systemError
-        .setStatus(400)
-        .setMessage(ErrorMessages.CAN_NOT_CREATE_REDDIT_POST)
-        .throw();
-    }
-    return res.status(200).json({
-      result: createPost,
-      redditPost: response,
-    });
-  } catch (error) {
-    console.log(error);
-  }
-};
+const cron = require('node-cron');
 
 
-//======================================
-//======================================
-//======================================
+export async function AddAnAccount(req , res){
+try {
+  await RedditServices.saveAccount(req)
+  res.json({message:"done"})
+} catch (error) {
+  console.error("Error adding group:", error);
+  return systemError.sendError(res, error);
+}
+}
 
 
 export async function add_subreddit(req, res) {
   try {
-    const {token, group_name, link, group_id, niche, brand, platform, engagement } = req.body;
-    const subscribers = await RedditServices.getSubredditSubs(token, group_name);
+    const {group_name, link, group_id, niche, brand, platform, engagement } = req.body;
+    console.log("group  name \n" , group_name)
+
+    const acount = await RedditServices.getAccount(null);
+    const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
+
+    const subscribers = await RedditServices.getSubredditSubs(r, group_name);
 
     const newGroup = await RedditServices.AddSubreddit(
       group_name,
@@ -67,7 +35,6 @@ export async function add_subreddit(req, res) {
       subscribers,
       niche,
       brand,
-      platform,
       engagement
     );
 
@@ -79,30 +46,52 @@ export async function add_subreddit(req, res) {
   }
 }
 
+
+
 export async function get_subreddits(req, res) {
   try {
+    const acount = await RedditServices.getAccount(null);
+    const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
+
     const groups = await RedditServices.getSubreddits();
-    res.status(200).json({ channels: groups }); // Respond with all the groups
+    groups.forEach(async(group)=>{
+      group.subscribers = await RedditServices.getSubredditSubs(r, group.group_name)
+      group.save()
+    })
+    res.status(200).json({groups }); // Respond with all the groups
   } catch (error) {
-    console.error("Error fetching groups:", error);
+    console.log(error)
     return systemError.sendError(res, error);
   }
 }
+
+
 
 export async function get_subreddits_brand(req, res) {
   try {
-    const channels = await RedditServices.getSubredditsByBrand(req.body.brand);
-    res.json(channels);
+    const acount = await RedditServices.getAccount(null);
+    const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
+
+    const groups = await RedditServices.getSubredditsByBrand(req.body.brand);
+    groups.forEach(async(group)=>{
+      group.subscribers = await RedditServices.getSubredditSubs(r, group.group_name)
+      group.save()
+    })
+    res.json(groups);
   } catch (error) {
+    console.log(error)
     return systemError.sendError(res, error);
   }
 }
 
 
 
-export const BrandRedditSubs = async (res, req) => {
+export const BrandRedditSubs = async (req, res) => {
   try {
-    return await RedditServices.GetSubCount(req.body.brand)
+    
+    const subs = await RedditServices.GetSubCount(req.body.brand)
+    console.log(subs)
+    res.json({subscribers:subs})
   } catch (error) {
     return systemError.sendError(res, error);
   }
@@ -115,40 +104,82 @@ function delay(ms) {
 }
 
 
-export const CampaignBroadcast = async (res, req) =>{
-  const {token, title, text, img_url, subreddit, ms} = res.body
+
+
+export const CampaignBroadcast = async (req, res) =>{
+  const {title, text, img_url, ms,  minute, hour} = req.body
+  console.log("hi hello hi hello", req.body)
   try {
+
     const groups = await RedditServices.getSubreddits();
-    groups.forEach(async (group)=>{
-      const m = await RedditServices.CreateRedditPost(token, title, text, img_url, subreddit)
-      await RedditServices.AddRedditPostDB(m.data.json.data.id, group.group_name, group.group_id, Date.now())
-      delay(ms)
-    })
+    
+    const acount = await RedditServices.getAccount(null);
+    const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
+
+
+    // Schedule a task to run at 8:15 PM only once
+    const task = cron.schedule(`${minute} ${hour} * * *`, () => {
+
+      groups.forEach(async (group)=>{
+
+        const m = await RedditServices.CreateRedditPost(r, title, text, img_url, group.group_id)
+        console.log("reddit post \n", m.name)
+        await RedditServices.AddRedditPostDB(m.name, group.group_name, group.group_id, Date.now(), group.brand)
+        
+        delay(ms)
+      })
+      // Stop the task after it runs
+      task.stop();
+    });
+
+    res.json({message: "done", })
   } catch (error) {
     return systemError.sendError(res, error);
   }
 
 }
 
-export const CampaignByBrand = async (res, req) =>{
+
+
+export const CampaignByBrand = async (req, res) =>{
  
- const {token, title, text, img_url, subreddit, brand, ms} = res.body
+ const {title, text, img_url, brand, ms, minute, hour} = req.body
  try {
   const groups = await RedditServices.getSubredditsByBrand(brand)
-   groups.forEach(async (group)=>{
-     const m = await RedditServices.CreateRedditPost(token, title, text, img_url, subreddit)
-     await RedditServices.AddRedditPostDB(m.data.json.data.id, group.group_name, group.group_id, Date.now())
-     delay(ms)
-   })
+    
+  const acount = await RedditServices.getAccount(brand);
+  const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
+
+
+
+      // Schedule a task to run at 8:15 PM only once
+    const task = cron.schedule(`${minute} ${hour} * * *`, () => {
+      groups.forEach(async (group)=>{
+
+        const m = await RedditServices.CreateRedditPost(r, title, text, img_url,  group.group_id)
+        console.log("reddit post \n", m.name)
+        await RedditServices.AddRedditPostDB(m.name, group.group_name, group.group_id, Date.now(), group.brand)
+        
+        delay(ms)
+      })
+      // Stop the task after it runs
+      task.stop();
+    });
+
+  res.json({message: "done", })
  } catch (error) {
    return systemError.sendError(res, error);
  }
 }
 
-export const DeletePost = async (res, req) => {
-  const {accessToken,group_name,messageId} = req.body
+
+
+export const DeletePost = async (req, res) => {
   try {
-    return await RedditServices.DeleteRedditPost(accessToken,group_name,messageId)
+    const acount = await RedditServices.getAccount(null);
+    const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
+
+    return await RedditServices.DeleteRedditPost(r, req.body.messageId)
   } catch (error) {
     return systemError.sendError(res, error);
   }

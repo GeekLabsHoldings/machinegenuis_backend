@@ -57,6 +57,13 @@ export async function add_channel(req, res) {
 
 export async function get_channels(req, res) {
   try {
+    // const tb =  new TelegramB()
+    // const subscribers = await tb.bot.getChatMemberCount(group_id);
+    // tb.cleanUp()
+    //   groups.forEach(async(group)=>{
+    //   group.subscribers = await RedditServices.getSubredditSubs(r, group.group_name)
+    //   group.save()
+    // })
     const groups = await getChannels();
     res.status(200).json({ channels: groups }); // Respond with all the groups
   } catch (error) {
@@ -85,7 +92,8 @@ const sendMessageToAll = (
             messageData.message_id,
             messageData.chat.title,
             messageData.chat.id,
-            messageData.date
+            messageData.date,
+            chatId.brand
           );
           console.log(`Message sent to chat ID: ${chatId}`);
         })
@@ -106,7 +114,8 @@ const sendMessageToAll = (
               messageData.message_id,
               messageData.chat.title,
               messageData.chat.id,
-              messageData.date
+              messageData.date,
+              chatId.brand
             );
 
             console.log(`file sent to chat ID: ${chatId}`);
@@ -126,7 +135,8 @@ const sendMessageToAll = (
               messageData.message_id,
               messageData.chat.title,
               messageData.chat.id,
-              messageData.date
+              messageData.date,
+              chatId.brand
             );
 
             console.log(`file sent to chat ID: ${chatId}`);
@@ -147,7 +157,8 @@ const sendMessageToAll = (
               messageData.message_id,
               messageData.chat.title,
               messageData.chat.id,
-              messageData.date
+              messageData.date,
+              chatId.brand
             );
 
             console.log(`file sent to chat ID: ${chatId}`);
@@ -167,7 +178,8 @@ const sendMessageToAll = (
               messageData.message_id,
               messageData.chat.title,
               messageData.chat.id,
-              messageData.date
+              messageData.date,
+              chatId.brand
             );
             
             console.log(`file sent to chat ID: ${chatId}`);

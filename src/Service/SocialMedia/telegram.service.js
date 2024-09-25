@@ -64,12 +64,15 @@ export const AddTelegramMessage = async (
   group_name,
   group_id,
   timestamp,
+  brand
 ) => {
   const newMessage = new SocialMediaPosts({
     post_id: post_id,
     group_name: group_name,
     group_id: String(group_id), 
     timestamp: timestamp,
+    platform:"TELEGRAM",
+    brand:brand
   });
 
   await newMessage.save();
