@@ -6,7 +6,7 @@ export default class AudiencesService implements IAudiencesService {
     async updateMonthAudience(audience: IAudienceModel): Promise<void> {
         await AudienceModel.findOneAndUpdate({ brand: audience.brand, date: audience.date }, {
             $set: {
-                count: { $inc: audience.count }
+                $inc: { count: audience.count || 1 },
             }
         }, { upsert: true, new: true });
     }
