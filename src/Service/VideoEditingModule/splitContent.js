@@ -31,7 +31,7 @@ const splitContent = async (content) => {
   
       const completion = await openai.chat.completions.create({
         model: "gpt-4", 
-        messages: [{ role: "user", content: prompt }],
+        messages: [{ role: "user", content: prompt } , { role: "system", content: prompt }],
       });
   
       const rawResult = completion.choices[0].message.content.trim();
@@ -48,6 +48,7 @@ const splitContent = async (content) => {
       const resultObject = await Promise.all(parsedResult.paragraphs.map(async (paragraph, index) => {
         const keywordsAndImages = await Promise.all(paragraph.keywords.map(async (keyword) => {
           const imageUrl = await getImgs.handleSearchImg(keyword);
+
           return { keyword, imageUrl };
         }));
 
@@ -98,6 +99,7 @@ const generateSlideJson = async (intro) => {
     });
 
     const rawResult = completion.choices[0].message.content.trim();
+    console.log("Trimmed Response:", rawResult);
     let parsedResult;
 
     try {
