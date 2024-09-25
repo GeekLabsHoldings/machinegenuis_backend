@@ -1,3 +1,4 @@
+import axios from "axios";
 import IAnalyticsModel from "../../../../Model/NewsLetter/Analytics/Analytics";
 import IUserSubscriptionModel from "../../../../Model/NewsLetter/UsersSubscriptions/IUserSubscriptionModel";
 import AnalysisNewsLetterService from "../../../../Service/NewsLetter/Analysis/AnalysisService";
@@ -7,6 +8,8 @@ import UserSubscriptionService from "../../../../Service/NewsLetter/UserSubscrip
 import moment, { EndOfYear, StartOfLastMonth, StartOfMonth, StartOfYear } from "../../../../Utils/DateAndTime";
 import { AnalyticsType, UserSubscriptionClass } from "../../../../Utils/NewsLetter";
 import IAudienceController, { IAudienceAnalysisResponse, IGrowthPercentage } from "./IAudiencesController";
+import systemError from "../../../../Utils/Error/SystemError";
+import { ErrorMessages } from "../../../../Utils/Error/ErrorsEnum";
 export default class AudienceController implements IAudienceController {
 
     async addNewUser(email: string, brand: string): Promise<void> {
@@ -21,6 +24,10 @@ export default class AudienceController implements IAudienceController {
             receivedEmails: 0,
             updatedAt: dateNow.valueOf()
         };
+        const checkEmailValid = await axios.get(`https://api.hunter.io/v2/email-verifier?email=${email}&api_key=${process.env.HUNTER_API_KEY}`);
+        if (checkEmailValid.data.data.status !== "valid") {
+            return systemError.setStatus(400).setMessage(ErrorMessages.INVALID_EMAILS).throw();
+        }
         await userSubscriptionService.createUserSubscription(userSubscribeData);
         const startOfMonth = StartOfMonth(dateNow);
         await audienceService.updateMonthAudience({
@@ -83,7 +90,7 @@ export default class AudienceController implements IAudienceController {
         const [countNewsLetterResult, countUsersResult] = await Promise.all([countNewsLetterFun, countUsersFun]);
 
         const countNewUsers = await this.getAudiencesAnalysisChart(brand, dateNow.valueOf());
-     
+
         const [NewSubscribersThisMonth, NewSubscribersLastMonth, UnSubscribersThisMonth, UnSubscribersLastMonth] = [
             countUsersResult[3].totalCount,
             countUsersResult[2].totalCount,
@@ -102,8 +109,8 @@ export default class AudienceController implements IAudienceController {
                 last_month: countNewsLetterResult[0].totalEmails,
             },
             GrowthPercentage: {
-                this_month: `${growthPercentageThisMessage}%`,
-                last_month: `${growthPercentageLastMessage}%`
+                this_month: `${growthPercentageThisMessage} % `,
+                last_month: `${growthPercentageLastMessage} % `
             },
             NewSubscribers: {
                 this_month: NewSubscribersThisMonth,
@@ -140,7 +147,7 @@ export default class AudienceController implements IAudienceController {
             if (user.type === AnalyticsType.OPEN) {
                 userEmailsAction[user.userEmail].openingCount++;
             } else {
-                const key = `${user.userEmail}-${user.article_id}`;
+                const key = `${user.userEmail} - ${user.article_id}`;
                 if (!oneClickOpening.has(key)) {
                     oneClickOpening.add(key);
                     userEmailsAction[user.userEmail].clickCount++;
