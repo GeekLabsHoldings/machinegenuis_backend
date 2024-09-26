@@ -1,4 +1,5 @@
-import { ChatCompletion, Completion } from "openai/resources";
+
+import { ChatCompletion } from "openai/resources";
 import IOpenAiService from "./IOpenAiService";
 import OpenAI from "openai";
 
