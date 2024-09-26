@@ -17,6 +17,23 @@ try {
 }
 }
 
+//====================================
+
+
+try {
+  cron.schedule('0 */6 * * *', async () => {
+    const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
+    const groups = await RedditServices.getSubreddits();
+    groups.forEach(async(group)=>{
+      group.subscribers = await RedditServices.getSubredditSubs(r, group.group_name)
+      group.save()
+    })
+  });
+} catch (error) {
+  
+}
+
+//===================================
 
 export async function add_subreddit(req, res) {
   try {
@@ -39,7 +56,7 @@ export async function add_subreddit(req, res) {
     );
 
     const savedGroup = await newGroup.save();
-    res.status(200).json(savedGroup); // Respond with the saved group
+    res.status(200).json({savedGroup}); // Respond with the saved group
   } catch (error) {
     console.error("Error adding group:", error);
     return systemError.sendError(res, error);
@@ -54,10 +71,7 @@ export async function get_subreddits(req, res) {
     const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
 
     const groups = await RedditServices.getSubreddits();
-    groups.forEach(async(group)=>{
-      group.subscribers = await RedditServices.getSubredditSubs(r, group.group_name)
-      group.save()
-    })
+
     res.status(200).json({groups }); // Respond with all the groups
   } catch (error) {
     console.log(error)
@@ -73,11 +87,8 @@ export async function get_subreddits_brand(req, res) {
     const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
 
     const groups = await RedditServices.getSubredditsByBrand(req.body.brand);
-    groups.forEach(async(group)=>{
-      group.subscribers = await RedditServices.getSubredditSubs(r, group.group_name)
-      group.save()
-    })
-    res.json(groups);
+
+    res.json({groups});
   } catch (error) {
     console.log(error)
     return systemError.sendError(res, error);
@@ -107,33 +118,36 @@ function delay(ms) {
 
 
 export const CampaignBroadcast = async (req, res) =>{
-  const {title, text, img_url, ms,  minute, hour} = req.body
-  console.log("hi hello hi hello", req.body)
+  
   try {
 
+
+    let {title, text, img_url, ms,  minute, hour} = req.body
+    console.log("hi hello hi hello", req.body)
     const groups = await RedditServices.getSubreddits();
     
     const acount = await RedditServices.getAccount(null);
     const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
+  
 
+    groups.forEach(async (group)=>{
 
-    // Schedule a task to run at 8:15 PM only once
+      const m = await RedditServices.CreateRedditPost(r, title, text, img_url,  group.group_id)
+      console.log("reddit post \n", m)
+      await RedditServices.AddRedditPostDB(m.name, group.group_name, group.group_id, Date.now(), group.brand)
+      
+      delay(ms)
+    })
     const task = cron.schedule(`${minute} ${hour} * * *`, () => {
 
-      groups.forEach(async (group)=>{
 
-        const m = await RedditServices.CreateRedditPost(r, title, text, img_url, group.group_id)
-        console.log("reddit post \n", m.name)
-        await RedditServices.AddRedditPostDB(m.name, group.group_name, group.group_id, Date.now(), group.brand)
-        
-        delay(ms)
-      })
       // Stop the task after it runs
       task.stop();
     });
 
     res.json({message: "done", })
   } catch (error) {
+    console.log(error)
     return systemError.sendError(res, error);
   }
 
@@ -143,31 +157,33 @@ export const CampaignBroadcast = async (req, res) =>{
 
 export const CampaignByBrand = async (req, res) =>{
  
- const {title, text, img_url, brand, ms, minute, hour} = req.body
+ 
  try {
+  let {title, text, img_url, brand, ms, minute, hour} = req.body
   const groups = await RedditServices.getSubredditsByBrand(brand)
     
   const acount = await RedditServices.getAccount(brand);
   const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
 
+  groups.forEach(async (group)=>{
 
-
+    const m = await RedditServices.CreateRedditPost(r, title, text, img_url,  group.group_id)
+    console.log("reddit post \n", m)
+    await RedditServices.AddRedditPostDB(m.name, group.group_name, group.group_id, Date.now(), group.brand)
+    
+    delay(ms)
+  })
+    ms = Math.max(ms, 3600 *1000)
       // Schedule a task to run at 8:15 PM only once
-    const task = cron.schedule(`${minute} ${hour} * * *`, () => {
-      groups.forEach(async (group)=>{
 
-        const m = await RedditServices.CreateRedditPost(r, title, text, img_url,  group.group_id)
-        console.log("reddit post \n", m.name)
-        await RedditServices.AddRedditPostDB(m.name, group.group_name, group.group_id, Date.now(), group.brand)
-        
-        delay(ms)
-      })
-      // Stop the task after it runs
-      task.stop();
-    });
-
+      const task = cron.schedule(`${minute} ${hour} * * *`, () => {
+      
+        // Stop the task after it runs
+        task.stop();
+      });
   res.json({message: "done", })
  } catch (error) {
+   console.log(error)
    return systemError.sendError(res, error);
  }
 }
@@ -184,3 +200,8 @@ export const DeletePost = async (req, res) => {
     return systemError.sendError(res, error);
   }
 }
+
+
+
+
+

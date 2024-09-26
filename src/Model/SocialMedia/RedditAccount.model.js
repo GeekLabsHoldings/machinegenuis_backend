@@ -4,7 +4,8 @@ import { EnumStringRequired } from "../../Utils/Schemas";
 import { PlatformArr } from "../../Utils/SocialMedia/Platform";
 import { brandArr } from "../../Utils/SocialMedia/Brand";
 
-const TwitterDataSchema = new Schema({
+const RedditAccountSchema = new Schema({
+  platform: EnumStringRequired(PlatformArr),
 
   brand: EnumStringRequired(brandArr),
   
@@ -12,6 +13,6 @@ const TwitterDataSchema = new Schema({
 
 });
 
-const twitterModel = model( SchemaTypesReference.TwitterData,TwitterDataSchema);
+const RedditAccountModel = model( SchemaTypesReference.RedditAccount,RedditAccountSchema);
 
-export default twitterModel;
+export default RedditAccountModel;

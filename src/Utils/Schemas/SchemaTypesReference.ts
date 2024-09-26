@@ -21,6 +21,7 @@ enum SchemaTypesReference {
   SocialMediaAccount = "socialAccount",
   SocialMediaComment = "socialMediaComment",
   TwitterData = "twitterData",
+  RedditAccount = "RedditAccount",
   Payroll = "payroll",
   Subscription = "subscription",
   BankAccount = "bankAccount",

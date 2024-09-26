@@ -2,7 +2,28 @@ import axios from 'axios';
 import qs from 'qs';
 import SocialMediaGroups from "../../Model/SocialMedia/SocialMediaGroups.model";
 import SocialMediaPosts from "../../Model/SocialMedia/SocialMediaPosts.models";
-import twitterModel from '../../Model/SocialMedia/TwitterData.model';
+import RedditAccountModel from '../../Model/SocialMedia/RedditAccount.model';
+const crypto = require('crypto');
+
+// Secret key (32 bytes for AES-256)
+const secretKey =  Buffer.from(process.env.ENCRYPTION_SECRET_KEY, 'hex');
+
+function encrypt(text) {
+  const cipher = crypto.createCipheriv('aes-256-ecb', secretKey, null); // No IV for ECB
+  let encrypted = cipher.update(text, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  return encrypted;
+}
+
+// Decrypt function using AES-256-ECB
+function decrypt(encryptedData) {
+  const decipher = crypto.createDecipheriv('aes-256-ecb', secretKey, null); // No IV for ECB
+  let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
+}
+
+
 
 const snoowrap = require('snoowrap');
 const jwt = require('jsonwebtoken');
@@ -50,7 +71,7 @@ const userAgent = 'axios:myapp/1.0.0 (by Hasan_Gad)'
 export async function saveAccount(req){
 
 
-  const result = await twitterModel.deleteOne({ platform:"REDDIT", brand:req.body.brand});
+  const result = await RedditAccountModel.deleteOne({ platform:"REDDIT", brand:req.body.brand});
 
   if (result.deletedCount === 1) {
     console.log('Message deleted successfully!');
@@ -58,12 +79,12 @@ export async function saveAccount(req){
     console.log('Message not found.');
   }
 
-  const payload = { appID: req.body.appID, appSecret: req.body.appSecret, username: req.body.username, password:req.body.password };
-  const token = jwt.sign(payload, process.env.JWT_SECRET);
+  let payload = { appID: req.body.appID, appSecret: req.body.appSecret, username: req.body.username, password:req.body.password };
+  payload = JSON.stringify(payload)
+  const token = encrypt(payload)
 
 
-
-  const redditAccount = new twitterModel({
+  const redditAccount = new RedditAccountModel({
     token: token, 
     platform: "REDDIT",
     brand:req.body.brand
@@ -73,54 +94,24 @@ export async function saveAccount(req){
 }
 
 
+
+
+
 export async function getAccount(brand){
   let account
   if(brand){
-     account = await twitterModel.findOne({platform:"REDDIT", brand:brand})
+     account = await RedditAccountModel.findOne({platform:"REDDIT", brand:brand})
   }else{
-     account = await twitterModel.findOne({platform:"REDDIT",})
+     account = await RedditAccountModel.findOne({platform:"REDDIT",})
   }
-  console.log("account", account)
-  return  jwt.verify(account.token, process.env.JWT_SECRET);
+  //console.log("account", account)
+  const payload = decrypt(account.token)
+  const obj = JSON.parse(payload)
+  return  obj;
 }
 
 
 
-
-
-
-
-// Get the access token
-async function getAccessToken(clientId,clientSecret,username,password) {
-  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-  const tokenUrl = 'https://www.reddit.com/api/v1/access_token';
-  try {
-    const response = await axios.post(
-      tokenUrl,
-      new URLSearchParams({
-        grant_type: 'password',
-        username: username,
-        password: password,
-      }),
-      {
-        headers: {
-          Authorization: `Basic ${credentials}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      }
-    );
-    if (response.data && response.data.access_token) {
-      console.log('Token fetched successfully:', response.data.access_token);
-      return response.data.access_token;  // Return the token
-    } else {
-      console.error('Token response does not contain access_token:', response.data);
-      return null;
-    }
-  } catch (error) {
-    console.error('Error fetching access token:', error.response ? error.response.data : error.message);
-    return null;
-  }
-}
 
 
 
@@ -134,7 +125,7 @@ export async function getsnoowrap(clientId,clientSecret,username,password) {
       username: username,
       password: password
     });
-
+    r.getMe()
     return r
   }
 
@@ -158,6 +149,9 @@ export const CreateRedditPost = async (r, title, text, img_url, sr) => {
       };
     }
   };
+
+
+
 
 
 
@@ -298,3 +292,52 @@ brand
   return sum;
 
 }
+
+
+//============================================================================
+
+
+
+
+
+
+export const getAccessToken = async (clientId,clientSecret,username,password) => {
+
+  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+  const response = await axios.post(
+      'https://www.reddit.com/api/v1/access_token',
+      qs.stringify({
+          grant_type: 'password',
+          username: username,
+          password: password,
+      }),
+      {
+          headers: {
+              'Authorization': `Basic ${auth}`,
+              'Content-Type': 'application/x-www-form-urlencoded',
+          },
+      }
+  );
+  return response.data.access_token;
+}
+
+
+
+
+export const postToSubreddit = async (accessToken,  title, text,  url, subreddit) => {
+  const response = await axios.post('https://oauth.reddit.com/api/submit', qs.stringify({
+      title: title,
+      text: text,
+      kind: 'self',
+      // url:url,
+      sr:subreddit,
+       // For text posts; use 'link' for link posts
+  }), {
+      headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'User-Agent': userAgent,
+          'Content-Type': 'application/x-www-form-urlencoded',
+      },
+  });
+  return response.data;
+};
