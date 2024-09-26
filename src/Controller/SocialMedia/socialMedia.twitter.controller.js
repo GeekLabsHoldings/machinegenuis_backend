@@ -140,9 +140,7 @@ export const addNewAccountTwitter = async (req, res) => {
     return res.json({ message: "Done" });
   } catch (error) {
     console.error("Error encrypting data:", error);
-    res
-      .status(500)
-      .json({ message: "Error encrypting data", error: error.message });
+   return systemError.sendError(res, error);
   }
 };
 export const getTwitterAccountSecretData = async (req, res) => {
@@ -194,7 +192,7 @@ export const addSocialAccountTwitter = async (req, res) => {
       campaignType,
       delayBetweenPosts,
       delayBetweenGroups,
-      longPauseAfterCount 
+      longPauseAfterCount,
     } = req.body;
     const employeeId = req.body.currentUser._id;
     if (
@@ -219,9 +217,9 @@ export const addSocialAccountTwitter = async (req, res) => {
         .setMessage(ErrorMessages.INVALID_SOCIAL_MEDIA_TYPE)
         .throw();
     }
-    const checkAccount = await checkAccountBrand(brand,userName)
+    const checkAccount = await checkAccountBrand(brand, userName);
     if (checkAccount)
-      return res.json({message:"ACCOUNT_ALREADY_EXIST_IN_BRAND"})
+      return res.json({ message: "ACCOUNT_ALREADY_EXIST_IN_BRAND" });
     const twitterData = await getTwitterData(brand);
     if (!twitterData) {
       return systemError
@@ -250,7 +248,7 @@ export const addSocialAccountTwitter = async (req, res) => {
     );
     return res.status(200).json({ result: socialAccount });
   } catch (error) {
-    console.log(error);
+   return systemError.sendError(res, error);
   }
 };
 export const editTwitterAccount = async (req, res) => {
@@ -294,16 +292,19 @@ export const editTwitterAccount = async (req, res) => {
     twitterAccount.accountName = accountName || twitterAccount.accountName;
     twitterAccount.accountLink = accountLink || twitterAccount.accountLink;
     twitterAccount.campaignType = campaignType || twitterAccount.campaignType;
-    twitterAccount.delayBetweenPosts = delayBetweenPosts || twitterAccount.delayBetweenPosts;
-    twitterAccount.delayBetweenGroups = delayBetweenGroups || twitterAccount.delayBetweenGroups;
-    twitterAccount.longPauseAfterCount = longPauseAfterCount || twitterAccount.longPauseAfterCount;
+    twitterAccount.delayBetweenPosts =
+      delayBetweenPosts || twitterAccount.delayBetweenPosts;
+    twitterAccount.delayBetweenGroups =
+      delayBetweenGroups || twitterAccount.delayBetweenGroups;
+    twitterAccount.longPauseAfterCount =
+      longPauseAfterCount || twitterAccount.longPauseAfterCount;
     await twitterAccount.save();
     return res.status(200).json({ result: twitterAccount });
   } catch (error) {
     if (error.code === 11000) {
       return res.status(400).json({ message: "Account name already exists" });
     }
-    console.log(error);
+   return systemError.sendError(res, error);
   }
 };
 export const editCampaignTwitterAccount = async (req, res) => {
@@ -324,7 +325,7 @@ export const editCampaignTwitterAccount = async (req, res) => {
     if (error.code === 11000) {
       return res.status(400).json({ message: "Account name already exists" });
     }
-    console.log(error);
+   return systemError.sendError(res, error);
   }
 };
 export const deleteTwitterAccount = async (req, res) => {
@@ -349,6 +350,6 @@ export const getAllAccountTwitter = async (req, res) => {
     const twitterAccounts = await getTwitterAccounts(req.params.sharingList);
     return res.status(200).json({ result: twitterAccounts });
   } catch (error) {
-    console.log(error);
+   return systemError.sendError(res, error);
   }
 };
