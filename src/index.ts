@@ -3,7 +3,6 @@ import "dotenv/config";
 import { DBConnection } from "./DbSetup/DbConfig";
 import createIo from "./socketIo";
 import startCronJobs from "./Utils/CronJobs/startCronJobs";
-
 const port = process.env.PORT || 5550;
 const server = app.listen(port, async () => {
   try {
@@ -17,4 +16,3 @@ const server = app.listen(port, async () => {
 
 createIo(server);
 export default app;
- 
