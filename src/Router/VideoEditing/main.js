@@ -1,3 +1,5 @@
+import get_all_content from '../../Controller/VideoEditing/getContent';
+
 const express = require('express')
 const Video_editing_router = express.Router();
 
@@ -9,7 +11,9 @@ const controllerRenderVideo = require('../../Controller/VideoEditing/renderVideo
 const controllerSplitAndGenerate = require('../../Service/VideoEditingModule/splitContent')
 const controllerRegenrateAudio = require('../../Service/VideoEditingModule/splitContent')
 const controllerReplaceWords = require('../../Controller/VideoEditing/addWord')
+const controllerGetContent = require('../../Controller/VideoEditing/getContent')
 
+Video_editing_router.get('/get-all-content', get_all_content);
 Video_editing_router.post('/render-video', controllerRenderVideo.renderVideo);
 Video_editing_router.post('/get-img', controllerGetImgs.getImg);
 Video_editing_router.post('/split-content', controllerSplitAndGenerate.splitAndConvert);
