@@ -124,7 +124,6 @@ export const addNewAccountTwitter = async (req, res) => {
     const encryptedAccessToken = encrypt(accessToken);
     const encryptedAccessSecret = encrypt(accessSecret);
     const encryptedBearerToken = encrypt(bearerToken);
-
     const token = jwt.sign(
       {
         appKey: encryptedAppKey,
@@ -136,7 +135,6 @@ export const addNewAccountTwitter = async (req, res) => {
       process.env.JWT_SECRET
     );
     await createTwitterAccountSecret(brand, token);
-
     return res.json({ message: "Done" });
   } catch (error) {
     console.error("Error encrypting data:", error);
