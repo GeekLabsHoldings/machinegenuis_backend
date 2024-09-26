@@ -18,9 +18,19 @@ export default class AnalysisNewsLetterController implements IAnalysisNewsLetter
     async getNewsLetterAnalysis(brand: string): Promise<IAnalysisNewsLetterServiceResponse[]> {
         const analysisService = new AnalysisNewsLetterService();
         const analysisData = await analysisService.getNewsLetterAnalysis(brand);
-        const result = analysisData.map((data) => {
-            return {
-                openingCount: `${(data.openingCount / data.userSubscriptionCount) * 100} %`,
+
+        const result: IAnalysisNewsLetterServiceResponse[] = [];
+        analysisData.forEach((data) => {
+            const percentage = parseFloat(((data.openingCount / data.userSubscriptionCount) * 100).toFixed(2));
+            const month = moment(data.createdAt).format("YYYY-MMMM");
+            if (result.length === 0 || result[result.length - 1].MonthAnalysis !== month) {
+                result.push({
+                    MonthAnalysis: month,
+                    result: []
+                });
+            }
+            result[result.length - 1].result.push({
+                openingCount: `${percentage}%`,
                 clickCount: data.clickCount,
                 createdAt: data.createdAt,
                 userSubscriptionCount: data.userSubscriptionCount,
@@ -29,7 +39,7 @@ export default class AnalysisNewsLetterController implements IAnalysisNewsLetter
                     title: data.email.title,
                     brand: data.email.brand
                 }
-            }
+            });
         });
         return result;
     }

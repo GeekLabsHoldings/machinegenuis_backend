@@ -1,3 +1,4 @@
+import { Video } from "creatomate";
 import { DepartmentEnum } from "../DepartmentAndRoles";
 
 enum RouterEnum {
@@ -12,7 +13,8 @@ enum RouterEnum {
     ContentCreation = DepartmentEnum.ContentCreator,
     Administrative = DepartmentEnum.Administrative,
     socialMedia = DepartmentEnum.SocialMedia,
-    Accounting = DepartmentEnum.Accounting
+    Accounting = DepartmentEnum.Accounting,
+    VideoEditing = DepartmentEnum.VideoEditing
 }
 
 export default RouterEnum;
