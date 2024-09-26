@@ -1,6 +1,9 @@
+import promptsModel from "../../Model/ContentCreation/Prompts/prompts_model";
 import { socialMediaModel } from "../../Model/SocialMedia/SocialMedia.model";
 import socialAccountModel from "../../Model/SocialMedia/SocialMediaAccount.model";
+import socialCommentModel from "../../Model/SocialMedia/Twitter.SocialMedia.tweets.model";
 import twitterModel from "../../Model/SocialMedia/TwitterData.model";
+import { campaignListEnum } from "../../Utils/SocialMedia/campaign";
 
 export const createAccountTwitter = async (
   platform,
@@ -44,9 +47,31 @@ export const deleteAccountTwitter = async (_id) => {
   const twitterAccount = await socialAccountModel.deleteOne({ _id });
   return twitterAccount;
 };
-export const getTwitterAccounts = async (sharingList) => {
-  const twitterAccounts = await socialAccountModel.find({
-    sharingList,
+export const getAllTweetsMustApprove = async () => {
+  const twitters = await socialCommentModel.find({
+    campaignType: campaignListEnum.MUST_APPROVE,
   });
-  return twitterAccounts;
+  return twitters;
 };
+export const getTweetById = async (_id) => {
+  const twitterComment = await socialCommentModel.findById(_id);
+  return twitterComment;
+};
+// export const getPromptWithPlatform = async (platform) => {
+//   const twitterPrompt = await promptsModel.find({
+//     service: platform,
+//   });
+//   return twitterPrompt;
+// };
+// export const getAndUpdateTweetComment = async (_id, tweetId, comment) => {
+//   const twitterComment = await socialCommentModel.findOneAndUpdate(
+//     { _id, tweetId },
+//     {
+//       comment,
+//     },
+//     {
+//       new: true,
+//     }
+//   );
+//   return twitterComment;
+// };

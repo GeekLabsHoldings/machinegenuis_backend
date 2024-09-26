@@ -18,10 +18,6 @@ twitterRouter.delete(
   "/delete-account/:_id",
   socialMediaController.deleteTwitterAccount
 );
-twitterRouter.get(
-  "/get-account-data/:sharingList",
-  socialMediaController.getAllAccountTwitter
-);
 twitterRouter.post(
   "/add-post",
   socialMediaController.addPostSocialMediaTwitter
@@ -34,4 +30,17 @@ twitterRouter.post(
   "/get-account-data",
   socialMediaController.getTwitterAccountSecretData
 );
+twitterRouter.get(
+  "/get-tweets-mustApprove",
+  socialMediaController.getTweetsMustApprove
+);
+twitterRouter.post(
+  "/generate-new-reply",
+  socialMediaController.generateNewReply
+);
+twitterRouter.post(
+  "/add-reply-to-tweet/:_id",
+  socialMediaController.addReplyToTweet
+);
+
 export default twitterRouter;

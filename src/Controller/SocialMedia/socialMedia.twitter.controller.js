@@ -20,12 +20,17 @@ import {
 import {
   deleteAccountTwitter,
   existAccount,
+  getAllTweetsMustApprove,
+  getAndUpdateTweetComment,
+  getPromptWithPlatform,
+  getTweetById,
   getTwitterAccount,
   getTwitterAccounts,
 } from "../../Service/SocialMedia/twitter.service";
 import moment from "moment-timezone";
 import OpenAiService from "../../Service/OpenAi/OpenAiService";
 import { campaignListEnum } from "../../Utils/SocialMedia/campaign";
+import PromptService from "../../Service/Prompt/PromptService";
 
 function decrypt(encryptedText) {
   const algorithm = "aes-256-cbc";
@@ -138,7 +143,7 @@ export const addNewAccountTwitter = async (req, res) => {
     return res.json({ message: "Done" });
   } catch (error) {
     console.error("Error encrypting data:", error);
-   return systemError.sendError(res, error);
+    return systemError.sendError(res, error);
   }
 };
 export const getTwitterAccountSecretData = async (req, res) => {
@@ -246,7 +251,7 @@ export const addSocialAccountTwitter = async (req, res) => {
     );
     return res.status(200).json({ result: socialAccount });
   } catch (error) {
-   return systemError.sendError(res, error);
+    return systemError.sendError(res, error);
   }
 };
 export const editTwitterAccount = async (req, res) => {
@@ -302,7 +307,7 @@ export const editTwitterAccount = async (req, res) => {
     if (error.code === 11000) {
       return res.status(400).json({ message: "Account name already exists" });
     }
-   return systemError.sendError(res, error);
+    return systemError.sendError(res, error);
   }
 };
 export const editCampaignTwitterAccount = async (req, res) => {
@@ -323,7 +328,7 @@ export const editCampaignTwitterAccount = async (req, res) => {
     if (error.code === 11000) {
       return res.status(400).json({ message: "Account name already exists" });
     }
-   return systemError.sendError(res, error);
+    return systemError.sendError(res, error);
   }
 };
 export const deleteTwitterAccount = async (req, res) => {
@@ -343,11 +348,70 @@ export const deleteTwitterAccount = async (req, res) => {
     return systemError.sendError(res, error);
   }
 };
-export const getAllAccountTwitter = async (req, res) => {
+export const getTweetsMustApprove = async (req, res) => {
   try {
-    const twitterAccounts = await getTwitterAccounts(req.params.sharingList);
+    const twitterAccounts = await getAllTweetsMustApprove();
     return res.status(200).json({ result: twitterAccounts });
   } catch (error) {
-   return systemError.sendError(res, error);
+    return systemError.sendError(res, error);
+  }
+};
+export const generateNewReply = async (req, res) => {
+  try {
+    const { content, platform } = req.body;
+    const openaiService = new OpenAiService();
+    const promptService = new PromptService();
+    const promptData = await promptService.getPromptData(platform, null);
+    const prompt = promptData.prompt.replace("[[1]]", content);
+    const result = await openaiService.callOpenAiApi(
+      prompt,
+      "You are a representative of Machine Genius, a social media organization focused on multiple fields. Provide a brief and relevant comment in response to the input, ensuring clarity and engagement."
+    );
+    const reply = result.choices[0].message.content;
+    return res.status(200).json({ NewComment: reply });
+  } catch (error) {
+    return systemError.sendError(res, error);
+  }
+};
+export const addReplyToTweet = async (req, res) => {
+  try {
+    const { _id } = req.params;
+    const { brand, tweetId, reply } = req.body;
+    console.log({ _id, tweetId, brand, reply });
+
+    const tweet = await getTweetById(_id);
+    console.log("===================",{tweet});
+    if (!tweet) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.ACCOUNT_NOT_FOUND)
+        .throw();
+    }
+    const twitterData = await getTwitterData(tweet.brand);
+    const { token } = twitterData;
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const decryptedAppKey = decrypt(decodedToken.appKey);
+    const decryptedAppSecret = decrypt(decodedToken.appSecret);
+    const decryptedAccessToken = decrypt(decodedToken.accessToken);
+    const decryptedAccessSecret = decrypt(decodedToken.accessSecret);
+    const decryptedBearerToken = decrypt(decodedToken.bearerToken);
+    console.log(tweet.comment, reply);
+    if (tweet.comment !== reply) {
+      tweet.comment = reply;
+      const addComment = await tweet.save();
+      console.log(addComment); 
+    }
+    console.log("=================== HERE 2 ==================");
+    const tweetReply = await addReply(
+      decryptedAppKey,
+      decryptedAppSecret,
+      decryptedAccessToken,
+      decryptedAccessSecret,
+      reply,
+      tweetId
+    );
+    return res.status(200).json({ result :tweetReply});
+  } catch (error) {
+    return systemError.sendError(res, error);
   }
 };
