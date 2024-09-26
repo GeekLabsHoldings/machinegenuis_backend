@@ -41,7 +41,10 @@ export const createSocialAccount = async (
   accountLink,
   account_id,
   campaignType,
-  employeeId
+  employeeId,
+  delayBetweenPosts,
+  delayBetweenGroups,
+  longPauseAfterCount
 ) => {
   const socialAccount = await socialAccountModel.create({
     sharingList,
@@ -51,7 +54,17 @@ export const createSocialAccount = async (
     accountLink,
     account_id,
     campaignType,
-    employeeId
+    employeeId,
+    delayBetweenPosts,
+    delayBetweenGroups,
+    longPauseAfterCount
   });
   return socialAccount;
+};
+export const checkAccountBrand = async (brand, userName) => {
+  const checkAccount = await socialAccountModel.findOne({
+    brand,
+    userName,
+  });
+  return checkAccount;
 };
