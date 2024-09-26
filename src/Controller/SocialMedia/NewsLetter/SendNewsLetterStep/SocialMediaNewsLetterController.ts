@@ -77,7 +77,7 @@ class SocialMediaNewsLetterController implements ISocialMediaNewsLetterControlle
                 html: personalizedContent
             };
 
-            await emailService.sendEmail(data);
+            await Promise.all([emailService.sendEmail(data), usersSubscriptions.addReceivedEmails(item.email, job.data.brand)]);
         }
         console.log("End Queue");
     }

@@ -7,6 +7,7 @@ import UserRouter from "./Router/User";
 import unAuthorizerApis from "./Router/UnAuthorizer";
 import CalendlyRouter from "./Router/Calendly";
 
+
 const app: Application = express();
 
 import bodyParser from "body-parser";
@@ -14,6 +15,7 @@ import bodyParser from "body-parser";
 
 import path from "path";
 import content_creation_router from "./Router/ContentCreation/main";
+import video_editing_router from "./Router/VideoEditing/main";
 import { checkAuthority } from "./middleware/verifyToken";
 import RouterEnum from "./Utils/Routes";
 import socialMediaRouter from "./Router/SocialMedia";
@@ -43,6 +45,7 @@ app.get("/generate-image/:email", async (req, res) => {
 app.use(`/${RouterEnum.authentication}`, AuthenticationRouter);
 app.use(`/${RouterEnum.unAuthorizer}`, unAuthorizerApis);
 app.use(`/${RouterEnum.calendly}`, CalendlyRouter);
+app.use(`/${RouterEnum.VideoEditing}`, video_editing_router);
 app.use(checkAuthority);
 app.use(`/${RouterEnum.ContentCreation}`, content_creation_router);
 app.use(`/${RouterEnum.hr}`, HR_Router);

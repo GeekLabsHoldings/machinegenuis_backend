@@ -3,4 +3,6 @@ export default interface IUserSubscriptionModel {
     brand: string;
     subscriptionDate: number;
     subscriptionStatus: boolean;
+    receivedEmails: number;
+    updatedAt: number
 }

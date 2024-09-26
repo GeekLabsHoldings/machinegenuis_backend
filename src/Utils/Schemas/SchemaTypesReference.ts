@@ -33,6 +33,11 @@ enum SchemaTypesReference {
   NewsLetters = "news-letter",
   Analytics = "analytics",
   Prompt = "prompt",
+  Audiences = "audiences",
+  Telegram = "telegram",
+  SocialMediaGroups="socialmediagroups",
+  SocialMediaPosts="socialmediaposts",
+  TelegramMessage = "telegram_message",
 }
 
 export { SchemaTypesReference };

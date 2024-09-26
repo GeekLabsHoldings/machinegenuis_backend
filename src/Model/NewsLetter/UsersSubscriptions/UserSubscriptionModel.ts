@@ -7,7 +7,9 @@ const UserSubscriptionSchema = new Schema<IUserSubscription>({
     email: RequiredString,
     brand: RequiredString,
     subscriptionDate: RequiredNumber,
-    subscriptionStatus: RequiredBoolean
+    subscriptionStatus: RequiredBoolean,
+    receivedEmails: RequiredNumber,
+    updatedAt: RequiredNumber
 });
 
 const UserSubscriptionModel = model<IUserSubscription>(SchemaTypesReference.UserEmailsSubscription, UserSubscriptionSchema);
