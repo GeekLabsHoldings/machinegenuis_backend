@@ -5,6 +5,8 @@ import * as telegramController from "../../Controller/SocialMedia/socialMedia.te
 
 const TelegramRouter = Router();
 
+
+TelegramRouter.post("/add-telegram-account",telegramController.AddAnAccount);
 TelegramRouter.post("/add-telegram-channel",telegramController.add_channel);
 TelegramRouter.get("/list-telegram-channels",telegramController.get_channels);
 TelegramRouter.get("/list-telegram-channels-brand",telegramController.get_channels_brand);

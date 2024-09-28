@@ -9,7 +9,7 @@ const cron = require('node-cron');
 
 export async function AddAnAccount(req , res){
 try {
-  await RedditServices.saveAccount(req)
+  await RedditServices.saveAccount(req, res)
   res.json({message:"done"})
 } catch (error) {
   console.error("Error adding group:", error);
@@ -17,33 +17,16 @@ try {
 }
 }
 
-//====================================
-
-
-try {
-  cron.schedule('0 */6 * * *', async () => {
-    const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
-    const groups = await RedditServices.getSubreddits();
-    groups.forEach(async(group)=>{
-      group.subscribers = await RedditServices.getSubredditSubs(r, group.group_name)
-      group.save()
-    })
-  });
-} catch (error) {
-  
-}
-
-//===================================
 
 export async function add_subreddit(req, res) {
   try {
     const {group_name, link, group_id, niche, brand, platform, engagement } = req.body;
     console.log("group  name \n" , group_name)
 
-    const acount = await RedditServices.getAccount(null);
-    const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
+    const acount = await RedditServices.getAccount(null, res);
+    const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password, res);
 
-    const subscribers = await RedditServices.getSubredditSubs(r, group_name);
+    const subscribers = await RedditServices.getSubredditSubs(r, group_name, res);
 
     const newGroup = await RedditServices.AddSubreddit(
       group_name,
@@ -52,7 +35,7 @@ export async function add_subreddit(req, res) {
       subscribers,
       niche,
       brand,
-      engagement
+      engagement, res
     );
 
     const savedGroup = await newGroup.save();
@@ -67,8 +50,6 @@ export async function add_subreddit(req, res) {
 
 export async function get_subreddits(req, res) {
   try {
-    const acount = await RedditServices.getAccount(null);
-    const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
 
     const groups = await RedditServices.getSubreddits();
 
@@ -83,9 +64,6 @@ export async function get_subreddits(req, res) {
 
 export async function get_subreddits_brand(req, res) {
   try {
-    const acount = await RedditServices.getAccount(null);
-    const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
-
     const groups = await RedditServices.getSubredditsByBrand(req.body.brand);
 
     res.json({groups});
@@ -121,26 +99,31 @@ export const CampaignBroadcast = async (req, res) =>{
   
   try {
 
-
-    let {title, text, img_url, ms,  minute, hour} = req.body
-    console.log("hi hello hi hello", req.body)
+    let {title, text, url, ms,  minute, hour, timezone} = req.body
+    const cronSchedule = RedditServices.cronSchedule(hour, minute, timezone)
     const groups = await RedditServices.getSubreddits();
+
+    ms = Math.max(ms,  10000)
+
+
+    const imgurUrlPattern =  /^https:\/\/imgur\.com(\/[a-zA-Z0-9-_\/]*)?(#\/[a-zA-Z0-9-_\/]*)?$/;
+
+    if (! imgurUrlPattern.test(url)) {
+       return res.status(400).json({ message: 'Invalid Imgur URL  make sure no file extension at the end' });
+    } 
+
+    const task = cron.schedule(cronSchedule, () => {
+
+      groups.forEach(async (group)=>{
     
-    const acount = await RedditServices.getAccount(null);
-    const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
-  
-
-    groups.forEach(async (group)=>{
-
-      const m = await RedditServices.CreateRedditPost(r, title, text, img_url,  group.group_id)
-      console.log("reddit post \n", m)
-      await RedditServices.AddRedditPostDB(m.name, group.group_name, group.group_id, Date.now(), group.brand)
-      
-      delay(ms)
-    })
-    const task = cron.schedule(`${minute} ${hour} * * *`, () => {
-
-
+        const acount = await RedditServices.getAccount(group.brand, res);
+        const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password, res);
+        const m = await RedditServices.CreateRedditPost(r, title, text, url,  group.group_id, res)
+        console.log("reddit post \n", m)
+        await RedditServices.AddRedditPostDB(m.name, group.group_name, group.group_id, Date.now(), group.brand, res)
+        
+        delay(ms)
+      })
       // Stop the task after it runs
       task.stop();
     });
@@ -149,7 +132,7 @@ export const CampaignBroadcast = async (req, res) =>{
   } catch (error) {
     console.log(error)
     return systemError.sendError(res, error);
-  }
+   }
 
 }
 
@@ -159,28 +142,29 @@ export const CampaignByBrand = async (req, res) =>{
  
  
  try {
-  let {title, text, img_url, brand, ms, minute, hour} = req.body
+  let {title, text, url, brand, ms, minute, hour, timezone} = req.body
+  const cronSchedule = RedditServices.cronSchedule(hour, minute, timezone)
   const groups = await RedditServices.getSubredditsByBrand(brand)
     
-  const acount = await RedditServices.getAccount(brand);
-  const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
+  const acount = await RedditServices.getAccount(brand, res);
+  const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password, res);
 
-  groups.forEach(async (group)=>{
 
-    const m = await RedditServices.CreateRedditPost(r, title, text, img_url,  group.group_id)
-    console.log("reddit post \n", m)
-    await RedditServices.AddRedditPostDB(m.name, group.group_name, group.group_id, Date.now(), group.brand)
-    
-    delay(ms)
-  })
-    ms = Math.max(ms, 3600 *1000)
-      // Schedule a task to run at 8:15 PM only once
+  ms = Math.max(ms,  10000)
 
-      const task = cron.schedule(`${minute} ${hour} * * *`, () => {
-      
-        // Stop the task after it runs
-        task.stop();
-      });
+
+  const task = cron.schedule(cronSchedule, () => {
+      groups.forEach(async (group)=>{
+
+        const m = await RedditServices.CreateRedditPost(r, title, text, url,  group.group_id, res)
+        console.log("reddit post \n", m)
+        await RedditServices.AddRedditPostDB(m.name, group.group_name, group.group_id, Date.now(), group.brand, res)
+        
+        delay(ms)
+      })
+      // Stop the task after it runs
+      task.stop();
+  });
   res.json({message: "done", })
  } catch (error) {
    console.log(error)
@@ -192,16 +176,35 @@ export const CampaignByBrand = async (req, res) =>{
 
 export const DeletePost = async (req, res) => {
   try {
-    const acount = await RedditServices.getAccount(null);
+    const acount = await RedditServices.getAccount(req.body.brand);
     const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
 
-    return await RedditServices.DeleteRedditPost(r, req.body.messageId)
+    const m = await RedditServices.DeleteRedditPost(r, req.body.messageId)
+    res.json({message: "done", m: m})
   } catch (error) {
+    console.log(error)
     return systemError.sendError(res, error);
   }
 }
 
 
 
+//====================================
+
+
+try {
+  cron.schedule('0 */6 * * *', async () => {
+    const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
+    const groups = await RedditServices.getSubreddits();
+    groups.forEach(async(group)=>{
+      group.subscribers = await RedditServices.getSubredditSubs(r, group.group_name)
+      group.save()
+    })
+  });
+} catch (error) {
+  
+}
+
+//===================================
 
 

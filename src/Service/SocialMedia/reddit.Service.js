@@ -3,12 +3,15 @@ import qs from 'qs';
 import SocialMediaGroups from "../../Model/SocialMedia/SocialMediaGroups.model";
 import SocialMediaPosts from "../../Model/SocialMedia/SocialMediaPosts.models";
 import RedditAccountModel from '../../Model/SocialMedia/RedditAccount.model';
-const crypto = require('crypto');
-
+import crypto from 'crypto';
+import moment from 'moment';
+import { console } from 'inspector';
+import systemError from "../../Utils/Error/SystemError";
 // Secret key (32 bytes for AES-256)
-const secretKey =  Buffer.from(process.env.ENCRYPTION_SECRET_KEY, 'hex');
 
 function encrypt(text) {
+  const secretKey =  Buffer.from(process.env.ENCRYPTION_SECRET_KEY, 'hex');
+
   const cipher = crypto.createCipheriv('aes-256-ecb', secretKey, null); // No IV for ECB
   let encrypted = cipher.update(text, 'utf8', 'hex');
   encrypted += cipher.final('hex');
@@ -17,6 +20,8 @@ function encrypt(text) {
 
 // Decrypt function using AES-256-ECB
 function decrypt(encryptedData) {
+  const secretKey =  Buffer.from(process.env.ENCRYPTION_SECRET_KEY, 'hex');
+
   const decipher = crypto.createDecipheriv('aes-256-ecb', secretKey, null); // No IV for ECB
   let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
@@ -28,7 +33,7 @@ function decrypt(encryptedData) {
 const snoowrap = require('snoowrap');
 const jwt = require('jsonwebtoken');
 
-const userAgent = 'axios:myapp/1.0.0 (by Hasan_Gad)'
+const userAgent = 'nodejs:myapp:v1.0.0 (by /u/hassan gad)'
 
 // export const submitRedditPost = async ({token, title, text, subreddit}) => {
 //     const url = 'https://oauth.reddit.com/api/submit';
@@ -68,9 +73,10 @@ const userAgent = 'axios:myapp/1.0.0 (by Hasan_Gad)'
 //===========================================================
 //===========================================================
 
-export async function saveAccount(req){
+export async function saveAccount(req,res){
 
-
+try {
+  
   const result = await RedditAccountModel.deleteOne({ platform:"REDDIT", brand:req.body.brand});
 
   if (result.deletedCount === 1) {
@@ -91,23 +97,34 @@ export async function saveAccount(req){
   });
 
   redditAccount.save()
+} catch (error) {
+  console.log(error)
+  return systemError.sendError(res, error);
+}
+
+
 }
 
 
 
 
 
-export async function getAccount(brand){
-  let account
-  if(brand){
-     account = await RedditAccountModel.findOne({platform:"REDDIT", brand:brand})
-  }else{
-     account = await RedditAccountModel.findOne({platform:"REDDIT",})
+export async function getAccount(brand,res){
+  try {
+    let account
+    if(brand){
+       account = await RedditAccountModel.findOne({platform:"REDDIT", brand:brand})
+    }else{
+       account = await RedditAccountModel.findOne({platform:"REDDIT",})
+    }
+    //console.log("account", account)
+    const payload = decrypt(account.token)
+    const obj = JSON.parse(payload)
+    return  obj;
+  } catch (error) {
+    console.error(error);
+    return systemError.sendError(res, error);
   }
-  //console.log("account", account)
-  const payload = decrypt(account.token)
-  const obj = JSON.parse(payload)
-  return  obj;
 }
 
 
@@ -116,37 +133,47 @@ export async function getAccount(brand){
 
 
 
-export async function getsnoowrap(clientId,clientSecret,username,password) {
-  const r = new snoowrap({
+export async function getsnoowrap(clientId,clientSecret,username,password, res) {
+  try {
+    const r = new snoowrap({
 
-    userAgent:userAgent,
-      clientId: clientId,
-      clientSecret: clientSecret,
-      username: username,
-      password: password
-    });
-    r.getMe()
-    return r
+      userAgent:userAgent,
+        clientId: clientId,
+        clientSecret: clientSecret,
+        username: username,
+        password: password
+      });
+      r.getMe()
+      return r
+  } catch (error) {
+    return systemError.sendError(res, error);
+  }
+  
   }
 
 
 
 
-export const CreateRedditPost = async (r, title, text, img_url, sr) => {
+export const CreateRedditPost = async (r, title, text, img_url, sr, res) => {
   try{
-     const m = await r.getSubreddit(sr)
+
+    if (img_url)
+     return await r.getSubreddit(sr)
       .submitLink({
             title: title,
             text:text,
             url: img_url
           });
-      return m
+      
+    return await r.getSubreddit(sr)
+      .submitSelfpost({
+            title: title,
+            text:text,
+          });
     } catch (error) {
       console.error('Error submitting to Reddit:', error.response?.data || error.message);
       // Return error details if needed or rethrow
-      return {
-        error: error.response?.data || error.message
-      };
+      return systemError.sendError(res, error);
     }
   };
 
@@ -160,37 +187,29 @@ export const CreateRedditPost = async (r, title, text, img_url, sr) => {
     group_name,
     group_id,
     timestamp,
-    brand
+    brand,
+    res
     ) => {
-    const newMessage = new SocialMediaPosts({
-      post_id: post_id,
-      group_name: group_name,
-      group_id: String(group_id), 
-      timestamp: timestamp,
-      platform: "REDDIT",
-      brand:brand
-    });
-    
-    await newMessage.save();
+
+    try {
+      const newMessage = new SocialMediaPosts({
+        post_id: post_id,
+        group_name: group_name,
+        group_id: String(group_id), 
+        timestamp: timestamp,
+        platform: "REDDIT",
+        brand:brand
+      });
+      
+      await newMessage.save();
+    } catch (error) {
+       return systemError.sendError(res, error);
+    }
+   
     }  
 
 
 
-
-
-
-
-
-export async function getSubredditSubs(r, subredditName) {
-  const sub = await r.getSubreddit(subredditName);
-    
-  // Access the subscribers property
-  const subscribers = await sub.subscribers;
-  
-  console.log(`The subreddit "${subredditName}" has ${subscribers} subscribers.`);
-  
-  return subscribers; // Return the number of subscribers if needed
-}
 
 
 
@@ -202,7 +221,8 @@ export const AddSubreddit = async (
   subscribers,
   niche,
   brand,
-  engagement
+  engagement,
+  res
 ) => {
   try {
       // Create a new group record
@@ -223,9 +243,10 @@ export const AddSubreddit = async (
       return savedGroup
   } catch (error) {
       console.error('Error adding group:', error);
-      return null
+       return systemError.sendError(res, error);
   } 
 };
+
 
 
 export const getSubreddits = async ()=>{
@@ -237,6 +258,10 @@ try {
   return []
 }
 }
+
+
+
+
 
 export const getSubredditsByBrand = async (brandName)=>{
 try {
@@ -254,7 +279,7 @@ try {
 
 export const DeleteRedditPost = async(
 r,
-messageId
+messageId,
 ) =>{
   const result = await SocialMediaPosts.deleteOne({ platform:"REDDIT", post_id:messageId });
   
@@ -274,9 +299,10 @@ messageId
     console.log(`Post with ID ${messageId} has been deleted successfully.`);
  
 
-return response.data;
+return submission;
 
 }
+
 
 
 export const GetSubCount = async(
@@ -294,50 +320,58 @@ brand
 }
 
 
-//============================================================================
 
 
 
 
-
-
-export const getAccessToken = async (clientId,clientSecret,username,password) => {
-
-  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-  const response = await axios.post(
-      'https://www.reddit.com/api/v1/access_token',
-      qs.stringify({
-          grant_type: 'password',
-          username: username,
-          password: password,
-      }),
-      {
-          headers: {
-              'Authorization': `Basic ${auth}`,
-              'Content-Type': 'application/x-www-form-urlencoded',
-          },
-      }
-  );
-  return response.data.access_token;
+export async function getSubredditSubs(r, subredditName) {
+  const sub = await r.getSubreddit(subredditName);
+    
+  // Access the subscribers property
+  const subscribers = await sub.subscribers;  
+  return subscribers; // Return the number of subscribers if needed
 }
 
 
 
 
-export const postToSubreddit = async (accessToken,  title, text,  url, subreddit) => {
-  const response = await axios.post('https://oauth.reddit.com/api/submit', qs.stringify({
-      title: title,
-      text: text,
-      kind: 'self',
-      // url:url,
-      sr:subreddit,
-       // For text posts; use 'link' for link posts
-  }), {
-      headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'User-Agent': userAgent,
-          'Content-Type': 'application/x-www-form-urlencoded',
-      },
-  });
-  return response.data;
-};
+
+
+export function cronSchedule(h, m, userTimeZone) {
+
+
+    /*
+        for example:
+        
+        userInputTime = '00:59'; // User's input time
+        userTimeZone = 'Africa/Cairo'; // User's input time zone
+
+    */ 
+
+     
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based, so we add 1
+    const day = String(today.getDate()).padStart(2, '0');
+    h = String(h).padStart(2, '0');
+    m = String(m).padStart(2, '0');
+
+    const userInputTime = `${year}-${month}-${day} ${h}:${m}`;
+
+    const serverTimeZone = moment.tz.guess(); // Get the server's local time zone
+
+    // Convert user input time to server local time
+    const userTime = moment.tz(userInputTime, userTimeZone); // User's time
+    const serverLocalTime = userTime.clone().tz(serverTimeZone); // Convert to server local time
+
+    // Get minute and hour from the server local time
+    const minute = serverLocalTime.minutes();
+    const hour = serverLocalTime.hours();
+
+    // Cron schedule string
+    const cronSchedule = `${minute} ${hour} * * *`; // Schedule for every day at the specified time
+
+
+   
+    return cronSchedule;
+}
