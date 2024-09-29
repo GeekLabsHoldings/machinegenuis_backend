@@ -8,7 +8,7 @@ const server = app.listen(port, async () => {
   try {
     await DBConnection();
     console.log(`Server is Running And DB Connected http://localhost:${port}`);
-    startCronJobs();
+    process.env.NODE_ENV === "PROD" ? startCronJobs() : null;
   } catch (error) {
     console.log(error);
   }
