@@ -15,7 +15,7 @@ import {
 import systemError from "../../Utils/Error/SystemError";
 const crypto = require('crypto');
 const cron = require('node-cron');
-
+import telegramQueueAddJob from "../../Utils/CronJobs/RedisQueue/telegram.social";
 
 
 class TelegramB { 
@@ -111,28 +111,16 @@ export async function campaign(req, res) {
     const file_url = req.body.file_url;
     const captionText = req.body.captionText;
     const file_type = req.body.file_type;
-    const ms = req.body.ms;
-    const hour = req.body.hour;
-    const minute = req.body.minute;
-    const timezone = req.body.timezone;
+    let delay = req.body.delay;
+    let starttime = req.body.starttime;
 
+    starttime = starttime - Date.now();
+    
+    if (starttime<=0)
+        starttime = 10000
 
-    const cronSchedulet = cronSchedule(hour, minute, timezone)
-    const task = cron.schedule(cronSchedulet, async() => {
-
-
-      await sendMessageToAll(
-        TelegramB,
-        message,
-        chatIds,
-        file_type,
-        file_url,
-        captionText,
-        ms
-      );
-      // Stop the task after it runs
-      task.stop();
-    });
+    
+    telegramQueueAddJob({ message, chatIds, file_type, file_url, captionText, delay}, starttime)
 
     res.json({
       message: message,
@@ -153,27 +141,15 @@ export async function campaignByBrand(req, res) {
     const file_url = req.body.file_url;
     const captionText = req.body.captionText;
     const file_type = req.body.file_type;
-    const ms = req.body.ms;
-    const hour = req.body.hour;
-    const minute = req.body.minute;
-    const timezone = req.body.timezone;
+    let delay = req.body.delay;
+    let starttime = req.body.starttime;
 
+    starttime = starttime - Date.now();
 
-    const cronSchedulet = cronSchedule(hour, minute, timezone)
-    const task = cron.schedule(cronSchedulet, async() => {
-
-      await sendMessageToAll(
-        TelegramB,
-        message,
-        chatIds,
-        file_type,
-        file_url,
-        captionText,
-        ms
-      );
-      // Stop the task after it runs
-      task.stop();
-    });
+    if (starttime<=0)
+        starttime = 10000
+    telegramQueueAddJob({TelegramB, message, chatIds, file_type, file_url, captionText, delay}, starttime)
+    
 
     res.json({
       message: message,

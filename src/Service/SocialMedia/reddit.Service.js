@@ -7,7 +7,11 @@ import crypto from 'crypto';
 import moment from 'moment';
 import { console } from 'inspector';
 import systemError from "../../Utils/Error/SystemError";
-// Secret key (32 bytes for AES-256)
+import redditQueue from "../../Utils/CronJobs/RedisQueue/reddit.social"
+
+
+
+
 
 function encrypt(text) {
   const secretKey =  Buffer.from(process.env.ENCRYPTION_SECRET_KEY, 'hex');
@@ -33,7 +37,7 @@ function decrypt(encryptedData) {
 const snoowrap = require('snoowrap');
 const jwt = require('jsonwebtoken');
 
-const userAgent = 'nodejs:myapp:v1.0.0 (by /u/hassan gad)'
+const userAgent = 'nodejs:snoowrap:myapp:v1.0.0 (by hassan gad 2023)'
 
 // export const submitRedditPost = async ({token, title, text, subreddit}) => {
 //     const url = 'https://oauth.reddit.com/api/submit';
@@ -73,7 +77,7 @@ const userAgent = 'nodejs:myapp:v1.0.0 (by /u/hassan gad)'
 //===========================================================
 //===========================================================
 
-export async function saveAccount(req,res){
+export async function saveAccount(req){
 
 try {
   
@@ -99,7 +103,6 @@ try {
   redditAccount.save()
 } catch (error) {
   console.log(error)
-  return systemError.sendError(res, error);
 }
 
 
@@ -109,7 +112,7 @@ try {
 
 
 
-export async function getAccount(brand,res){
+export async function getAccount(brand){
   try {
     let account
     if(brand){
@@ -117,13 +120,19 @@ export async function getAccount(brand,res){
     }else{
        account = await RedditAccountModel.findOne({platform:"REDDIT",})
     }
+
+    if(!account){
+      account = await RedditAccountModel.findOne({platform:"REDDIT", brand:"Geek Labs Holdings"})
+    }
+
     //console.log("account", account)
     const payload = decrypt(account.token)
     const obj = JSON.parse(payload)
+    console.log("account",obj, account)
+
     return  obj;
   } catch (error) {
     console.error(error);
-    return systemError.sendError(res, error);
   }
 }
 
@@ -133,7 +142,7 @@ export async function getAccount(brand,res){
 
 
 
-export async function getsnoowrap(clientId,clientSecret,username,password, res) {
+export async function getsnoowrap(clientId,clientSecret,username,password) {
   try {
     const r = new snoowrap({
 
@@ -146,7 +155,7 @@ export async function getsnoowrap(clientId,clientSecret,username,password, res) 
       r.getMe()
       return r
   } catch (error) {
-    return systemError.sendError(res, error);
+    console.log(error)
   }
   
   }
@@ -154,7 +163,7 @@ export async function getsnoowrap(clientId,clientSecret,username,password, res) 
 
 
 
-export const CreateRedditPost = async (r, title, text, img_url, sr, res) => {
+export const CreateRedditPost = async (r, title, text, img_url, sr) => {
   try{
 
     if (img_url)
@@ -172,8 +181,6 @@ export const CreateRedditPost = async (r, title, text, img_url, sr, res) => {
           });
     } catch (error) {
       console.error('Error submitting to Reddit:', error.response?.data || error.message);
-      // Return error details if needed or rethrow
-      return systemError.sendError(res, error);
     }
   };
 
@@ -188,7 +195,6 @@ export const CreateRedditPost = async (r, title, text, img_url, sr, res) => {
     group_id,
     timestamp,
     brand,
-    res
     ) => {
 
     try {

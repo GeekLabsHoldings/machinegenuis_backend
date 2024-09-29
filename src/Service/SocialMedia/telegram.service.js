@@ -73,7 +73,11 @@ export async function saveAccount(req,res){
       }else{
          account = await RedditAccountModel.findOne({platform:"TELEGRAM",})
       }
-      //console.log("account", account)
+      
+    if(!account){
+      account = await RedditAccountModel.findOne({platform:"TELEGRAM", brand:"Geek Labs Holdings"})
+    }
+    console.log("account \n\n", account)
       const token = decrypt(account.token)
       return token;
     } catch (error) {
@@ -237,7 +241,6 @@ export const sendMessageToAll = (
 ) => {
   chatIds.forEach(async(chatId) => {
     const acountToken = await getAccount(chatId.brand);
-    console.log(`this is ${chatId.brand} acountToken: ${acountToken}`);
     const tb =  new TelegramB(acountToken)
     console.log("group_id  ", chatId.group_id);
     
