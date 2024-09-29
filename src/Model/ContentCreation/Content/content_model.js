@@ -65,4 +65,5 @@ const contentSchema = new Schema({
   }
 });
 const contentModel =  model('Content', contentSchema);
-export default contentModel;
+// export default contentModel;
+module.exports = contentModel

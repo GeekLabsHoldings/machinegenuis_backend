@@ -4,7 +4,6 @@ import { TwitterApi } from "twitter-api-v2";
 import systemError from "../../Utils/Error/SystemError";
 import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
 import axios from "axios";
-
 export const TwitterSocialMedia = async ({
   content,
   mediaId,
@@ -42,7 +41,7 @@ export const TwitterSocialMedia = async ({
     console.error("Error posting tweet:", error);
   }
 };
-export const getUserByUsername = async (userName , BearerToken) => {
+export const getUserByUsername = async (userName, BearerToken) => {
   const url = `https://api.twitter.com/2/users/by/username/${userName}`;
 
   try {
@@ -67,7 +66,11 @@ export const getUserByUsername = async (userName , BearerToken) => {
     }
 
     // Handle other errors
-    console.error(`Error fetching user by username: ${AccountName}`, error.response ? error.response.data : error.message);
+    console.error(
+      `Error fetching user by username: ${AccountName}`,
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
+

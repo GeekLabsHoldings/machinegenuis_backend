@@ -55,7 +55,7 @@ export const handleMessage = async (io, socket, msgData) => {
   const senderId = socket.handshake.user._id;
   try {
     const { conversationId, text, media } = msgData;
-
+    if (!text && !media) throw new Error("Message must have text or media");
     // Create a new message document
     const checkSenderAvailability =
       await conversation_chat.checkSenderAvailability(
@@ -65,7 +65,19 @@ export const handleMessage = async (io, socket, msgData) => {
       );
     if (!checkSenderAvailability) throw new Error("Sender not available");
     const moment_time = moment().valueOf();
-
+    // Emit the message to all members of the conversation
+    socket.to(conversationId).emit("message", {
+      sender: {
+        _id: senderId,
+        firstName: socket.handshake.user.firstName,
+        lastName: socket.handshake.user.lastName,
+        theme: socket.handshake.user.theme,
+      },
+      text,
+      media,
+      chat: conversationId,
+      createdAt: moment_time,
+    });
     const newMessage = await conversation_chat.createMessageInConversation(
       session,
       senderId,
@@ -97,8 +109,6 @@ export const handleMessage = async (io, socket, msgData) => {
       session
     );
 
-    // Emit the message to all members of the conversation
-    socket.to(conversationId).emit("message", newMessage);
     await session.commitTransaction();
   } catch (error) {
     io.to(onlineUser.get(senderId.toString()).id).emit(

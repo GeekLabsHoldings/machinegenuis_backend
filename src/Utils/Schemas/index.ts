@@ -28,6 +28,14 @@ const RequiredNumber = {
     required: true
 }
 
+const RequiredSpecificNumber = (specificNumber: number) => {
+    return {
+        type: Number,
+        required: true,
+        default: specificNumber
+    }
+}
+
 const RequiredUniqueNumber = {
     type: Number,
     required: true,
@@ -89,6 +97,7 @@ export {
     NotRequiredNumber,
     RequiredUniqueString,
     RequiredUniqueNumber,
+    RequiredSpecificNumber,
     RefType,
     StringValidation,
     EnumStringRequired,
