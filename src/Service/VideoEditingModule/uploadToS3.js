@@ -9,26 +9,52 @@ const client = new S3Client({
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     }
   });
-  
+
 const uploadToS3 = async (audioStream, index) => {
+  const id = `${index}-${Date.now()}`
     try {
       const upload = new Upload({
-        client: client,  
+        client: client,
+        params: {
+          Bucket: 'machine-genius',
+          Key: `My_Audios/audio-${id}.mp3`,
+          Body: audioStream,
+          ContentType: 'audio/mpeg',
+          ACL: "public-read",
+        },
+      });
+
+      await upload.done();
+      console.log(`Audio uploaded succ`)
+      const audioUrl = `https://machine-genius.s3.amazonaws.com/My_Audios/audio-${id}.mp3`;
+      // const duration =  await getAudioDurationInSeconds(audioUrl);
+
+      index = `${id}`
+      return { index , url: audioUrl, duration:10 };
+    } catch (error) {
+      console.error("Error uploading to S3:", error);
+      throw error;
+    }
+};
+
+const overWriteToS3 = async (audioStream, index) => {
+    try {
+      const upload = new Upload({
+        client: client,
         params: {
           Bucket: 'machine-genius',
           Key: `My_Audios/audio-${index}.mp3`,
           Body: audioStream,
           ContentType: 'audio/mpeg',
-          ACL: "public-read", 
+          ACL: "public-read",
         },
       });
-  
+
       await upload.done();
       console.log(`Audio uploaded succ`)
-      const audioUrl = `https://machine-genius.s3.amazonaws.com/My_Audios/audio-${index}.mp3`;    
-      const duration = 10 //await getAudioDurationInSeconds(audioUrl);
-  
-      return { index , url: audioUrl, duration };
+      const audioUrl = `https://machine-genius.s3.amazonaws.com/My_Audios/audio-${index}.mp3`;
+      // const duration =  await getAudioDurationInSeconds(audioUrl);
+      return { index , url: audioUrl, duration:10 };
     } catch (error) {
       console.error("Error uploading to S3:", error);
       throw error;
@@ -36,6 +62,6 @@ const uploadToS3 = async (audioStream, index) => {
 };
 
 module.exports = {
-    uploadToS3
+    uploadToS3,
+    overWriteToS3
 }
-  
