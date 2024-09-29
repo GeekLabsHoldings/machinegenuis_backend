@@ -43,7 +43,7 @@ const overWriteToS3 = async (audioStream, index) => {
         client: client,
         params: {
           Bucket: 'machine-genius',
-          Key: `My_Audios/audio-${index}.mp3`,
+          Key: `My_Audios/audio-${id}.mp3`,
           Body: audioStream,
           ContentType: 'audio/mpeg',
           ACL: "public-read",
