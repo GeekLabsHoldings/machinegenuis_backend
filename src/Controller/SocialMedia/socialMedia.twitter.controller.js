@@ -31,6 +31,7 @@ import moment from "moment-timezone";
 import OpenAiService from "../../Service/OpenAi/OpenAiService";
 import { campaignListEnum } from "../../Utils/SocialMedia/campaign";
 import PromptService from "../../Service/Prompt/PromptService";
+import socialCommentModel from "../../Model/SocialMedia/Twitter.SocialMedia.tweets.model";
 
 function decrypt(encryptedText) {
   const algorithm = "aes-256-cbc";
@@ -377,10 +378,7 @@ export const addReplyToTweet = async (req, res) => {
   try {
     const { _id } = req.params;
     const { brand, tweetId, reply } = req.body;
-    console.log({ _id, tweetId, brand, reply });
-
     const tweet = await getTweetById(_id);
-    console.log("===================",{tweet});
     if (!tweet) {
       return systemError
         .setStatus(400)
@@ -395,13 +393,6 @@ export const addReplyToTweet = async (req, res) => {
     const decryptedAccessToken = decrypt(decodedToken.accessToken);
     const decryptedAccessSecret = decrypt(decodedToken.accessSecret);
     const decryptedBearerToken = decrypt(decodedToken.bearerToken);
-    console.log(tweet.comment, reply);
-    if (tweet.comment !== reply) {
-      tweet.comment = reply;
-      const addComment = await tweet.save();
-      console.log(addComment); 
-    }
-    console.log("=================== HERE 2 ==================");
     const tweetReply = await addReply(
       decryptedAppKey,
       decryptedAppSecret,
@@ -410,6 +401,10 @@ export const addReplyToTweet = async (req, res) => {
       reply,
       tweetId
     );
+   if(tweetReply.message === "Reply posted successfully"){
+    await socialCommentModel.deleteOne({_id});
+   }
+    
     return res.status(200).json({ result :tweetReply});
   } catch (error) {
     return systemError.sendError(res, error);
