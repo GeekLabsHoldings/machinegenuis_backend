@@ -48,30 +48,17 @@ export const deleteAccountTwitter = async (_id) => {
   return twitterAccount;
 };
 export const getAllTweetsMustApprove = async () => {
-  const twitters = await socialCommentModel.find({
-    campaignType: campaignListEnum.MUST_APPROVE,
-  });
+  const twitters = await socialCommentModel
+    .find({
+      campaignType: campaignListEnum.MUST_APPROVE,
+    })
+    .sort({ createdAt: -1 });
   return twitters;
 };
 export const getTweetById = async (_id) => {
   const twitterComment = await socialCommentModel.findById(_id);
   return twitterComment;
 };
-// export const getPromptWithPlatform = async (platform) => {
-//   const twitterPrompt = await promptsModel.find({
-//     service: platform,
-//   });
-//   return twitterPrompt;
-// };
-// export const getAndUpdateTweetComment = async (_id, tweetId, comment) => {
-//   const twitterComment = await socialCommentModel.findOneAndUpdate(
-//     { _id, tweetId },
-//     {
-//       comment,
-//     },
-//     {
-//       new: true,
-//     }
-//   );
-//   return twitterComment;
-// };
+export const deleteTweet = async (_id) => {
+  await socialCommentModel.deleteOne({ _id });
+};

@@ -3,6 +3,7 @@ import "dotenv/config";
 import { DBConnection } from "./DbSetup/DbConfig";
 import createIo from "./socketIo";
 import startCronJobs from "./Utils/CronJobs/startCronJobs";
+import "./Utils/CronJobs/TweetsQueue/queue";
 const port = process.env.PORT || 4000;
 const server = app.listen(port, async () => {
   try {

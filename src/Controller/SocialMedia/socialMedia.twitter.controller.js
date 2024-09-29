@@ -19,6 +19,7 @@ import {
 } from "../../Service/SocialMedia/socialMedia.service";
 import {
   deleteAccountTwitter,
+  deleteTweet,
   existAccount,
   getAllTweetsMustApprove,
   getAndUpdateTweetComment,
@@ -375,8 +376,8 @@ export const generateNewReply = async (req, res) => {
   }
 };
 export const addReplyToTweet = async (req, res) => {
+  const { _id } = req.params;
   try {
-    const { _id } = req.params;
     const { brand, tweetId, reply } = req.body;
     const tweet = await getTweetById(_id);
     if (!tweet) {
@@ -401,11 +402,39 @@ export const addReplyToTweet = async (req, res) => {
       reply,
       tweetId
     );
-   if(tweetReply.message === "Reply posted successfully"){
-    await socialCommentModel.deleteOne({_id});
-   }
+    console.log("------->",tweetReply.data.status);
     
-    return res.status(200).json({ result :tweetReply});
+    if (tweetReply.message === "Reply posted successfully") {
+      await deleteTweet(_id);
+    }
+
+    return res.status(200).json({ result: tweetReply });
+  } catch (error) {
+    console.log(error);
+    
+    if(error.statusCode === 403){ 
+      await deleteTweet(_id);
+    return res.status(403).json({ message: "Tweet not found" });
+    }
+    return systemError.sendError(res, error);
+  }
+};
+export const generateHashtags = async (req, res) => {
+  try {
+    const { content } = req.body;
+    const openaiService = new OpenAiService();
+    const promptService = new PromptService();
+    const promptData = await promptService.getPromptData(
+      "TWITTER_HASHTAGS",
+      null
+    );
+    const prompt = promptData.prompt.replace("[[1]]", content);
+    const result = await openaiService.callOpenAiApi(
+      prompt,
+      "You are a representative of Machine Genius, a social media organization focused on multiple fields. Provide a brief and relevant comment in response to the input, ensuring clarity and engagement."
+    );
+    const hashTags = result.choices[0].message.content;
+    return res.status(200).json({ hashTags });
   } catch (error) {
     return systemError.sendError(res, error);
   }
