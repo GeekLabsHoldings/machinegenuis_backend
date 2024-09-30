@@ -1,6 +1,9 @@
 const OpenAI = require("openai");
 const S3Uploader = require('./uploadToS3')
 const getImgs = require('./getImages');
+import wordsModel from '../../Model/VideoEditing/replacementWords_model';
+import { addWordAndReplace_srev } from '../../Service/VideoEditingModule/replaceWords';
+
 require("dotenv").config();
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -46,7 +49,7 @@ const splitContent = async (content) => {
       }
 
 
-      const resultObject = await Promise.all(parsedResult.paragraphs.map(async (paragraph, index) => {
+      var resultObject = await Promise.all(parsedResult.paragraphs.map(async (paragraph, index) => {
           console.log(`Processing paragraph ${index + 1}:`, paragraph.text);
 
           const keywordsAndImages = await Promise.all(paragraph.keywords.map(async (keyword) => {
@@ -60,28 +63,27 @@ const splitContent = async (content) => {
               }
           }));
 
-
+          const wordsList = await wordsModel.find({});
+          const upDatedText = await addWordAndReplace_srev.findAndReplaceWords(paragraph.text , wordsList)
           let audioPath;
           try {
               console.log(`Converting paragraph ${index + 1} to audio...`);
-              audioPath = await convertTextToAudio(paragraph.text, index);
+              audioPath = await convertTextToAudio(upDatedText, index);
               console.log(`Audio generated for paragraph ${index + 1}:`, audioPath);
           } catch (err) {
               console.error(`Error converting text to audio for paragraph ${index}:`, err);
               audioPath = null;
           }
-
-
-          console.log(`Processed result for paragraph ${index + 1}:`, { text: paragraph.text, keywordsAndImages, audioPath });
+                    
           return {
               index,
-              text: paragraph.text,
+              text: upDatedText,
               keywordsAndImages,
               audioPath
           };
       }));
 
-      console.log("Final processed result:", resultObject);
+      console.log("Final processed result:", resultObject);           
       return resultObject;
 
   } catch (error) {
