@@ -21,13 +21,11 @@ redditQueue.on('error', (err) => {
   });
 
 redditQueue.process((job) => {
-  console.log("Processing job: \t\n\n\n\n");
+  console.log("Processing job: \t\n");
   // use job.data to do your function
-  console.log(job.data.groups)
   job.data.groups.forEach(async (group)=>{
-      
+   
     const acount = await RedditServices.getAccount(group.brand);
-    console.log("acount  /n", acount)
     const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
     const m = await RedditServices.CreateRedditPost(r, job.data.title, job.data.text, job.data.url,  group.group_id)
     console.log("reddit post \n", m)
@@ -39,9 +37,9 @@ redditQueue.process((job) => {
 });
 
 const redditQueueAddJob =  (data, delay) => {
-  console.log("Job added:", data);
-    redditQueue.add(data,{delay:delay});
-  console.log("Job added success");
+
+  redditQueue.add(data,{delay:delay});
+  console.log("reddit Job added success");
 };
 
 export default redditQueueAddJob;

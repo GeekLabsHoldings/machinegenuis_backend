@@ -133,7 +133,6 @@ export const getAccounts = async (id: string, ) => {
   for(const account of accounts){
       const decrypted = decrypt(account.token)
       const obj = JSON.parse(String(decrypted))
-      console.log(obj,decrypted,account.token)
       data.push({platform:account.platform, account:obj})
   }
   return data
@@ -143,7 +142,6 @@ export const getAccounts = async (id: string, ) => {
 export const getAccount = async (id: string, platform:string) => {
   // Implement account retrieval logic
   const account = await SocialPostingAccount.findOne({brand: id, platform:platform});
-  console.log(account)
   if (account){
     let decrypted = decrypt(account.token)
     let obj = JSON.parse(String(decrypted))
@@ -171,7 +169,7 @@ export const addOrDeleteAccount = async (id: string, accountData: accountDataTyp
     let payloadStr = JSON.stringify(payload)
     const token = encrypt(payloadStr)
 
-    console.log('token: ' + token);
+
     const Account = new SocialPostingAccount({
       token: token,
       platform: accountData.platform,
@@ -213,7 +211,6 @@ function decrypt(encryptedData: string): string | null {
     let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
   
     decrypted += decipher.final('utf8');
-    console.log(encryptedData, decrypted)
     return decrypted;
   }
   return null
