@@ -9,6 +9,7 @@ const BrandCreationRouter = Router();
 BrandCreationRouter.get("/check-domain-availability", brandController.checkDomains);
 
 // Brand routes
+BrandCreationRouter.post("/add-brand-all-data", brandController.addBrandWithAllData);
 BrandCreationRouter.post("/add-brand", brandController.addBrand);
 BrandCreationRouter.get("/get-brands", brandController.getAllBrands);
 BrandCreationRouter.get("/:id", brandController.getBrand);
@@ -16,6 +17,7 @@ BrandCreationRouter.post("/:id/edit-brand", brandController.editBrand);
 BrandCreationRouter.post("/:id/delete-brand", brandController.deleteBrand);
 
 // Account routes 
+BrandCreationRouter.get("/:id/get-accounts", brandController.getAccounts);
 BrandCreationRouter.get("/:id/get-account", brandController.getAccount);
 BrandCreationRouter.post("/:id/add-change-account", brandController.addOrChangeAcount);
 

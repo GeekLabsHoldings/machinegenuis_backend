@@ -37,12 +37,12 @@ export const getAllBrands = async () => {
   const brands = await BrandsModel.find({ type: { $ne: 'subbrand' } });
 
   console.log(brands)
-  const brandswithData: { brand: IBrand, subBrands: ISubBrand[] }[] = []
+  const brandswithData: { brand: IBrand, subBrands: ISubBrand[], accounts:accountDataType[] }[] = []
   for (const brand of brands) {
     if (brand._id) {
       const subBrands = await getAllSubBrands(brand._id)
-      console.log(subBrands)
-      brandswithData.push({ brand: brand, subBrands: subBrands })
+      const accounts = await getAccounts(brand._id)
+      brandswithData.push({ brand: brand, subBrands: subBrands, accounts:accounts })
     }
 
   }
@@ -125,10 +125,34 @@ export async function checkAndSuggest(domainName:string) {
 
 
 // Placeholder for account-related functions
-export const getAccount = async (id: string) => {
+export const getAccounts = async (id: string, ) => {
   // Implement account retrieval logic
+  const accounts = await SocialPostingAccount.find({brand: id, });
+
+  const data :accountDataType[] = []
+  for(const account of accounts){
+      const decrypted = decrypt(account.token)
+      const obj = JSON.parse(String(decrypted))
+      console.log(obj,decrypted,account.token)
+      data.push({platform:account.platform, account:obj})
+  }
+  return data
+};
+
+
+export const getAccount = async (id: string, platform:string) => {
+  // Implement account retrieval logic
+  const account = await SocialPostingAccount.findOne({brand: id, platform:platform});
+  console.log(account)
+  if (account){
+    let decrypted = decrypt(account.token)
+    let obj = JSON.parse(String(decrypted))
   
-  throw new Error('Not implemented');
+    return {platform:account.platform, account:obj}
+  
+  }
+
+  return null
 };
 
 export const addOrDeleteAccount = async (id: string, accountData: accountDataType) => {
@@ -150,7 +174,7 @@ export const addOrDeleteAccount = async (id: string, accountData: accountDataTyp
     console.log('token: ' + token);
     const Account = new SocialPostingAccount({
       token: token,
-      platform: "REDDIT",
+      platform: accountData.platform,
       brand: id
     });
 
@@ -184,10 +208,12 @@ function decrypt(encryptedData: string): string | null {
   const sk: String | undefined = process.env.ENCRYPTION_SECRET_KEY
   if (sk) {
     const secretKey = Buffer.from(sk, 'hex');
-
+    console.log(encryptedData)
     const decipher = crypto.createDecipheriv('aes-256-ecb', secretKey, null); // No IV for ECB
     let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+  
     decrypted += decipher.final('utf8');
+    console.log(encryptedData, decrypted)
     return decrypted;
   }
   return null
@@ -197,108 +223,3 @@ function decrypt(encryptedData: string): string | null {
 
 
 
-
-export async function saveAccount_reddit(data: IRedditAccountData,) {
-
-  try {
-
-    const result = await SocialPostingAccount.deleteOne({ platform: "REDDIT", brand_id: data.brand_id, });
-
-    if (result.deletedCount === 1) {
-      console.log('Message deleted successfully!');
-    } else {
-      console.log('Message not found.');
-    }
-
-    let payload = { ...data };
-    let payloadStr = JSON.stringify(payload)
-    const token = encrypt(payloadStr)
-
-    console.log('token: ' + token);
-    const redditAccount = new SocialPostingAccount({
-      token: token,
-      platform: "REDDIT",
-      brand: data.brand_id
-    });
-
-    redditAccount.save()
-  } catch (error) {
-
-    console.log(error)
-  }
-
-
-}
-
-
-export async function getAccount_reddit(brand_id: string): Promise<IRedditAccountData | null> {
-  try {
-    let account: IAccount | null
-    if (brand_id) {
-      account = await SocialPostingAccount.findOne({ platform: "REDDIT", brand: brand_id })
-    } else {
-      account = await SocialPostingAccount.findOne({ platform: "REDDIT", })
-    }
-    //console.log("account", account)
-    if (!account)
-      account = await SocialPostingAccount.findOne({ platform: "REDDIT", brand: "Geek Labs Holdings" })
-    const payload = decrypt(account?.token || "")
-    const obj: IRedditAccountData = JSON.parse(payload || "")
-    return obj;
-  } catch (error) {
-    console.error(error);
-    return null
-  }
-}
-
-
-
-export async function saveAccount_telegram(data: ITelegramAccountData) {
-
-  try {
-
-    const result = await SocialPostingAccount.deleteOne({ platform: "TELEGRAM", brand: data.brand_id });
-
-    if (result.deletedCount === 1) {
-      console.log('Message deleted successfully!');
-    } else {
-      console.log('Message not found.');
-    }
-
-
-    const token = encrypt(data.token);
-
-    const redditAccount = new SocialPostingAccount({
-      token: token,
-      platform: "TELEGRAM",
-      brand: data.brand_id
-    });
-
-    redditAccount.save()
-  } catch (error) {
-    console.log(error)
-  }
-
-
-}
-
-
-
-
-
-export async function getAccount_telegram(brand: string) {
-  try {
-    let account
-    if (brand) {
-      account = await SocialPostingAccount.findOne({ platform: "TELEGRAM", brand: brand })
-    } else {
-      account = await SocialPostingAccount.findOne({ platform: "TELEGRAM", })
-    }
-    //console.log("account", account)
-    const token = decrypt(account?.token || "")
-    return token;
-  } catch (error) {
-    console.error(error);
-
-  }
-}

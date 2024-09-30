@@ -2,7 +2,7 @@ import systemError from "../../Utils/Error/SystemError";
  import * as brandService from "../../Service/Operations/BrandCreation.service"
 import { Request, Response } from 'express';
 import BrandsModel from "../../Model/Operations/BrandCreation.model";
-
+import { startSession } from "mongoose";
 
 export const getAllBrands = async (req: Request, res: Response) => {
   try {
@@ -40,6 +40,29 @@ export const addBrand = async (req: Request, res: Response) => {
   }
 };
 
+
+export const addBrandWithAllData = async (req: Request, res: Response) => {
+  const session = await startSession();
+  try {
+    session.startTransaction();
+
+    const newBrand = await brandService.createBrand(req.body);
+    const MainBrand = await newBrand.save()
+    
+    
+
+
+
+
+    res.status(201).json(newBrand);
+  } catch (error) {
+    await session.commitTransaction();
+    console.log(error)
+    return systemError.sendError(res, error);
+  }finally{
+    session.endSession();
+  }
+};
 
 
 export const editBrand = async (req: Request, res: Response) => {
@@ -120,15 +143,28 @@ export const deleteSubBrand = async (req: Request, res: Response) => {
   }
 };
 
-export const getAccount = async (req: Request, res: Response) => {
+export const getAccounts = async (req: Request, res: Response) => {
   try {
-    const account = await brandService.getAccount(req.params.id);
+    const account = await brandService.getAccounts(req.params.id);
     res.json(account);
   } catch (error) {
     console.log(error)
     return systemError.sendError(res, error);
   }
 };
+
+
+
+export const getAccount = async (req: Request, res: Response) => {
+  try {
+    const account = await brandService.getAccount(req.params.id, String(req.query.platform));
+    res.json(account);
+  } catch (error) {
+    console.log(error)
+    return systemError.sendError(res, error);
+  }
+};
+
 
 export const addOrChangeAcount = async (req: Request, res: Response) => {
   try {
