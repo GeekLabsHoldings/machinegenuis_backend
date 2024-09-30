@@ -195,6 +195,21 @@ const reConvertTextToAudio = async (text, index) => {
   }
 };
 
+const testAudio = async (req , res) => {
+  try {
+    const { selectedContent } = req.body;
+    if (!selectedContent) {
+      return res.status(400).json({ success: false, error: "No content provided" });
+    }
+    const audioPath = await reConvertTextToAudio(selectedContent, "test");
+    return res.json({ success: true, audioPath });
+  }
+  catch
+  {
+    return res.status(500).json({ success: false, error: "Error regenerating audio"})
+  }
+}
+
 const regenrateAudio = async (req , res) => {
   try {
     const { selectedContent , index} = req.body;
@@ -233,5 +248,6 @@ const splitAndConvert = async (req , res) => {
 module.exports =
 {
     splitAndConvert,
-    regenrateAudio
+    regenrateAudio,
+    testAudio
 }
