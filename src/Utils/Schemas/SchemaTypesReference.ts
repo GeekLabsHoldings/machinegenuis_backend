@@ -40,6 +40,7 @@ enum SchemaTypesReference {
   SocialMediaPosts="socialmediaposts",
   TelegramMessage = "telegram_message",
   Brands = "brands_collection",
+  BroadCastMessage="broadcastmessage",
 }
 
 export { SchemaTypesReference };
