@@ -1,8 +1,9 @@
 import { Schema , model } from "mongoose";
 import IBroadCastMessage from "../IBroadCastMessage.model";
-import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
-import {EnumStringRequired, RefType, RequiredString} from "../../Utils/Schemas";
-import { BroadCastMessageArr } from "../../Utils/BroadCastMessageType";
+import { BroadCastMessageArr } from "../../../Utils/BroadCastMessageType";
+import { EnumStringRequired, RequiredString, RefType } from "../../../Utils/Schemas";
+import { SchemaTypesReference } from "../../../Utils/Schemas/SchemaTypesReference";
+
 
 const BroadCastMessageSchema = new Schema<IBroadCastMessage>({
   messageType:EnumStringRequired(BroadCastMessageArr) ,
