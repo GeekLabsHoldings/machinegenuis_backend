@@ -19,13 +19,20 @@ import {
 } from "../../Service/SocialMedia/socialMedia.service";
 import {
   deleteAccountTwitter,
+  deleteTweet,
   existAccount,
+  getAllTweetsMustApprove,
+  getAndUpdateTweetComment,
+  getPromptWithPlatform,
+  getTweetById,
   getTwitterAccount,
   getTwitterAccounts,
 } from "../../Service/SocialMedia/twitter.service";
 import moment from "moment-timezone";
 import OpenAiService from "../../Service/OpenAi/OpenAiService";
 import { campaignListEnum } from "../../Utils/SocialMedia/campaign";
+import PromptService from "../../Service/Prompt/PromptService";
+import socialCommentModel from "../../Model/SocialMedia/Twitter.SocialMedia.tweets.model";
 
 function decrypt(encryptedText) {
   const algorithm = "aes-256-cbc";
@@ -138,7 +145,7 @@ export const addNewAccountTwitter = async (req, res) => {
     return res.json({ message: "Done" });
   } catch (error) {
     console.error("Error encrypting data:", error);
-   return systemError.sendError(res, error);
+    return systemError.sendError(res, error);
   }
 };
 export const getTwitterAccountSecretData = async (req, res) => {
@@ -246,7 +253,7 @@ export const addSocialAccountTwitter = async (req, res) => {
     );
     return res.status(200).json({ result: socialAccount });
   } catch (error) {
-   return systemError.sendError(res, error);
+    return systemError.sendError(res, error);
   }
 };
 export const editTwitterAccount = async (req, res) => {
@@ -302,7 +309,7 @@ export const editTwitterAccount = async (req, res) => {
     if (error.code === 11000) {
       return res.status(400).json({ message: "Account name already exists" });
     }
-   return systemError.sendError(res, error);
+    return systemError.sendError(res, error);
   }
 };
 export const editCampaignTwitterAccount = async (req, res) => {
@@ -323,7 +330,7 @@ export const editCampaignTwitterAccount = async (req, res) => {
     if (error.code === 11000) {
       return res.status(400).json({ message: "Account name already exists" });
     }
-   return systemError.sendError(res, error);
+    return systemError.sendError(res, error);
   }
 };
 export const deleteTwitterAccount = async (req, res) => {
@@ -343,11 +350,92 @@ export const deleteTwitterAccount = async (req, res) => {
     return systemError.sendError(res, error);
   }
 };
-export const getAllAccountTwitter = async (req, res) => {
+export const getTweetsMustApprove = async (req, res) => {
   try {
-    const twitterAccounts = await getTwitterAccounts(req.params.sharingList);
+    const twitterAccounts = await getAllTweetsMustApprove();
     return res.status(200).json({ result: twitterAccounts });
   } catch (error) {
-   return systemError.sendError(res, error);
+    return systemError.sendError(res, error);
+  }
+};
+export const generateNewReply = async (req, res) => {
+  try {
+    const { content, platform } = req.body;
+    const openaiService = new OpenAiService();
+    const promptService = new PromptService();
+    const promptData = await promptService.getPromptData(platform, null);
+    const prompt = promptData.prompt.replace("[[1]]", content);
+    const result = await openaiService.callOpenAiApi(
+      prompt,
+      "You are a representative of Machine Genius, a social media organization focused on multiple fields. Provide a brief and relevant comment in response to the input, ensuring clarity and engagement."
+    );
+    const reply = result.choices[0].message.content;
+    return res.status(200).json({ NewComment: reply });
+  } catch (error) {
+    return systemError.sendError(res, error);
+  }
+};
+export const addReplyToTweet = async (req, res) => {
+  const { _id } = req.params;
+  try {
+    const { brand, tweetId, reply } = req.body;
+    const tweet = await getTweetById(_id);
+    if (!tweet) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.ACCOUNT_NOT_FOUND)
+        .throw();
+    }
+    const twitterData = await getTwitterData(tweet.brand);
+    const { token } = twitterData;
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const decryptedAppKey = decrypt(decodedToken.appKey);
+    const decryptedAppSecret = decrypt(decodedToken.appSecret);
+    const decryptedAccessToken = decrypt(decodedToken.accessToken);
+    const decryptedAccessSecret = decrypt(decodedToken.accessSecret);
+    const decryptedBearerToken = decrypt(decodedToken.bearerToken);
+    const tweetReply = await addReply(
+      decryptedAppKey,
+      decryptedAppSecret,
+      decryptedAccessToken,
+      decryptedAccessSecret,
+      reply,
+      tweetId
+    );
+    console.log("------->",tweetReply.data.status);
+    
+    if (tweetReply.message === "Reply posted successfully") {
+      await deleteTweet(_id);
+    }
+
+    return res.status(200).json({ result: tweetReply });
+  } catch (error) {
+    console.log(error);
+    
+    if(error.statusCode === 403){ 
+      await deleteTweet(_id);
+    return res.status(403).json({ message: "Tweet not found" });
+    }
+    return systemError.sendError(res, error);
+  }
+};
+export const generateHashtags = async (req, res) => {
+  try {
+    const { content } = req.body;
+    const openaiService = new OpenAiService();
+    const promptService = new PromptService();
+    const promptData = await promptService.getPromptData(
+      "TWITTER_HASHTAGS",
+      null
+    );
+    const prompt = promptData.prompt.replace("[[1]]", content);
+    const result = await openaiService.callOpenAiApi(
+      prompt,
+      "You are a representative of Machine Genius, a social media organization focused on multiple fields. Provide a brief and relevant comment in response to the input, ensuring clarity and engagement."
+    );
+    const hashTags = result.choices[0].message.content;
+    return res.status(200).json({ hashTags });
+  } catch (error) {
+    return systemError.sendError(res, error);
   }
 };
