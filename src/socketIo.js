@@ -5,7 +5,7 @@ import {
   msgHandler,
 } from "./Controller/chat/chat.controller.js";
 import eventEmitter from "./Utils/CronJobs/TweetsQueue/eventEmitter.js";
-import { DepartmentEnum } from "./Utils/DepartmentAndRoles/index.ts";
+import { DepartmentEnum } from "./Utils/DepartmentAndRoles/index";
 let io;
 
 export default function createIo(server) {
