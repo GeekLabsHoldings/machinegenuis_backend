@@ -4,7 +4,7 @@ import SocialMediaPosts from "../../Model/SocialMedia/SocialMediaPosts.models";
 import axios from 'axios';
 import moment from "moment";
 import systemError from "../../Utils/Error/SystemError";
-import RedditAccountModel from '../../Model/SocialMedia/RedditAccount.model';
+import SocialPostingAccount from "../../Model/Operations/SocialPostingAccount.model";
 import crypto from 'crypto';
 
 
@@ -36,7 +36,7 @@ export async function saveAccount(req,res){
 
   try {
     
-    const result = await RedditAccountModel.deleteOne({ platform:"REDDIT", brand:req.body.brand});
+    const result = await SocialPostingAccount.deleteOne({ platform:"TELEGRAM", brand:req.body.brand});
   
     if (result.deletedCount === 1) {
       console.log('Message deleted successfully!');
@@ -47,7 +47,7 @@ export async function saveAccount(req,res){
 
     const token = encrypt(req.body.token);
   
-    const redditAccount = new RedditAccountModel({
+    const redditAccount = new SocialPostingAccount({
       token: token, 
       platform: "TELEGRAM",
       brand:req.body.brand
@@ -69,13 +69,13 @@ export async function saveAccount(req,res){
     try {
       let account
       if(brand){
-         account = await RedditAccountModel.findOne({platform:"TELEGRAM", brand:brand})
+         account = await SocialPostingAccount.findOne({platform:"TELEGRAM", brand:brand})
       }else{
-         account = await RedditAccountModel.findOne({platform:"TELEGRAM",})
+         account = await SocialPostingAccount.findOne({platform:"TELEGRAM",})
       }
       
     if(!account){
-      account = await RedditAccountModel.findOne({platform:"TELEGRAM", brand:"Geek Labs Holdings"})
+      account = await SocialPostingAccount.findOne({platform:"TELEGRAM", brand:"Geek Labs Holdings"})
     }
     console.log("account \n\n", account)
       const token = decrypt(account.token)

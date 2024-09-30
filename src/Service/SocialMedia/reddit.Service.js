@@ -2,7 +2,7 @@ import axios from 'axios';
 import qs from 'qs';
 import SocialMediaGroups from "../../Model/SocialMedia/SocialMediaGroups.model";
 import SocialMediaPosts from "../../Model/SocialMedia/SocialMediaPosts.models";
-import RedditAccountModel from '../../Model/SocialMedia/RedditAccount.model';
+import SocialPostingAccount from '../../Model/Operations/SocialPostingAccount.model';
 import crypto from 'crypto';
 import moment from 'moment';
 import { console } from 'inspector';
@@ -94,7 +94,7 @@ try {
   const token = encrypt(payload)
 
 
-  const redditAccount = new RedditAccountModel({
+  const redditAccount = new SocialPostingAccount({
     token: token, 
     platform: "REDDIT",
     brand:req.body.brand
@@ -116,13 +116,13 @@ export async function getAccount(brand){
   try {
     let account
     if(brand){
-       account = await RedditAccountModel.findOne({platform:"REDDIT", brand:brand})
+       account = await SocialPostingAccount.findOne({platform:"REDDIT", brand:brand})
     }else{
-       account = await RedditAccountModel.findOne({platform:"REDDIT",})
+       account = await SocialPostingAccount.findOne({platform:"REDDIT",})
     }
 
     if(!account){
-      account = await RedditAccountModel.findOne({platform:"REDDIT", brand:"Geek Labs Holdings"})
+      account = await SocialPostingAccount.findOne({platform:"REDDIT", brand:"Geek Labs Holdings"})
     }
 
     //console.log("account", account)

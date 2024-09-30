@@ -6,7 +6,7 @@ import BrandCreationRouter from "./BrandCreation.router";
 
 
 const OperationRouter = Router();
-socialMediaRouter.use("/brand", BrandCreationRouter);
+OperationRouter.use("/brand", BrandCreationRouter);
 
 
 export default OperationRouter;

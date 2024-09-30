@@ -2,17 +2,18 @@ import { Schema, model,Types } from "mongoose";
 import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
 import { EnumStringRequired } from "../../Utils/Schemas";
 import { PlatformArr } from "../../Utils/SocialMedia/Platform";
-import { brandArr } from "../../Utils/SocialMedia/Brand";
+import { IAccount } from "./IPostingAccounts_interface";
 
-const RedditAccountSchema = new Schema({
+
+const SocialPostingAccountSchema = new Schema<IAccount>({
   platform: EnumStringRequired(PlatformArr),
 
-  brand: EnumStringRequired(brandArr),
+  brand: Types.ObjectId,
   
   token: { type: String, required: true },
 
 });
 
-const RedditAccountModel = model( SchemaTypesReference.RedditAccount,RedditAccountSchema);
+const SocialPostingAccount = model( SchemaTypesReference.SocialPostingAccount,SocialPostingAccountSchema);
 
-export default RedditAccountModel;
+export default SocialPostingAccount;
