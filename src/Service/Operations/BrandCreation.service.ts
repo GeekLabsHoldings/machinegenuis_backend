@@ -22,7 +22,6 @@ export const addBrandWithSubandAccounts = async () => {
 
 
 
-
     await session.commitTransaction();
   } catch (error) {
     await session.abortTransaction();
@@ -143,7 +142,6 @@ export const getAccounts = async (id: string, ) => {
 export const getAccount = async (id: string, platform:string) => {
   // Implement account retrieval logic
   const account = await SocialPostingAccount.findOne({brand: id, platform:platform});
-  console.log(account)
   if (account){
     let decrypted = decrypt(account.token)
     let obj = JSON.parse(String(decrypted))
@@ -171,7 +169,6 @@ export const addOrDeleteAccount = async (id: string, accountData: accountDataTyp
     let payloadStr = JSON.stringify(payload)
     const token = encrypt(payloadStr)
 
-    console.log('token: ' + token);
     const Account = new SocialPostingAccount({
       token: token,
       platform: accountData.platform,
@@ -179,6 +176,7 @@ export const addOrDeleteAccount = async (id: string, accountData: accountDataTyp
     });
 
     Account.save()
+    console.log('Account added successfully!');
   } catch (error) {
     console.log(error)
   }
@@ -208,12 +206,10 @@ function decrypt(encryptedData: string): string | null {
   const sk: String | undefined = process.env.ENCRYPTION_SECRET_KEY
   if (sk) {
     const secretKey = Buffer.from(sk, 'hex');
-    console.log(encryptedData)
     const decipher = crypto.createDecipheriv('aes-256-ecb', secretKey, null); // No IV for ECB
     let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
   
     decrypted += decipher.final('utf8');
-    console.log(encryptedData, decrypted)
     return decrypted;
   }
   return null
