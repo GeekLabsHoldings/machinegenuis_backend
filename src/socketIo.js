@@ -4,7 +4,8 @@ import {
   handleMessage,
   msgHandler,
 } from "./Controller/chat/chat.controller.js";
-
+import eventEmitter from "./Utils/CronJobs/TweetsQueue/eventEmitter.js";
+import { DepartmentEnum } from "./Utils/DepartmentAndRoles/index";
 let io;
 
 export default function createIo(server) {
@@ -25,8 +26,24 @@ export default function createIo(server) {
 
 // Define the onConnection function
 const onConnection = (socket) => {
-  console.log(`New client connected: ${socket.id}`);
   msgHandler(io, socket);
-  
+  const user = socket.handshake.user;
+  console.log(`New client connected: ${socket.id}`);
+  if (user.department && Array.isArray(user.department)) {
+    user.department.forEach((dept) => {
+      const roomName = `department_${dept}`;
+      socket.join(roomName);
+      console.log(`User ${user.firstName} joined room: ${roomName}`);
+    });
+  }
+
+  eventEmitter.on("TwitterNewTweets", (data) => {
+    console.log("Event Received: Post Added to Approval Queue:", data);
+    if (user.department.includes(DepartmentEnum.SocialMedia)) {
+      const socialMediaRoom = `department_${DepartmentEnum.SocialMedia}`;
+      io.to(socialMediaRoom).emit("NewTweets", data);
+      console.log(`Message sent to ${socialMediaRoom}:`, data);
+    }
+  });
 };
-export {io};
+export { io };

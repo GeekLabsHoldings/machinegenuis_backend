@@ -15,6 +15,18 @@ class addWordServ  {
             throw new Error(`Database save failed: ${error.message}`);
         }
     }
+
+    async findAndReplaceWords(content, wordsList){
+        let updatedContent = content;
+        console.log(updatedContent);
+              
+        wordsList.forEach(({ original_word, replacement_word }) => {
+          const regex = new RegExp(`\\b${original_word}\\b`, 'g');
+          updatedContent = updatedContent.replace(regex, replacement_word);
+        });
+        console.log(updatedContent);
+        return updatedContent;
+    };   
 }
 
 
