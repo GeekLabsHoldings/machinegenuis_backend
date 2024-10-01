@@ -21,6 +21,7 @@ enum SchemaTypesReference {
   SocialMediaAccount = "socialAccount",
   SocialMediaComment = "socialMediaComment",
   TwitterData = "twitterData",
+  SocialPostingAccount = "socialmedia-posting-accounts",
   Payroll = "payroll",
   Subscription = "subscription",
   BankAccount = "bankAccount",
@@ -38,6 +39,8 @@ enum SchemaTypesReference {
   SocialMediaGroups="socialmediagroups",
   SocialMediaPosts="socialmediaposts",
   TelegramMessage = "telegram_message",
+  Brands = "brands_collection",
+  BroadCastMessage="broadcastmessage",
 }
 
 export { SchemaTypesReference };
