@@ -10,7 +10,6 @@ const socialMediaSchema = new Schema({
   brand: EnumStringRequired(brandArr),
   content: {
     type: String,
-    required: true,
   },
   postId: { type: String, required: true },
   employeeId: {

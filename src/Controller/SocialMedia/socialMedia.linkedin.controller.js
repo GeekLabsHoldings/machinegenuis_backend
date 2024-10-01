@@ -40,7 +40,7 @@ export const getDataLinkedin = async (req, res) => {
 export const addPostSocialMediaLinkedin = async (req, res) => {
   const { brand, content, asset } = req.body;
   const userId = req.body.currentUser._id;
-  if (!content || !brand) {
+  if (!brand) {
     return systemError
       .setStatus(400)
       .setMessage(ErrorMessages.DATA_IS_REQUIRED)
