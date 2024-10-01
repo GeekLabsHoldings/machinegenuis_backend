@@ -8,8 +8,9 @@ export interface IAccount {
   }    
 export interface IRedditAccountData {appID:string, appSecret:string, username:string, password:string, }
 export interface ITelegramAccountData {token:string,}  
-
+export interface ITwetterAccountData {ConsumerKey:string,ConsumerSecret:string,AccessToken:string,TokenSecret:string,BearerToken:string }  
+export interface ILinkedInAccountData {token:string,owner:string} 
 
 export type accountDataType = 
 {platform:string,
-  account:IRedditAccountData|ITelegramAccountData}
+  account:IRedditAccountData|ITelegramAccountData|ITwetterAccountData|ILinkedInAccountData}

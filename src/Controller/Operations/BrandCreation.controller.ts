@@ -177,6 +177,19 @@ export const addOrChangeAcount = async (req: Request, res: Response) => {
       const result = await brandService.addOrDeleteAccount(req.params.id, accountData);
       return  res.json(result);
     }
+    if (req.body.platform=="LINKEDIN"){
+      accountData = {platform:req.body.platform,
+         account:{token:req.body.token, owner:req.body.owner,}}
+      const result = await brandService.addOrDeleteAccount(req.params.id, accountData);
+      return  res.json(result);
+    }
+    if (req.body.platform=="TWITTER"){
+      accountData = {platform:req.body.platform,
+         account:{ConsumerKey:req.body.ConsumerKey, ConsumerSecret:req.body.ConsumerSecret,
+          AccessToken:req.body.AccessToken, TokenSecret:req.body.TokenSecret, BearerToken:req.body.BearerToken}}
+      const result = await brandService.addOrDeleteAccount(req.params.id, accountData);
+      return  res.json(result);
+    }
     else if (req.body.platform=="TELEGRAM"){
       accountData = {platform:req.body.platform,
          account:{token:req.body.token}}
