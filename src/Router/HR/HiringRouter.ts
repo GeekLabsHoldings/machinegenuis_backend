@@ -43,8 +43,8 @@ HiringRouter.put('/publish-job/:_id', async (req: Request, res: Response): Promi
     session.startTransaction();
     try {
         const { _id } = req.params;
-        const { contract, template, skills, role } = req.body;
-        const result = await hiringController.publishJob(_id, contract, template, skills, role, session);
+        const { role, contract, template, skills, questions } = req.body.details;
+        const result = await hiringController.publishJob(_id, role, contract, template, skills, questions, session);
         await session.commitTransaction();
         return res.json(result);
     } catch (error) {

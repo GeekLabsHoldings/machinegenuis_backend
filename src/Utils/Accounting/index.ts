@@ -1,4 +1,3 @@
-import { Model } from "mongoose";
 import { DigitalAssetModel, EquipmentModel, RealEstateModel } from "../../Model/Accounting/Assets/AssetsModel";
 
 enum AssetsTypeEnum {

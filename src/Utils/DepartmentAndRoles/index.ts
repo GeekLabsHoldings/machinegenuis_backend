@@ -20,13 +20,14 @@ enum RoleEnum {
 
 
 const DepartmentRoles = {
-    Departments: ["Recruiter", "Training", "Employee Relations"],
+    'hr': ["Recruiter", "Training", "Employee Relations"],
     "content-creation": ["ContentWriter"],
     CEO: ['CEO'],
     "social-media": ["SocialMedia"],
     administrative: ['administrative'],
     accounting: ['Payroll'],
     VideoEditing: ['VideoEditor']
+
 } as const;
 
 const Departments = Object.keys(DepartmentRoles)
