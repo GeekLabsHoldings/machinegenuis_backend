@@ -43,11 +43,6 @@ app.get("/generate-image/:email", async (req, res) => {
   console.log(`==================User ${email} Open the link==================`);
   return res.redirect("https://machine-genius.s3.amazonaws.com/images/1725871410553.png");
 });
-
-
-app.use(`/${RouterEnum.Operations}`, OperationRouter )
-app.use(`/${RouterEnum.socialMedia}`, socialMediaRouter);
-
 app.use(`/${RouterEnum.authentication}`, AuthenticationRouter);
 app.use(`/${RouterEnum.unAuthorizer}`, unAuthorizerApis);
 app.use(`/${RouterEnum.calendly}`, CalendlyRouter);
@@ -59,7 +54,7 @@ app.use(`/${RouterEnum.admin}`, AdminRouter);
 app.use(`/${RouterEnum.user}`, UserRouter);
 app.use(`/${RouterEnum.Administrative}`, AdministrativeRouter);
 app.use(`/${RouterEnum.Accounting}`, AccountingRouter);
-
-
+app.use(`/${RouterEnum.socialMedia}`, socialMediaRouter);
+app.use(`/${RouterEnum.CEO}`, OperationRouter )
 export { app };
 
