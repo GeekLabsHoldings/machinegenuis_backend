@@ -24,7 +24,6 @@ export async function add_subreddit(req, res) {
   try {
     const { group_name, link, group_id, niche, brand, platform, engagement } =
       req.body;
-    console.log("group  name \n", group_name);
 
     const acount = await RedditServices.getAccount(null, res);
     const r = await RedditServices.getsnoowrap(

@@ -58,7 +58,7 @@ app.use(`/${RouterEnum.admin}`, AdminRouter);
 app.use(`/${RouterEnum.user}`, UserRouter);
 app.use(`/${RouterEnum.Administrative}`, AdministrativeRouter);
 app.use(`/${RouterEnum.Accounting}`, AccountingRouter);
-app.use(`/${RouterEnum.Operations}`, OperationRouter )
+app.use(`/${RouterEnum.CEO}`, OperationRouter )
 app.use(`/${RouterEnum.socialMedia}`, socialMediaRouter);
 
 export { app };

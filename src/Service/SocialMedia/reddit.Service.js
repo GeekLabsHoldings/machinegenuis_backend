@@ -92,7 +92,7 @@ export async function saveAccount(req){
   payload = JSON.stringify(payload)
   const token = encrypt(payload)
 
-  console.log(token)
+ 
   const redditAccount = new SocialPostingAccount({
     token: token, 
     platform: "REDDIT",
@@ -120,7 +120,7 @@ export async function getAccount(brand){
 
     const payload = decrypt(account.token)
     const obj = JSON.parse(payload)
-    console.log("account",obj, account)
+
 
     return  obj;
 

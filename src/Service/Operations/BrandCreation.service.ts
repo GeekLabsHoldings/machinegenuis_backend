@@ -5,7 +5,7 @@ import { ISubBrand, IBrand, IBrandWithSubs } from "../../Model/Operations/IBrand
 import { IAccount, IRedditAccountData, ITelegramAccountData, accountDataType } from "../../Model/Operations/IPostingAccounts_interface";
 import SocialPostingAccount from "../../Model/Operations/SocialPostingAccount.model";
 import crypto, { Encoding } from 'crypto';
-import Route53DomainChecker from "../AWS/Rout53/domains";
+import Route53DomainChecker, { ContactDetail } from "../AWS/Rout53/domains";
 
 
 
@@ -13,15 +13,26 @@ import Route53DomainChecker from "../AWS/Rout53/domains";
 
 // import { Request, Response } from 'express';
 
-export const addBrandWithSubandAccounts = async () => {
+export const addBrandWithSubandAccounts = async (brandData: IBrand,
+   subBrands:{subbrand:ISubBrand, accounts:accountDataType[]}[],
+    accounts:accountDataType[]) => {
   const session = await startSession();
   try {
     session.startTransaction();
 
-    const newbrand = new BrandsModel({});
+    const newbrand = new BrandsModel({...brandData});
+    const Brand = await newbrand.save()
+    for(const sub of subBrands){
+      const subbrand = await createSubBrand(Brand._id, sub.subbrand)
+      for (const acc of sub.accounts){
+          const account = await addOrDeleteAccount(subbrand._id, acc)
+      }
+    }
 
-
-
+    for (const acc of accounts){
+      const account = await addOrDeleteAccount(Brand._id, acc)
+    }
+    return Brand
     await session.commitTransaction();
   } catch (error) {
     await session.abortTransaction();
@@ -35,7 +46,7 @@ export const addBrandWithSubandAccounts = async () => {
 export const getAllBrands = async () => {
   const brands = await BrandsModel.find({ type: { $ne: 'subbrand' } });
 
-  console.log(brands)
+  //console.log(brands)
   const brandswithData: { brand: IBrand, subBrands: ISubBrand[], accounts:accountDataType[] }[] = []
   for (const brand of brands) {
     if (brand._id) {
@@ -120,6 +131,16 @@ export async function checkAndSuggest(domainName:string) {
 }
 
 
+export async function registerDomain(domainName: string,DurationInYears:number, contactDetails: ContactDetail) {
+  const checker = new Route53DomainChecker();
+
+  const result = await checker.registerDomain(domainName,DurationInYears, contactDetails);
+  console.log(`Is domain result is ${result}`);
+
+  return result
+
+}
+
 
 
 
@@ -163,19 +184,37 @@ export const addOrDeleteAccount = async (id: string, accountData: accountDataTyp
     } else {
       console.log('Account not found.');
     }
+    if (accountData.platform == "REDDIT"){
+      let payload = { ...accountData.account };
+      let payloadStr = JSON.stringify(payload)
+      const token = encrypt(payloadStr)
+      // console.log("encryption\t",accountData, payload, payloadStr, token)
+      const Account = new SocialPostingAccount({
+        token: token,
+        platform: accountData.platform,
+        brand: id
+      });
+      Account.save()
+      console.log('Account added successfully!');
+      return
+    }
+    else if(accountData.platform == "TELEGRAM"){
+      let payload = { ...accountData.account };
+      let payloadStr = JSON.stringify(payload)
+      const token = encrypt(payloadStr)
+      console.log("encryption\t",accountData, payload, payloadStr, token)
+      const Account = new SocialPostingAccount({
+        token: token,
+        platform: accountData.platform,
+        brand: id
+      });
+      Account.save()
+      console.log('Account added successfully!');
+      return
+    }
+    
 
-    let payload = { ...accountData.account };
-    let payloadStr = JSON.stringify(payload)
-    const token = encrypt(payloadStr)
 
-    const Account = new SocialPostingAccount({
-      token: token,
-      platform: accountData.platform,
-      brand: id
-    });
-
-    Account.save()
-    console.log('Account added successfully!');
   } catch (error) {
     console.log(error)
   }
@@ -207,8 +246,9 @@ function decrypt(encryptedData: string): string | null {
     const secretKey = Buffer.from(sk, 'hex');
     const decipher = crypto.createDecipheriv('aes-256-ecb', secretKey, null); // No IV for ECB
     let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
-  
+    
     decrypted += decipher.final('utf8');
+
     return decrypted;
   }
   return null

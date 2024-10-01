@@ -3,6 +3,10 @@ import systemError from "../../Utils/Error/SystemError";
 import { Request, Response } from 'express';
 import BrandsModel from "../../Model/Operations/BrandCreation.model";
 import { startSession } from "mongoose";
+import { ContactDetail } from "../../Service/AWS/Rout53/domains"; 
+import { accountDataType } from "../../Model/Operations/IPostingAccounts_interface";
+import { IBrand, ISubBrand } from "../../Model/Operations/IBrand_interface";
+
 
 export const getAllBrands = async (req: Request, res: Response) => {
   try {
@@ -42,25 +46,17 @@ export const addBrand = async (req: Request, res: Response) => {
 
 
 export const addBrandWithAllData = async (req: Request, res: Response) => {
-  const session = await startSession();
   try {
-    session.startTransaction();
-
-    const newBrand = await brandService.createBrand(req.body);
-    const MainBrand = await newBrand.save()
-    
-    
-
-
-
+     const  brandData: IBrand = req.body.brandData
+     const subBrands:{subbrand:ISubBrand, accounts:accountDataType[]}[] = req.body.brandData
+     const accounts:accountDataType[] = req.body.brandData
+     const newBrand = await brandService.addBrandWithSubandAccounts(brandData, subBrands, accounts);
 
     res.status(201).json(newBrand);
   } catch (error) {
-    await session.commitTransaction();
     console.log(error)
     return systemError.sendError(res, error);
   }finally{
-    session.endSession();
   }
 };
 
@@ -168,8 +164,23 @@ export const getAccount = async (req: Request, res: Response) => {
 
 export const addOrChangeAcount = async (req: Request, res: Response) => {
   try {
-    const result = await brandService.addOrDeleteAccount(req.params.id, req.body);
-    res.json(result);
+
+    //appID:string, appSecret:string, username:string, password:string, brand:string|Types.ObjectId
+    let accountData:accountDataType
+    if (req.body.platform=="REDDIT"){
+      accountData = {platform:req.body.platform,
+         account:{appID:req.body.appID, appSecret:req.body.appSecret,
+           username:req.body.username, password:req.body.password, brand:req.body.brand}}
+      const result = await brandService.addOrDeleteAccount(req.params.id, accountData);
+      return  res.json(result);
+    }
+    else if (req.body.platform=="TELEGRAM"){
+      accountData = {platform:req.body.platform,
+         account:{token:req.body.token, brand:req.body.brand}}
+      const result = await brandService.addOrDeleteAccount(req.params.id, accountData);
+      return  res.json(result);
+    }
+    return res.json({message:"error adding account check Platform and the correct Inputs for the platform"});
   } catch (error) {
     return systemError.sendError(res, error);
   }
@@ -179,6 +190,28 @@ export const addOrChangeAcount = async (req: Request, res: Response) => {
 export const checkDomains = async (req: Request, res: Response) => {
   try {
     const result = await brandService.checkAndSuggest(req.body.domainName);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    return systemError.sendError(res, error);
+  }
+};
+
+export const registerDomain = async (req: Request, res: Response) => {
+  try {
+    const contactDetail:ContactDetail = {
+      FirstName: req.body.FirstName,
+      LastName: req.body.LastName,
+      ContactType: req.body.ContactType,
+      AddressLine1: req.body.AddressLine1,
+      City: req.body.City,
+      State: req.body.State,
+      CountryCode: req.body.CountryCode,
+      ZipCode: req.body.ZipCode,
+      PhoneNumber: req.body.PhoneNumber,
+      Email: req.body.Email,
+    };
+    const result = await brandService.registerDomain(req.body.domainName, req.body.DurationInYears, contactDetail);
     res.json(result);
   } catch (error) {
     console.log(error);

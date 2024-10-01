@@ -2,7 +2,7 @@ import { Route53Domains, RegisterDomainCommand , CountryCode  } from '@aws-sdk/c
 import { fromIni, fromEnv } from '@aws-sdk/credential-providers';
 
 
-interface ContactDetail {
+export interface ContactDetail {
   FirstName: string;
   LastName: string;
   ContactType: 'PERSON' | 'COMPANY';
@@ -93,6 +93,7 @@ export default class Route53DomainChecker {
     try {
       const result = await this.client.send(command);
       console.log("Domain registration initiated successfully:", result);
+      return result
     } catch (error) {
       console.error("Error registering domain:", error);
     }
