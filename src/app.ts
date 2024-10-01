@@ -6,13 +6,8 @@ import AdminRouter from "./Router/Admin";
 import UserRouter from "./Router/User";
 import unAuthorizerApis from "./Router/UnAuthorizer";
 import CalendlyRouter from "./Router/Calendly";
-
-
 const app: Application = express();
-
 import bodyParser from "body-parser";
-
-
 import path from "path";
 import content_creation_router from "./Router/ContentCreation/main";
 import video_editing_router from "./Router/VideoEditing/main";
@@ -22,9 +17,6 @@ import socialMediaRouter from "./Router/SocialMedia";
 import AdministrativeRouter from './Router/Administrative';
 import AccountingRouter from "./Router/Accounting";
 import OperationRouter from "./Router/Operations";
-
-
-
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Middleware for parsing request body
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -36,8 +28,6 @@ app.use(cors());
 app.get("/", async (_, res) => {
   return res.json("Hello world!");
 });
-
-
 app.get("/generate-image/:email", async (req, res) => {
   const { email } = req.params;
   console.log(`==================User ${email} Open the link==================`);
@@ -57,4 +47,3 @@ app.use(`/${RouterEnum.Accounting}`, AccountingRouter);
 app.use(`/${RouterEnum.socialMedia}`, socialMediaRouter);
 app.use(`/${RouterEnum.CEO}`, OperationRouter )
 export { app };
-
