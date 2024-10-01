@@ -5,31 +5,44 @@ import axios from "axios";
  * @param {string} content The text content to post.
  * @returns {Promise<Object>} The response from the LinkedIn API.
  */
-export const postToLinkedIn = async  (content, asset)=> {
+export const postToLinkedIn = async (content, asset) => {
   try {
-    const response = await axios.post(
-      "https://api.linkedin.com/v2/ugcPosts",
-      {
-        author: `${process.env.LINKEDIN_AUTHOR_ID}`,
-        lifecycleState: "PUBLISHED",
-        specificContent: {
-          "com.linkedin.ugc.ShareContent": {
-            shareCommentary: {
-              text: content || "",
+    // Conditionally set media and category only if asset is provided
+    const mediaData = asset
+      ? {
+          shareMediaCategory: "IMAGE",
+          media: [
+            {
+              status: "READY",
+              media: asset, // Ensure asset is a valid media URN (e.g., "urn:li:digitalmediaAsset:...")
             },
-            shareMediaCategory: "IMAGE",
-            media: [
-              {
-                status: "READY",
-                media: asset,
-              },
-            ],
+          ],
+        }
+      : {
+          shareMediaCategory: "NONE", // No media provided
+        };
+
+    // Prepare the request body
+    const requestBody = {
+      author: `${process.env.LINKEDIN_AUTHOR_ID}`,
+      lifecycleState: "PUBLISHED",
+      specificContent: {
+        "com.linkedin.ugc.ShareContent": {
+          shareCommentary: {
+            text: content || "",
           },
-        },
-        visibility: {
-          "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC",
+          ...mediaData, // Spread the mediaData object
         },
       },
+      visibility: {
+        "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC",
+      },
+    };
+
+    // Send the post request
+    const response = await axios.post(
+      "https://api.linkedin.com/v2/ugcPosts",
+      requestBody,
       {
         headers: {
           Authorization: `Bearer ${process.env.LINKEDIN_ACCESS_TOKEN}`,
@@ -45,13 +58,19 @@ export const postToLinkedIn = async  (content, asset)=> {
 
     return response.data;
   } catch (error) {
-    console.error(
-      "Failed to post to LinkedIn:",
-      error.response ? error.response.data : error.message
-    );
+    if (error.response) {
+      // Handle specific LinkedIn errors
+      if (error.response.status === 422) {
+        console.error("Duplicate content detected. Consider modifying the content.");
+      } else if (error.response.status === 400) {
+        console.error("Bad request. Check media URN and content format.");
+      }
+    }
+
+    console.error("Failed to post to LinkedIn:", error.response ? error.response.data : error.message);
     throw error;
   }
-}
+};
 export const registerUpload = async () => {
   try {
     const response = await axios.post(
