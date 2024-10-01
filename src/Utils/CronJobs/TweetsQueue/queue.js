@@ -1,6 +1,6 @@
 import Queue from "bull";
 import "dotenv/config";
-import eventEmitter from "./eventEmitter";
+import eventEmitter from "../../EventEmitter/eventEmitter";
 const postApprovalQueue = new Queue("postApproval", {
   redis: {
     host: process.env.REDIS_HOST,

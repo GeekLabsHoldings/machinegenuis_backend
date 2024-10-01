@@ -9,6 +9,6 @@ const BroadCastMessageSchema = new Schema<IBroadCastMessage>({
   messageType:EnumStringRequired(BroadCastMessageArr) ,
   message: RequiredString,
   employee: RefType(SchemaTypesReference.Employee, true),
-});
+},{timestamps: true});
 const BroadCastMessageModel = model(SchemaTypesReference.BroadCastMessage, BroadCastMessageSchema);  
 export default BroadCastMessageModel;
