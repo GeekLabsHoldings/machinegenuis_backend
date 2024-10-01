@@ -5,14 +5,14 @@ const redditRouter = Router();
 
 
 
-redditRouter.post("/add-account",redditController.AddAnAccount)
+
 redditRouter.post("/add-subreddit",redditController.add_subreddit)
 redditRouter.post("/campaign-broadcast",redditController.CampaignBroadcast)
-redditRouter.post("/campaign-brand",redditController.CampaignByBrand)
+redditRouter.post("/campaign-brand/:id",redditController.CampaignByBrand)
 redditRouter.post("/delete-post",redditController.DeletePost)
 redditRouter.get("/subreddits",redditController.get_subreddits)
-redditRouter.get("/subreddits-brand",redditController.get_subreddits_brand)
-redditRouter.get("/brand-subs",redditController.BrandRedditSubs)
+redditRouter.get("/subreddits-brand/:id",redditController.get_subreddits_brand)
+redditRouter.get("/brand-subs/:id",redditController.BrandRedditSubs)
 
 
 

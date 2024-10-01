@@ -8,6 +8,7 @@ import { accountDataType } from "../../Model/Operations/IPostingAccounts_interfa
 import { IBrand, ISubBrand } from "../../Model/Operations/IBrand_interface";
 
 
+
 export const getAllBrands = async (req: Request, res: Response) => {
   try {
     const brands = await brandService.getAllBrands();
@@ -48,8 +49,10 @@ export const addBrand = async (req: Request, res: Response) => {
 export const addBrandWithAllData = async (req: Request, res: Response) => {
   try {
      const  brandData: IBrand = req.body.brandData
-     const subBrands:{subbrand:ISubBrand, accounts:accountDataType[]}[] = req.body.brandData
-     const accounts:accountDataType[] = req.body.brandData
+     const subBrands:{subbrand:ISubBrand, accounts:accountDataType[]}[] = req.body.brandData.subBrands
+     const accounts:accountDataType[] = req.body.brandData.accounts
+     console.log("adding a brand with all data");
+     
      const newBrand = await brandService.addBrandWithSubandAccounts(brandData, subBrands, accounts);
 
     res.status(201).json(newBrand);
@@ -170,13 +173,13 @@ export const addOrChangeAcount = async (req: Request, res: Response) => {
     if (req.body.platform=="REDDIT"){
       accountData = {platform:req.body.platform,
          account:{appID:req.body.appID, appSecret:req.body.appSecret,
-           username:req.body.username, password:req.body.password, brand:req.body.brand}}
+           username:req.body.username, password:req.body.password}}
       const result = await brandService.addOrDeleteAccount(req.params.id, accountData);
       return  res.json(result);
     }
     else if (req.body.platform=="TELEGRAM"){
       accountData = {platform:req.body.platform,
-         account:{token:req.body.token, brand:req.body.brand}}
+         account:{token:req.body.token}}
       const result = await brandService.addOrDeleteAccount(req.params.id, accountData);
       return  res.json(result);
     }

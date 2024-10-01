@@ -6,8 +6,8 @@ export interface IAccount {
     brand: string|Types.ObjectId,
     platform: string
   }    
-export interface IRedditAccountData {appID:string, appSecret:string, username:string, password:string, brand:string|Types.ObjectId,}
-export interface ITelegramAccountData {token:string, brand:string|Types.ObjectId}  
+export interface IRedditAccountData {appID:string, appSecret:string, username:string, password:string, }
+export interface ITelegramAccountData {token:string,}  
 
 
 export type accountDataType = 

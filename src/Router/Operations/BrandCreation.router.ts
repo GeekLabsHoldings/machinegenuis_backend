@@ -1,10 +1,10 @@
-import { Router } from "express";
+import { Router,json } from "express";
 import * as brandController from "../../Controller/Operations/BrandCreation.controller"
 
 
 
 const BrandCreationRouter = Router();
-
+// BrandCreationRouter.use(json)
 // Domains
 BrandCreationRouter.post("/check-domain-availability", brandController.checkDomains);
 BrandCreationRouter.post("/register-domain", brandController.registerDomain);

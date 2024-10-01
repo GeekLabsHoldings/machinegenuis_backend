@@ -42,7 +42,11 @@ const SocialMediaGroupsSchema = new mongoose.Schema({
 
   platform: EnumStringRequired(PlatformArr),
 
-  brand: EnumStringRequired(brandArr),
+  brand: {
+    type: String,
+    required: true,
+    trim: true,
+  },
 
   engagement: {
     type: Number,

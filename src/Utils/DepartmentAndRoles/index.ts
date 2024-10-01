@@ -4,14 +4,14 @@ enum DepartmentEnum {
     SocialMedia = "social-media",
     Administrative = "administrative",
     Accounting = "accounting",
-    CEO = "CEO",
+    CEO = "ceo",
     VideoEditing = "VideoEditing"
 }
 
 enum RoleEnum {
     ContentWriter = "ContentWriter",
     Payroll = "Payroll",
-    CEO = "CEO",
+    CEO = "ceo",
     SocialMedia = "SocialMedia",
     Administrative = "administrative",
     VideoEditor = "VideoEditor"
@@ -22,7 +22,7 @@ enum RoleEnum {
 const DepartmentRoles = {
     Departments: ["Recruiter", "Training", "Employee Relations"],
     "content-creation": ["ContentWriter"],
-    CEO: ['CEO'],
+    ceo: ['ceo'],
     "social-media": ["SocialMedia"],
     administrative: ['administrative'],
     accounting: ['Payroll'],

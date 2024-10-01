@@ -1,26 +1,8 @@
 import Queue from "bull";
 import {sendMessageToAll, CleanUp} from "../../../Service/SocialMedia/telegram.service";
+import { TelegramB } from "../../../Controller/SocialMedia/socialMedia.telegram.controller";
 const TelegramBot = require("node-telegram-bot-api");
 
-class TelegramB { 
-    constructor(token){
-      if(!token)
-        token = process.env.TELEGRAMBOT_ACCESS_TOKEN
-  
-     // console.log("token: " + token);
-      this.bot= new TelegramBot(token, {
-        polling: true,
-      });
-      
-      this.bot.on('polling_error', () => {
-        // Do nothing, prevent logging
-      });
-    }
-    async cleanUp(){
-      await CleanUp()
-    }
-      
-  }
 
 
 function delay_(ms) {
@@ -35,7 +17,10 @@ const redisOptions = {
 
 
 // Create a queue with a name (e.g., 'my-queue')
-const telegramQueue = new Queue("reddit-social-queue1",  { redis: redisOptions });
+const telegramQueue = new Queue("telegram-social-queue1",  { redis: redisOptions });
+telegramQueue.on('error', (err) => {
+  console.log('Redis error:', err);
+});
 
 
 telegramQueue.process((job) => {
