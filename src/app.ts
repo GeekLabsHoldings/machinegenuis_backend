@@ -46,6 +46,7 @@ app.get("/generate-image/:email", async (req, res) => {
 
 
 app.use(`/${RouterEnum.Operations}`, OperationRouter )
+app.use(`/${RouterEnum.socialMedia}`, socialMediaRouter);
 
 app.use(`/${RouterEnum.authentication}`, AuthenticationRouter);
 app.use(`/${RouterEnum.unAuthorizer}`, unAuthorizerApis);
@@ -56,7 +57,6 @@ app.use(`/${RouterEnum.ContentCreation}`, content_creation_router);
 app.use(`/${RouterEnum.hr}`, HR_Router);
 app.use(`/${RouterEnum.admin}`, AdminRouter);
 app.use(`/${RouterEnum.user}`, UserRouter);
-app.use(`/${RouterEnum.socialMedia}`, socialMediaRouter);
 app.use(`/${RouterEnum.Administrative}`, AdministrativeRouter);
 app.use(`/${RouterEnum.Accounting}`, AccountingRouter);
 

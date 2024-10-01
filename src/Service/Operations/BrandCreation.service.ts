@@ -132,7 +132,6 @@ export const getAccounts = async (id: string, ) => {
   for(const account of accounts){
       const decrypted = decrypt(account.token)
       const obj = JSON.parse(String(decrypted))
-      console.log(obj,decrypted,account.token)
       data.push({platform:account.platform, account:obj})
   }
   return data

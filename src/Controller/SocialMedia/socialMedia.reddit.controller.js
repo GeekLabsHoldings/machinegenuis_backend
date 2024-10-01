@@ -10,7 +10,9 @@ const cron = require("node-cron");
 
 export async function AddAnAccount(req, res) {
   try {
-    await RedditServices.saveAccount(req, res);
+
+    await RedditServices.saveAccount(req)
+
     res.json({ message: "done" });
   } catch (error) {
     console.error("Error adding group:", error);
@@ -98,7 +100,8 @@ export const CampaignBroadcast = async (req, res) => {
     delay = Math.max(delay, 10000);
     starttime = starttime - Date.now();
     if (starttime<=0)
-      starttime = 10000
+      starttime = 1000
+
     const imgurUrlPattern =
       /^https:\/\/imgur\.com(\/[a-zA-Z0-9-_\/]*)?(#\/[a-zA-Z0-9-_\/]*)?$/;
 
@@ -126,7 +129,7 @@ export const CampaignByBrand = async (req,res) => {
     delay = Math.max(delay, 10000);
     starttime = starttime - Date.now();
     if (starttime<=0)
-      starttime = 10000
+      starttime = 1000
 
     const imgurUrlPattern =
     /^https:\/\/imgur\.com(\/[a-zA-Z0-9-_\/]*)?(#\/[a-zA-Z0-9-_\/]*)?$/;

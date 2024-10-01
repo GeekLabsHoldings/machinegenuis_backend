@@ -78,10 +78,9 @@ const userAgent = 'nodejs:snoowrap:myapp:v1.0.0 (by hassan gad 2023)'
 //===========================================================
 
 export async function saveAccount(req){
+  console.log('Saving account...');
 
-try {
-  
-  const result = await RedditAccountModel.deleteOne({ platform:"REDDIT", brand:req.body.brand});
+  const result = await SocialPostingAccount.deleteOne({ platform:"REDDIT", brand:req.body.brand});
 
   if (result.deletedCount === 1) {
     console.log('Message deleted successfully!');
@@ -93,7 +92,7 @@ try {
   payload = JSON.stringify(payload)
   const token = encrypt(payload)
 
-
+  console.log(token)
   const redditAccount = new SocialPostingAccount({
     token: token, 
     platform: "REDDIT",
@@ -101,9 +100,6 @@ try {
   });
 
   redditAccount.save()
-} catch (error) {
-  console.log(error)
-}
 
 
 }
@@ -113,27 +109,21 @@ try {
 
 
 export async function getAccount(brand){
-  try {
+
     let account
     if(brand){
        account = await SocialPostingAccount.findOne({platform:"REDDIT", brand:brand})
-    }else{
-       account = await SocialPostingAccount.findOne({platform:"REDDIT",})
     }
-
     if(!account){
-      account = await SocialPostingAccount.findOne({platform:"REDDIT", brand:"Geek Labs Holdings"})
+      account = await SocialPostingAccount.findOne({platform:"REDDIT", brand:"66fa6d4321b187544fd1c6ce"})
     }
 
-    //console.log("account", account)
     const payload = decrypt(account.token)
     const obj = JSON.parse(payload)
     console.log("account",obj, account)
 
     return  obj;
-  } catch (error) {
-    console.error(error);
-  }
+
 }
 
 
@@ -209,7 +199,7 @@ export const CreateRedditPost = async (r, title, text, img_url, sr) => {
       
       await newMessage.save();
     } catch (error) {
-       return systemError.sendError(res, error);
+    console.log(error)
     }
    
     }  
