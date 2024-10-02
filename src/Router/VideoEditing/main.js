@@ -16,6 +16,7 @@ const controllerGetContent = require('../../Controller/VideoEditing/getContent')
 Video_editing_router.get('/get-all-content', get_all_content);
 Video_editing_router.post('/render-video', controllerRenderVideo.renderVideo);
 Video_editing_router.post('/get-img', controllerGetImgs.getImg);
+Video_editing_router.post('/get-img-new', controllerGetImgs.getImgNew);
 Video_editing_router.post('/split-content', controllerSplitAndGenerate.splitAndConvert);
 Video_editing_router.post('/test-audio', controllerSplitAndGenerate.testAudio);
 Video_editing_router.post('/regenrate-audio', controllerRegenrateAudio.regenrateAudio);
