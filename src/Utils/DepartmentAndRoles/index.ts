@@ -4,13 +4,10 @@ enum DepartmentEnum {
     SocialMedia = "social-media",
     Administrative = "administrative",
     Accounting = "accounting",
-<<<<<<< HEAD
+
     CEO = "ceo",
     VideoEditing = "VideoEditing"
-=======
-    CEO = "CEO",
-    VideoEditing = "VideoEditing",
->>>>>>> 2ea8074ce92cf411db9e64961b0167c097e0c10c
+
 }
 enum RoleEnum {
     ContentWriter = "ContentWriter",

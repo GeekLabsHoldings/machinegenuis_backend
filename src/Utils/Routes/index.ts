@@ -16,10 +16,7 @@ enum RouterEnum {
     Accounting = DepartmentEnum.Accounting,
     VideoEditing = DepartmentEnum.VideoEditing,
     CEO = DepartmentEnum.CEO,
-<<<<<<< HEAD
 
-=======
->>>>>>> 2ea8074ce92cf411db9e64961b0167c097e0c10c
 }
 
 export default RouterEnum;
