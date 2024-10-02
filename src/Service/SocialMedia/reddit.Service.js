@@ -17,11 +17,9 @@ import { getAccount } from '../Operations/BrandCreation.service';
 const snoowrap = require('snoowrap');
 const jwt = require('jsonwebtoken');
 
-<<<<<<< HEAD
+
 const userAgent = 'app:v1.0.0 (by a nerdy person)'
-=======
-const userAgent = 'snoowrap:app/1.2.15 (by hasan)'
->>>>>>> 13f40100e11e86ea610b6aa53c98e6dcad09e9ec
+
 
 // export const submitRedditPost = async ({token, title, text, subreddit}) => {
 //     const url = 'https://oauth.reddit.com/api/submit';
