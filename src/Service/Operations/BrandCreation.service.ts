@@ -1,5 +1,5 @@
 import BrandsModel from "../../Model/Operations/BrandCreation.model";
-import { Types, startSession } from "mongoose";
+import { ClientSession, Types, startSession } from "mongoose";
 import BrandType from "../../Model/Operations/IBrand_interface";
 import {
   ISubBrand,
@@ -15,6 +15,7 @@ import {
 import SocialPostingAccount from "../../Model/Operations/SocialPostingAccount.model";
 import crypto, { Encoding } from "crypto";
 import Route53DomainChecker, { ContactDetail } from "../AWS/Rout53/domains";
+import seenModel from "../../Model/Chat/seen.model";
 
 // import { Request, Response } from 'express';
 
@@ -29,16 +30,16 @@ export const addBrandWithSubandAccounts = async (
     session.startTransaction();
 
     const newbrand = new BrandsModel({ ...brandData });
-    const Brand = await newbrand.save();
+    const Brand = await newbrand.save({ session });
     for (const sub of subBrands) {
-      const subbrand = await createSubBrand(Brand._id, sub.subbrand);
+      const subbrand = await createSubBrand(Brand._id, sub.subbrand, session);
       for (const acc of sub.accounts) {
-        const account = await addOrDeleteAccount(subbrand._id, acc);
+        const account = await addOrDeleteAccount(subbrand._id, acc, session);
       }
     }
 
     for (const acc of accounts) {
-      const account = await addOrDeleteAccount(Brand._id, acc);
+      const account = await addOrDeleteAccount(Brand._id, acc, session);
     }
     return Brand;
     await session.commitTransaction();
@@ -117,14 +118,15 @@ export const getSubBrandById = async (parentId: string, id: string) => {
 };
 export const createSubBrand = async (
   parentId: string,
-  subBrandData: ISubBrand
+  subBrandData: ISubBrand,
+  session?: ClientSession
 ) => {
   const newSubBrand = new BrandsModel({
     ...subBrandData,
     type: "subbrand",
     parentId,
   });
-  return await newSubBrand.save();
+  return await newSubBrand.save({ session });
 };
 export const updateSubBrand = async (
   parentId: string,
@@ -217,14 +219,15 @@ export const getAccount = async (id: string, platform: string) => {
 };
 export const addOrDeleteAccount = async (
   id: string,
-  accountData: accountDataType
+  accountData: accountDataType,
+  session?: ClientSession
 ) => {
   // Implement account addition or deletion logic
   try {
     const result = await SocialPostingAccount.deleteOne({
       platform: accountData.platform,
       brand: id,
-    });
+    }, { session });
 
     if (result.deletedCount === 1) {
       console.log("Account deleted successfully!");
@@ -235,13 +238,13 @@ export const addOrDeleteAccount = async (
       let payload = { ...accountData.account };
       let payloadStr = JSON.stringify(payload);
       const token = encrypt(payloadStr);
-      //console.log("encryption\t",accountData, payload, payloadStr, token)
+      console.log("encryption\t", accountData, payload, payloadStr, token)
       const Account = new SocialPostingAccount({
         token: token,
         platform: accountData.platform,
         brand: id,
       });
-      const acc = await Account.save();
+      const acc = await Account.save({ session });
       console.log("Account added successfully!");
       return acc;
     } else if (

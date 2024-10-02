@@ -48,6 +48,8 @@ app.use(`/${RouterEnum.calendly}`, CalendlyRouter);
 app.use(`/${RouterEnum.VideoEditing}`, video_editing_router);
 app.use(checkAuthority);
 
+app.use(`/${RouterEnum.socialMedia}`, socialMediaRouter);
+app.use(`/${RouterEnum.CEO}`, OperationRouter)
 app.use(`/${RouterEnum.ContentCreation}`, content_creation_router);
 app.use(`/${RouterEnum.hr}`, HR_Router);
 app.use(`/${RouterEnum.admin}`, AdminRouter);
@@ -56,7 +58,5 @@ app.use(`/${RouterEnum.Administrative}`, AdministrativeRouter);
 app.use(`/${RouterEnum.Accounting}`, AccountingRouter);
 
 
-app.use(`/${RouterEnum.socialMedia}`, socialMediaRouter);
-app.use(`/${RouterEnum.CEO}`, OperationRouter)
 
 export { app };
