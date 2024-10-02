@@ -18,20 +18,25 @@ twitterRouter.delete(
   "/delete-account/:_id",
   socialMediaController.deleteTwitterAccount
 );
-twitterRouter.get(
-  "/get-account-data/:sharingList",
-  socialMediaController.getAllAccountTwitter
-);
 twitterRouter.post(
-  "/add-post",
+  "/add-post/:brandId",
   socialMediaController.addPostSocialMediaTwitter
 );
-twitterRouter.post(
-  "/add-new-account",
-  socialMediaController.addNewAccountTwitter
+twitterRouter.get(
+  "/get-tweets-mustApprove",
+  socialMediaController.getTweetsMustApprove
 );
 twitterRouter.post(
-  "/get-account-data",
-  socialMediaController.getTwitterAccountSecretData
+  "/generate-new-reply",
+  socialMediaController.generateNewReply
 );
+twitterRouter.post(
+  "/add-reply-to-tweet/:_id",
+  socialMediaController.addReplyToTweet
+);
+twitterRouter.post(
+  "/generate-hashtags",
+  socialMediaController.generateHashtags
+);
+
 export default twitterRouter;

@@ -28,7 +28,13 @@ const SocialMediaPostsSchema = new mongoose.Schema({
     required: true,
     default: 0,
   },
+  platform: EnumStringRequired(PlatformArr),
 
+  brand: {
+    type: String,
+    required: true,
+    trim:true
+  },
 });
 
 // Create the model

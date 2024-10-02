@@ -2,13 +2,12 @@ import IHiringModel from "../../../Model/HR/Hiring/IHiringModel";
 import hiringService from "../../../Service/HR/Hiring/HiringService";
 import { ErrorMessages } from "../../../Utils/Error/ErrorsEnum";
 import systemError from "../../../Utils/Error/SystemError";
-import IHiringController from "./IHiringController";
+import IHiringController, { IQuestionTemplate } from "./IHiringController";
 import SuccessMessage from "../../../Utils/SuccessMessages";
 import templateService from "../../../Service/HR/Template/Template/TemplateService";
 import { HiringStatusLevelEnum } from "../../../Utils/Hiring";
 import { ITemplateModel } from "../../../Model/HR/Templates/ITemplateModel";
 import { HiringSteps, HiringStepsEnum } from "../../../Utils/GroupsAndTemplates";
-import linkedinAccountController from "../LinkedinAccounts/LinkedinAccountsController";
 import { ClientSession } from "mongoose";
 import axios from "axios";
 
@@ -72,29 +71,21 @@ class HiringController implements IHiringController {
         return result;
     }
 
-    async publishJob(hiringId: string, contract: string, template: string, skills: Array<string>, role: string, session: ClientSession): Promise<{ userName: string }> {
-        const { _id, userName, password } = await linkedinAccountController.getOneFreeAccounts(session);
-        const changeAccountFree = await linkedinAccountController.changeAccountIsBusy(_id, true, session);
-        if (!changeAccountFree)
-            return systemError.setStatus(404).setMessage(ErrorMessages.LINKEDIN_ACCOUNT_NOT_FOUND).throw();
-
-        await hiringService.addHiringLinkedinAccount(hiringId, _id, session);
+    async publishJob(hiringId: string, role: string, contract: string, template: string, skills: Array<string>, questions: Array<IQuestionTemplate>, session: ClientSession): Promise<string> {
         const data = {
-            "user_name": userName,
-            "password": password,
-            "description": template,
-            "job_title": "Backend Developer",
-            "contract_type": contract,
-            "skills": skills
-        };
-        await axios.post('http://54.152.98.221/post-job', data,
-            {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+            details: {
+                jobTitle: role,
+                contract_type: contract,
+                skills,
+                description: template,
+                questions
+
             }
-        )
-        return { userName };
+        };
+        const result = await axios.post('http://44.201.202.233/linkedin/post-job', data, { headers: { 'Content-Type': 'application/json' } });
+        const _id = result.data;
+        await hiringService.addHiringLinkedinAccount(hiringId, _id, session);
+        return "Job Published Successfully";
     }
 
 

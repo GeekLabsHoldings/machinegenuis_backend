@@ -4,7 +4,9 @@ import {
   handleMessage,
   msgHandler,
 } from "./Controller/chat/chat.controller.js";
-
+import { DepartmentEnum } from "./Utils/DepartmentAndRoles/index";
+import { BroadCastMessageEvent } from "./Utils/EventEmitter/BroadCastMessageEvent.js";
+import { NewTweetsEvent } from "./Utils/EventEmitter/NewTweetsEvent.js";
 let io;
 
 export default function createIo(server) {
@@ -25,8 +27,18 @@ export default function createIo(server) {
 
 // Define the onConnection function
 const onConnection = (socket) => {
-  console.log(`New client connected: ${socket.id}`);
   msgHandler(io, socket);
-  
+  const user = socket.handshake.user;
+  console.log(`New client connected: ${socket.id}`);
+  if (user.department && Array.isArray(user.department)) {
+    user.department.forEach((dept) => {
+      const roomName = `department_${dept}`;
+      socket.join(roomName);
+      console.log(`User ${user.firstName} joined room: ${roomName}`);
+    });
+  }
+
+  NewTweetsEvent(user, io);
+  BroadCastMessageEvent(io);
 };
-export {io};
+export { io };

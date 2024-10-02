@@ -21,6 +21,7 @@ enum SchemaTypesReference {
   SocialMediaAccount = "socialAccount",
   SocialMediaComment = "socialMediaComment",
   TwitterData = "twitterData",
+  SocialPostingAccount = "socialmedia-posting-accounts",
   Payroll = "payroll",
   Subscription = "subscription",
   BankAccount = "bankAccount",
@@ -35,9 +36,19 @@ enum SchemaTypesReference {
   Prompt = "prompt",
   Audiences = "audiences",
   Telegram = "telegram",
-  SocialMediaGroups="socialmediagroups",
-  SocialMediaPosts="socialmediaposts",
+  SocialMediaGroups = "socialmediagroups",
+  SocialMediaPosts = "socialmediaposts",
   TelegramMessage = "telegram_message",
+  Brands = "brands_collection",
+  BroadCastMessage = "broadcastmessage",
+  Word = "word",
+  Scraped = "scraped",
+  Movie = "movie",
+  generated_content = "generated-content",
+  Content = "content",
+  offlineMembers = "offlineMember",
+
 }
+
 
 export { SchemaTypesReference };

@@ -20,28 +20,26 @@ const addWordToReplace = async (req, res) => {
 };
 
 const findToReplace = async (req, res) => {
-    try {
-      const { selectedContent } = req.body;
-      if ( ! selectedContent) {
-        return res
-          .status(400)
-          .json({ success: false, error: "No selectedContent provided" });
-      }
-      const wordsList = await wordsModel.find({});
-      let updatedContent = selectedContent;
+  try {
+    const { selectedContent } = req.body;
 
-      wordsList.forEach(({ original_word, replacement_word }) => {
-          const regex = new RegExp(`\\b${original_word}\\b`, 'g');
-          updatedContent = updatedContent.replace(regex, replacement_word);
-      });
-
-      return res.json({ success: true, updatedContent });
-    } catch (error) {
-      console.error("Error in addWordToReplace:", error);
+    if (!selectedContent) {
       return res
-        .status(500)
-        .json({ success: false, error: "Something went wrong!" });
+        .status(400)
+        .json({ success: false, error: "No selectedContent provided" });
     }
+
+    const wordsList = await wordsModel.find({});
+    
+    const updatedContent = await addWordAndReplace_srev.findAndReplaceWords(selectedContent, wordsList);
+    console.log(updatedContent);
+    return res.json({ success: true, updatedContent });
+  } catch (error) {
+    console.error("Error in replaceWordsController:", error);
+    return res
+      .status(500)
+      .json({ success: false, error: "Something went wrong!" });
+  }
 };
 
 export { addWordToReplace, findToReplace };

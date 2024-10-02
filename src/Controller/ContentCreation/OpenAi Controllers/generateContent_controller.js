@@ -3,12 +3,12 @@ import generatedContentModel from "../../../Model/ContentCreation/Generated/Gene
 import scrapedModel from "../../../Model/ContentCreation/Scraped/scraped_model";
 import generatedContentService from "../../../Service/ContentCreation/GeneratedContent/GeneratedContentService";
 const scrapedDBControllers = require("../Scraped DB Controller/scrapedDB_controller");
-require("dotenv").config();
+import "dotenv/config";
 const mongoose = require("mongoose");
 const OpenAI = require("openai");
 require("dotenv").config();
 const axios = require("axios");
-
+console.log(process.env.OPENAI_API_KEY);
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });

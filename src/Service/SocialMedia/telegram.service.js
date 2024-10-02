@@ -2,6 +2,78 @@ import { channel } from "diagnostics_channel";
 import SocialMediaGroups from "../../Model/SocialMedia/SocialMediaGroups.model";
 import SocialMediaPosts from "../../Model/SocialMedia/SocialMediaPosts.models";
 import axios from 'axios';
+import moment from "moment";
+import systemError from "../../Utils/Error/SystemError";
+import SocialPostingAccount from "../../Model/Operations/SocialPostingAccount.model";
+import crypto from 'crypto';
+import { getAccount } from "../Operations/BrandCreation.service";
+import { log } from "console";
+
+// Secret key (32 bytes for AES-256)
+
+function encrypt(text) {
+
+  try {
+    const secretKey =  Buffer.from(process.env.ENCRYPTION_SECRET_KEY, 'hex');
+
+    const cipher = crypto.createCipheriv('aes-256-ecb', secretKey, null); // No IV for ECB
+    let encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return encrypted;
+  } catch (error) {
+    console.log(error)
+  }
+
+}
+
+// Decrypt function using AES-256-ECB
+function decrypt(encryptedData) {
+  try {
+  const secretKey =  Buffer.from(process.env.ENCRYPTION_SECRET_KEY, 'hex');
+  const decipher = crypto.createDecipheriv('aes-256-ecb', secretKey, null); // No IV for ECB
+  let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
+  } catch (error) {
+    console.log(error)
+  }
+  
+}
+
+
+
+
+export async function saveAccount(req,res){
+
+  try {
+    const result = await SocialPostingAccount.deleteOne({ platform:"TELEGRAM", brand:req.body.brand});
+  
+    if (result.deletedCount === 1) {
+      console.log('Message deleted successfully!');
+    } else {
+      console.log('Message not found.');
+    }
+  
+
+    const token = encrypt(req.body.token);
+  
+    const redditAccount = new SocialPostingAccount({
+      token: token, 
+      platform: "TELEGRAM",
+      brand:req.body.brand
+    });
+  
+    redditAccount.save()
+  } catch (error) {
+    console.log(error)
+  }
+  
+  
+}
+  
+  
+  
+  
 
 
 export const AddTelegramChannel = async (
@@ -64,24 +136,33 @@ export const AddTelegramMessage = async (
   group_name,
   group_id,
   timestamp,
+  brand
 ) => {
-  const newMessage = new SocialMediaPosts({
-    post_id: post_id,
-    group_name: group_name,
-    group_id: String(group_id), 
-    timestamp: timestamp,
-  });
+  try {
+    const newMessage = new SocialMediaPosts({
+      post_id: post_id,
+      group_name: group_name,
+      group_id: String(group_id), 
+      timestamp: timestamp,
+      platform:"TELEGRAM",
+      brand:brand
+    });
+  
+    await newMessage.save();
+  } catch (error) {
+    console.log(error); 
+  }
 
-  await newMessage.save();
 }  
 
 
 export const DeleteTelegramMessage = async(
   channelId,
-  messageId
+  messageId,
+  brand
 ) =>{
   try {
-    const result = await SocialMediaPosts.deleteOne({ platform:"TELEGRAM",channel_id:channelId, message_id:messageId });
+    const result = await SocialMediaPosts.deleteOne({ platform:"TELEGRAM",group_id:channelId, post_id:messageId, brand:brand });
     
     if (result.deletedCount === 1) {
       console.log('Message deleted successfully!');
@@ -97,20 +178,30 @@ export const DeleteTelegramMessage = async(
 export const GetSubCount = async(
 brand
 )=>{
+  try {
     const channels = await SocialMediaGroups.find({brand:brand, platform:"TELEGRAM"})
 
     let sum=0
     console.log(channels, brand)
     channels.forEach(channel=>{
-      console.log(channel)
       sum+=channel.subscribers})
   
     return sum;
 
+  } catch (error) {
+    console.log()
+  }
+    
 }
 
-export const CleanUp = async()=>{
-  const url = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN_SECRET}/deleteWebhook`
+
+
+
+
+
+
+export const CleanUp = async(token)=>{
+  const url = `https://api.telegram.org/bot${token}/deleteWebhook`
   try {
     const response = await axios.post(url, {});
 
@@ -120,12 +211,154 @@ export const CleanUp = async()=>{
       
     };
   } catch (error) {
-    console.error('Error submitting to Reddit:', error.response?.data || error.message);
+    console.error('telegram cleanUp:', error.response?.data || error.message);
     // Return error details if needed or rethrow
     return {
       error: error.response?.data || error.message
     };
   }
 }
+
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
+export const sendMessageToAll = (
+  TelegramB,
+  message,
+  chatIds,
+  file_type,
+  file_url,
+  captionText, 
+  ms
+) => {
+  chatIds.forEach(async(chatId) => {
+
+    try {
+      let acountToken = await getAccount(chatId.brand, "TELEGRAM");
+      acountToken = acountToken.account.token
+      const tb =  new TelegramB(acountToken)
+      console.log("group_id  ", chatId.group_id,"chat_ brand",chatId.brand, "account token", acountToken);
+      
+      if (message) {
+        console.log("message\n", message.chat, message.date);
+        
+          tb.bot.sendMessage(chatId.group_id, message)
+          .then((messageData) => {
+            AddTelegramMessage(
+              messageData.message_id,
+              messageData.chat.title,
+              messageData.chat.id,
+              messageData.date,
+              chatId.brand
+            );
+            console.log(`Message sent to chat ID: ${chatId}`);
+          })
+          .catch((err) => {
+            console.error(
+              `~~~~~~Failed to send message to chat ID: ${chatId}`,
+              err
+            );
+          });
+      }
+      if (file_url !== "") {
+        if (file_type == "photo") {
+          console.log("sending a photo \n\n");
+          tb.bot
+            .sendPhoto(chatId.group_id, file_url, { caption: captionText })
+            .then((messageData) => {
+              AddTelegramMessage(
+                messageData.message_id,
+                messageData.chat.title,
+                messageData.chat.id,
+                messageData.date,
+                chatId.brand
+              );
+  
+              console.log(`file sent to chat ID: ${chatId}`);
+            })
+            .catch((err) => {
+              console.error(
+                `~~~~~~Failed to send file to chat ID: ${chatId}`,
+                err
+              );
+            });
+        } else if (file_type == "video") {
+  
+          tb.bot
+            .sendVideo(chatId.group_id, file_url, { caption: captionText })
+            .then((messageData) => {
+              AddTelegramMessage(
+                messageData.message_id,
+                messageData.chat.title,
+                messageData.chat.id,
+                messageData.date,
+                chatId.brand
+              );
+  
+              console.log(`file sent to chat ID: ${chatId}`);
+            })
+            .catch((err) => {
+              console.error(
+                `~~~~~~Failed to send file to chat ID: ${chatId}`,
+                err
+              );
+            });
+        } else if (file_type == "voice") {
+          console.log("sending a voice \n\n");
+  
+          tb.bot
+            .sendVoice(chatId.group_id, file_url, { caption: captionText })
+            .then((messageData) => {
+              AddTelegramMessage(
+                messageData.message_id,
+                messageData.chat.title,
+                messageData.chat.id,
+                messageData.date,
+                chatId.brand
+              );
+  
+              console.log(`file sent to chat ID: ${chatId}`);
+            })
+            .catch((err) => {
+              console.error(
+                `~~~~~~Failed to send file to chat ID: ${chatId}`,
+                err
+              );
+            });
+        } else {
+  
+          tb.bot
+            .sendDocument(chatId.group_id, file_url, { caption: captionText })
+            .then((messageData) => {
+              AddTelegramMessage(
+                messageData.message_id,
+                messageData.chat.title,
+                messageData.chat.id,
+                messageData.date,
+                chatId.brand
+              );
+              
+              console.log(`file sent to chat ID: ${chatId}`);
+            })
+            .catch((err) => {
+              console.error(
+                `~~~~~~Failed to send file to chat ID: ${chatId}`,
+                err
+              );
+            });
+  
+        }
+      }
+      tb.cleanUp()
+      delay(ms)
+  
+    } catch (error) {
+      console.log(error)
+    }
+  });
+};
 
 
