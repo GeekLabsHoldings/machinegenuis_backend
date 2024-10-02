@@ -8,23 +8,20 @@ import {
   GetSubCount,
   CleanUp,
   sendMessageToAll,
-  cronSchedule,
-  saveAccount,
-  getAccount
 } from "../../Service/SocialMedia/telegram.service";
 import systemError from "../../Utils/Error/SystemError";
 const crypto = require('crypto');
 const cron = require('node-cron');
 import telegramQueueAddJob from "../../Utils/CronJobs/RedisQueue/telegram.social";
+import { getAccount } from "../../Service/Operations/BrandCreation.service";
 
-
-class TelegramB { 
+export class TelegramB { 
   constructor(token){
     if(!token)
       token = process.env.TELEGRAMBOT_ACCESS_TOKEN
-
+    this.token = token
    // console.log("token: " + token);
-    this.bot= new TelegramBot(token, {
+    this.bot= new TelegramBot(this.token, {
       polling: true,
     });
     
@@ -33,22 +30,12 @@ class TelegramB {
     });
   }
   async cleanUp(){
-    await CleanUp()
+    await CleanUp(this.token)
   }
     
 }
 
 
-
-export async function AddAnAccount(req , res){
-  try {
-    await saveAccount(req, res)
-    res.json({message:"done"})
-  } catch (error) {
-    console.error("Error adding group:", error);
-    return systemError.sendError(res, error);
-  }
-  }
 
 
 
@@ -57,7 +44,8 @@ export async function add_channel(req, res) {
     const { group_name, link, group_id, niche, brand, platform, engagement } =
       req.body;
 
-    const acountToken = await getAccount(req.body.brand);
+    let acountToken = await getAccount(group.brand, "TELEGRAM");
+    acountToken = acountToken.token
     const tb =  new TelegramB(acountToken)
     const subscribers = await tb.bot.getChatMemberCount(group_id);
     tb.cleanUp()
@@ -93,7 +81,7 @@ export async function get_channels(req, res) {
 
 export async function get_channels_brand(req, res) {
   try {
-    const channels = await getChannelsByBrand(req.body.brand);
+    const channels = await getChannelsByBrand(req.params.id);
     res.json(channels);
   } catch (error) {
     return systemError.sendError(res, error);
@@ -136,7 +124,7 @@ export async function campaign(req, res) {
 
 export async function campaignByBrand(req, res) {
   try {
-    const chatIds = await getChannelsByBrand(req.body.brand);
+    const chatIds = await getChannelsByBrand(req.params.id);
     const message = req.body.message;
     const file_url = req.body.file_url;
     const captionText = req.body.captionText;
@@ -173,7 +161,8 @@ export async function deleteMessage(req, res) {
     const message_id = req.body.message_id;
     const channel_id = req.body.channel_id;
     const brand = req.body.brand
-    const acountToken = await getAccount(brand);
+    let acountToken = await getAccount(group.brand, "TELEGRAM");
+    acountToken = acountToken.account.token
     const tb =  new TelegramB(acountToken)
     await tb.bot.deleteMessage(channel_id, Number(message_id));
     await DeleteTelegramMessage(channel_id, message_id, brand);
@@ -195,7 +184,7 @@ export async function get_subscripers(req, res) {
   try {
     // console.log(req.body.brand);
 
-    const subs = await GetSubCount(req.body.brand);
+    const subs = await GetSubCount(req.params.id);
     res.json({ subscribers: subs });
   } catch (error) {
     return systemError.sendError(res, error);
@@ -213,16 +202,23 @@ try {
 
     const groups = await getChannels();
     groups.forEach(async(group)=>{
-      const acountToken = await getAccount(group.brand);
-      const tb =  new TelegramB(acountToken)
-      group.subscribers = await await tb.bot.getChatMemberCount(group.group_id);
-      group.save()
-      tb.cleanUp()
+
+      try {
+        let acountToken = await getAccount(group.brand, "TELEGRAM");
+        acountToken = acountToken.account.token
+        const tb =  new TelegramB(acountToken)
+        group.subscribers = await await tb.bot.getChatMemberCount(group.group_id);
+        group.save()
+        tb.cleanUp()
+      } catch (error) {
+          console.log(error)
+      }
+
     })
     
   });
 } catch (error) {
-  
+  console.log(error)
 }
 
 //===================================

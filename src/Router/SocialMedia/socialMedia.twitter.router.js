@@ -19,16 +19,8 @@ twitterRouter.delete(
   socialMediaController.deleteTwitterAccount
 );
 twitterRouter.post(
-  "/add-post",
+  "/add-post/:brandId",
   socialMediaController.addPostSocialMediaTwitter
-);
-twitterRouter.post(
-  "/add-new-account",
-  socialMediaController.addNewAccountTwitter
-);
-twitterRouter.post(
-  "/get-account-data",
-  socialMediaController.getTwitterAccountSecretData
 );
 twitterRouter.get(
   "/get-tweets-mustApprove",

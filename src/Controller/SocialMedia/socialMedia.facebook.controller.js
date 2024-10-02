@@ -1,7 +1,7 @@
 import S3_services from "../../Service/AWS/S3_Bucket/presinedURL";
 import { postPhotoToFacebook, textPhotoToFacebook } from "../../Service/SocialMedia/facebook.service";
 import { submitRedditPost } from "../../Service/SocialMedia/reddit.Service";
-import { createAccountSocialMedia } from "../../Service/SocialMedia/socialMedia.service";
+import { createSocialAccountAddPost } from "../../Service/SocialMedia/socialMedia.service";
 import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
 import systemError from "../../Utils/Error/SystemError";
 import { PlatformEnum } from "../../Utils/SocialMedia/Platform";
@@ -57,7 +57,7 @@ export const addPostSocialMediaFacebookText = async (req, res, next) => {
         .throw();
     }
     const postId = response.id;
-    const createPost = await createAccountSocialMedia(
+    const createPost = await createSocialAccountAddPost(
       PlatformEnum.REDDIT,
       brand,
       content,
@@ -104,7 +104,7 @@ export const addPostSocialMediaFacebookPhoto = async (req, res, next) => {
         .throw();
     }
     const postId = response.id;
-    const createPost = await createAccountSocialMedia(
+    const createPost = await createSocialAccountAddPost(
       PlatformEnum.FACEBOOK,
       brand,
       content,

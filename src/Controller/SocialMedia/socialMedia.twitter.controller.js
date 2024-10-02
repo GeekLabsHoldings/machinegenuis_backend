@@ -4,18 +4,16 @@ import {
   addReply,
   getTweets,
   getUserByUsername,
-  TwitterSocialMedia,
+  TwitterSocialMediaAddPost,
 } from "../../Service/SocialMedia/twitter.api";
 import systemError from "../../Utils/Error/SystemError";
 import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
 import { PlatformEnum } from "../../Utils/SocialMedia/Platform";
 import {
   checkAccountBrand,
-  createAccountSocialMedia,
+  createSocialAccountAddPost,
   createSocialAccount,
   createSocialMediaPostTwitter,
-  createTwitterAccountSecret,
-  getTwitterData,
 } from "../../Service/SocialMedia/socialMedia.service";
 import {
   deleteAccountTwitter,
@@ -33,6 +31,7 @@ import OpenAiService from "../../Service/OpenAi/OpenAiService";
 import { campaignListEnum } from "../../Utils/SocialMedia/campaign";
 import PromptService from "../../Service/Prompt/PromptService";
 import socialCommentModel from "../../Model/SocialMedia/Twitter.SocialMedia.tweets.model";
+import { getAccount } from "../../Service/Operations/BrandCreation.service";
 
 function decrypt(encryptedText) {
   const algorithm = "aes-256-cbc";
@@ -54,28 +53,25 @@ function decrypt(encryptedText) {
 }
 export const addPostSocialMediaTwitter = async (req, res) => {
   try {
-    const { brand, content, mediaId } = req.body;
+    const {content, mediaId } = req.body;
+    const {brandId} = req.params
     const userId = req.body.currentUser._id;
-    if (!brand || !content) {
+    if (!brandId || !content) {
       return systemError
         .setStatus(400)
         .setMessage(ErrorMessages.DATA_IS_REQUIRED)
         .throw();
     }
-    const twitterData = await getTwitterData(brand);
+    const twitterData = await getAccount(brandId, PlatformEnum.TWITTER);
     if (!twitterData) {
       return systemError
         .setStatus(400)
         .setMessage(ErrorMessages.BRAND_NOT_FOUND)
         .throw();
     }
-    const { token } = twitterData;
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    const decryptedAppKey = decrypt(decodedToken.appKey);
-    const decryptedAppSecret = decrypt(decodedToken.appSecret);
-    const decryptedAccessToken = decrypt(decodedToken.accessToken);
-    const decryptedAccessSecret = decrypt(decodedToken.accessSecret);
-    const response = await TwitterSocialMedia({
+    console.log(twitterData);
+    
+    const response = await TwitterSocialMediaAddPost({
       content,
       appKey: decryptedAppKey,
       appSecret: decryptedAppSecret,
@@ -83,9 +79,9 @@ export const addPostSocialMediaTwitter = async (req, res) => {
       accessSecret: decryptedAccessSecret,
       mediaId,
     });
-    const createPost = await createAccountSocialMedia(
+    const createPost = await createSocialAccountAddPost(
       PlatformEnum.TWITTER,
-      brand,
+      brandId,
       content,
       userId,
       response.tweet.data.id
@@ -93,94 +89,6 @@ export const addPostSocialMediaTwitter = async (req, res) => {
     return res.status(200).json({
       tweet: response,
       result: createPost,
-    });
-  } catch (error) {
-    return systemError.sendError(res, error);
-  }
-};
-export const addNewAccountTwitter = async (req, res) => {
-  try {
-    const algorithm = "aes-256-cbc";
-
-    // Ensure SECRET_KEY is defined and is a valid 32-byte key
-    const secretKeyHex = process.env.SECRET_KEY;
-    if (!secretKeyHex) {
-      throw new Error("SECRET_KEY environment variable is not set.");
-    }
-    if (secretKeyHex.length !== 64) {
-      throw new Error("SECRET_KEY must be a 64-character hexadecimal string.");
-    }
-
-    const secretKey = Buffer.from(secretKeyHex, "hex");
-
-    // Generate a new IV for each encryption
-    const iv = crypto.randomBytes(16);
-
-    function encrypt(text) {
-      const cipher = crypto.createCipheriv(algorithm, secretKey, iv);
-      let encrypted = cipher.update(text, "utf8", "hex");
-      encrypted += cipher.final("hex");
-      // Return IV and encrypted data together
-      return iv.toString("hex") + ":" + encrypted;
-    }
-
-    const { brand, appKey, appSecret, accessToken, accessSecret, bearerToken } =
-      req.body;
-    const encryptedAppKey = encrypt(appKey);
-    const encryptedAppSecret = encrypt(appSecret);
-    const encryptedAccessToken = encrypt(accessToken);
-    const encryptedAccessSecret = encrypt(accessSecret);
-    const encryptedBearerToken = encrypt(bearerToken);
-    const token = jwt.sign(
-      {
-        appKey: encryptedAppKey,
-        appSecret: encryptedAppSecret,
-        accessToken: encryptedAccessToken,
-        accessSecret: encryptedAccessSecret,
-        bearerToken: encryptedBearerToken,
-      },
-      process.env.JWT_SECRET
-    );
-    await createTwitterAccountSecret(brand, token);
-    return res.json({ message: "Done" });
-  } catch (error) {
-    console.error("Error encrypting data:", error);
-    return systemError.sendError(res, error);
-  }
-};
-export const getTwitterAccountSecretData = async (req, res) => {
-  try {
-    const { brand } = req.body;
-
-    if (!brand) {
-      return systemError
-        .setStatus(400)
-        .setMessage(ErrorMessages.DATA_IS_REQUIRED)
-        .throw();
-    }
-    const twitterData = await getTwitterData(brand);
-    if (!twitterData) {
-      return systemError
-        .setStatus(400)
-        .setMessage(ErrorMessages.BRAND_NOT_FOUND)
-        .throw();
-    }
-    const { token } = twitterData;
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    const decryptedAppKey = decrypt(decodedToken.appKey);
-    const decryptedAppSecret = decrypt(decodedToken.appSecret);
-    const decryptedAccessToken = decrypt(decodedToken.accessToken);
-    const decryptedAccessSecret = decrypt(decodedToken.accessSecret);
-    const decryptedBearerToken = decrypt(decodedToken.bearerToken);
-    return res.status(200).json({
-      message: "Success",
-      Data: {
-        ConsumerKey: decryptedAppKey,
-        ConsumerSecret: decryptedAccessSecret,
-        AccessToken: decryptedAccessToken,
-        TokenSecret: decryptedAccessSecret,
-        BearerToken: decryptedBearerToken,
-      },
     });
   } catch (error) {
     return systemError.sendError(res, error);
@@ -402,8 +310,8 @@ export const addReplyToTweet = async (req, res) => {
       reply,
       tweetId
     );
-    console.log("------->",tweetReply.data.status);
-    
+    console.log("------->", tweetReply.data.status);
+
     if (tweetReply.message === "Reply posted successfully") {
       await deleteTweet(_id);
     }
@@ -411,10 +319,10 @@ export const addReplyToTweet = async (req, res) => {
     return res.status(200).json({ result: tweetReply });
   } catch (error) {
     console.log(error);
-    
-    if(error.statusCode === 403){ 
+
+    if (error.statusCode === 403) {
       await deleteTweet(_id);
-    return res.status(403).json({ message: "Tweet not found" });
+      return res.status(403).json({ message: "Tweet not found" });
     }
     return systemError.sendError(res, error);
   }

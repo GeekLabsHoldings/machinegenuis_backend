@@ -5,39 +5,21 @@ import SocialMediaPosts from "../../Model/SocialMedia/SocialMediaPosts.models";
 import SocialPostingAccount from '../../Model/Operations/SocialPostingAccount.model';
 import crypto from 'crypto';
 import moment from 'moment';
-import { console } from 'inspector';
 import systemError from "../../Utils/Error/SystemError";
 import redditQueue from "../../Utils/CronJobs/RedisQueue/reddit.social"
+import { getAccount } from '../Operations/BrandCreation.service';
 
 
 
-
-
-function encrypt(text) {
-  const secretKey =  Buffer.from(process.env.ENCRYPTION_SECRET_KEY, 'hex');
-
-  const cipher = crypto.createCipheriv('aes-256-ecb', secretKey, null); // No IV for ECB
-  let encrypted = cipher.update(text, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
-  return encrypted;
-}
-
-// Decrypt function using AES-256-ECB
-function decrypt(encryptedData) {
-  const secretKey =  Buffer.from(process.env.ENCRYPTION_SECRET_KEY, 'hex');
-
-  const decipher = crypto.createDecipheriv('aes-256-ecb', secretKey, null); // No IV for ECB
-  let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
-  decrypted += decipher.final('utf8');
-  return decrypted;
-}
 
 
 
 const snoowrap = require('snoowrap');
 const jwt = require('jsonwebtoken');
 
-const userAgent = 'nodejs:snoowrap:myapp:v1.0.0 (by hassan gad 2023)'
+
+const userAgent = 'app:v1.0.0 (by a nerdy person)'
+
 
 // export const submitRedditPost = async ({token, title, text, subreddit}) => {
 //     const url = 'https://oauth.reddit.com/api/submit';
@@ -76,57 +58,6 @@ const userAgent = 'nodejs:snoowrap:myapp:v1.0.0 (by hassan gad 2023)'
 //===========================================================
 //===========================================================
 //===========================================================
-
-export async function saveAccount(req){
-  console.log('Saving account...');
-
-  const result = await SocialPostingAccount.deleteOne({ platform:"REDDIT", brand:req.body.brand});
-
-  if (result.deletedCount === 1) {
-    console.log('Message deleted successfully!');
-  } else {
-    console.log('Message not found.');
-  }
-
-  let payload = { appID: req.body.appID, appSecret: req.body.appSecret, username: req.body.username, password:req.body.password };
-  payload = JSON.stringify(payload)
-  const token = encrypt(payload)
-
-  console.log(token)
-  const redditAccount = new SocialPostingAccount({
-    token: token, 
-    platform: "REDDIT",
-    brand:req.body.brand
-  });
-
-  redditAccount.save()
-
-
-}
-
-
-
-
-
-export async function getAccount(brand){
-
-    let account
-    if(brand){
-       account = await SocialPostingAccount.findOne({platform:"REDDIT", brand:brand})
-    }
-    if(!account){
-      account = await SocialPostingAccount.findOne({platform:"REDDIT", brand:"66fa6d4321b187544fd1c6ce"})
-    }
-
-    const payload = decrypt(account.token)
-    const obj = JSON.parse(payload)
-    console.log("account",obj, account)
-
-    return  obj;
-
-}
-
-
 
 
 
@@ -200,9 +131,9 @@ export const CreateRedditPost = async (r, title, text, img_url, sr) => {
       await newMessage.save();
     } catch (error) {
     console.log(error)
-    }
+  }
    
-    }  
+}  
 
 
 
@@ -277,26 +208,31 @@ export const DeleteRedditPost = async(
 r,
 messageId,
 ) =>{
-  const result = await SocialMediaPosts.deleteOne({ platform:"REDDIT", post_id:messageId });
+
+  try {
+    const result = await SocialMediaPosts.deleteOne({ platform:"REDDIT", post_id:messageId });
   
-  if (result.deletedCount === 1) {
-    console.log('Message deleted successfully!');
-  } else {
-    console.log('Message not found.');
+    if (result.deletedCount === 1) {
+      console.log('Message deleted successfully!');
+    } else {
+      console.log('Message not found.');
+    }
+  
+  
+      // Get the submission object using the ID
+      const submission = await r.getSubmission(messageId);
+      
+      // Delete the post
+      await submission.delete();
+      
+      console.log(`Post with ID ${messageId} has been deleted successfully.`);
+   
+  
+  return submission;
+  } catch (error) {
+    console.log(error);
+    
   }
-
-
-    // Get the submission object using the ID
-    const submission = await r.getSubmission(messageId);
-    
-    // Delete the post
-    await submission.delete();
-    
-    console.log(`Post with ID ${messageId} has been deleted successfully.`);
- 
-
-return submission;
-
 }
 
 
@@ -304,15 +240,19 @@ return submission;
 export const GetSubCount = async(
 brand
 )=>{
-  const channels = await SocialMediaGroups.find({brand:brand, platform:"REDDIT"})
 
-  let sum=0
-  console.log(channels, brand)
-  channels.forEach(channel=>{
-    sum+=channel.subscribers})
+  try {
+    const channels = await SocialMediaGroups.find({brand:brand, platform:"REDDIT"})
 
-  return sum;
-
+    let sum=0
+    console.log(channels, brand)
+    channels.forEach(channel=>{
+      sum+=channel.subscribers})
+  
+    return sum;
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 
@@ -321,53 +261,18 @@ brand
 
 
 export async function getSubredditSubs(r, subredditName) {
-  const sub = await r.getSubreddit(subredditName);
+
+  try {
+    const sub = await r.getSubreddit(subredditName);
     
-  // Access the subscribers property
-  const subscribers = await sub.subscribers;  
-  return subscribers; // Return the number of subscribers if needed
+    // Access the subscribers property
+    const subscribers = await sub.subscribers;  
+    return subscribers; // Return the number of subscribers if needed
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 
 
 
-
-
-export function cronSchedule(h, m, userTimeZone) {
-
-
-    /*
-        for example:
-        
-        userInputTime = '00:59'; // User's input time
-        userTimeZone = 'Africa/Cairo'; // User's input time zone
-
-    */ 
-
-     
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based, so we add 1
-    const day = String(today.getDate()).padStart(2, '0');
-    h = String(h).padStart(2, '0');
-    m = String(m).padStart(2, '0');
-
-    const userInputTime = `${year}-${month}-${day} ${h}:${m}`;
-
-    const serverTimeZone = moment.tz.guess(); // Get the server's local time zone
-
-    // Convert user input time to server local time
-    const userTime = moment.tz(userInputTime, userTimeZone); // User's time
-    const serverLocalTime = userTime.clone().tz(serverTimeZone); // Convert to server local time
-
-    // Get minute and hour from the server local time
-    const minute = serverLocalTime.minutes();
-    const hour = serverLocalTime.hours();
-
-    // Cron schedule string
-    const cronSchedule = `${minute} ${hour} * * *`; // Schedule for every day at the specified time
-
-
-   
-    return cronSchedule;
-}
