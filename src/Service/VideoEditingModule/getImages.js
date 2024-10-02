@@ -22,7 +22,8 @@ const handleSearchImg = async (searchImgKeyword) => {
       && !url.includes('www.politico.com')
       && !url.includes('newsobserver')
       && !url.includes("usnews")
-      && !url.includes("macleans")); 
+      && !url.includes("macleans")
+      && !url.includes("www.intel.com")); 
 
     return filteredImageUrls;
   } catch (error) {
