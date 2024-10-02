@@ -218,11 +218,11 @@ export const addOrDeleteAccount = async (id: string, accountData: accountDataTyp
     } else {
       console.log('Account not found.');
     }
-    if (accountData.platform == "REDDIT"){
+    if (accountData.platform != "TELEGRAM" ){
       let payload = { ...accountData.account };
       let payloadStr = JSON.stringify(payload)
       const token = encrypt(payloadStr)
-      // console.log("encryption\t",accountData, payload, payloadStr, token)
+      //console.log("encryption\t",accountData, payload, payloadStr, token)
       const Account = new SocialPostingAccount({
         token: token,
         platform: accountData.platform,
