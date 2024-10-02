@@ -20,6 +20,10 @@ const warningHTMLEmail = () => {
 }
 
 const ScrapCronJob = cron.schedule('0 * * * *', async () => {
+    if (process.env.NODE_ENV !== 'PROD') {
+        console.log("Cron job skipped in non-production environment.");
+        return;
+    }
     const hour = moment().hour();
     if (hour <= 6 || hour >= 19) {
         console.log("================After work hour================");

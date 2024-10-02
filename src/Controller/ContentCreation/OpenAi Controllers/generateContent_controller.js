@@ -8,7 +8,6 @@ const mongoose = require("mongoose");
 const OpenAI = require("openai");
 require("dotenv").config();
 const axios = require("axios");
-console.log(process.env.OPENAI_API_KEY);
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
