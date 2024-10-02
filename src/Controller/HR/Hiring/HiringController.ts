@@ -8,7 +8,6 @@ import templateService from "../../../Service/HR/Template/Template/TemplateServi
 import { HiringStatusLevelEnum } from "../../../Utils/Hiring";
 import { ITemplateModel } from "../../../Model/HR/Templates/ITemplateModel";
 import { HiringSteps, HiringStepsEnum } from "../../../Utils/GroupsAndTemplates";
-import linkedinAccountController from "../LinkedinAccounts/LinkedinAccountsController";
 import { ClientSession } from "mongoose";
 import axios from "axios";
 
@@ -73,15 +72,7 @@ class HiringController implements IHiringController {
     }
 
     async publishJob(hiringId: string, role: string, contract: string, template: string, skills: Array<string>, questions: Array<IQuestionTemplate>, session: ClientSession): Promise<string> {
-        const { _id } = await linkedinAccountController.getOneFreeAccounts(session);
-        const changeAccountFree = await linkedinAccountController.changeAccountIsBusy(_id, true, session);
-        console.log({ changeAccountFree });
-        if (!changeAccountFree)
-            return systemError.setStatus(404).setMessage(ErrorMessages.LINKEDIN_ACCOUNT_NOT_FOUND).throw();
-
-        await hiringService.addHiringLinkedinAccount(hiringId, _id, session);
         const data = {
-            account_id: _id,
             details: {
                 jobTitle: role,
                 contract_type: contract,
@@ -91,7 +82,9 @@ class HiringController implements IHiringController {
 
             }
         };
-        await axios.post('http://44.201.202.233/linkedin/post-job', data, { headers: { 'Content-Type': 'application/json' } });
+        const result = await axios.post('http://44.201.202.233/linkedin/post-job', data, { headers: { 'Content-Type': 'application/json' } });
+        const _id = result.data;
+        await hiringService.addHiringLinkedinAccount(hiringId, _id, session);
         return "Job Published Successfully";
     }
 
