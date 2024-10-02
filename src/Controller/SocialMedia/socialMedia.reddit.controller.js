@@ -1,6 +1,6 @@
 import { subscribe } from "diagnostics_channel";
 import * as RedditServices from "../../Service/SocialMedia/reddit.Service";
-import { createAccountSocialMedia } from "../../Service/SocialMedia/socialMedia.service";
+import { createSocialAccountAddPost } from "../../Service/SocialMedia/socialMedia.service";
 import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
 import systemError from "../../Utils/Error/SystemError";
 import { PlatformEnum } from "../../Utils/SocialMedia/Platform";

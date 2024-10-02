@@ -3,7 +3,7 @@ import {
   registerUpload,
   postToLinkedIn,
 } from "../../Service/SocialMedia/LinkedinService";
-import { createAccountSocialMedia } from "../../Service/SocialMedia/socialMedia.service";
+import { createSocialAccountAddPost } from "../../Service/SocialMedia/socialMedia.service";
 import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
 import systemError from "../../Utils/Error/SystemError";
 import { PlatformEnum } from "../../Utils/SocialMedia/Platform";
@@ -55,7 +55,7 @@ export const addPostSocialMediaLinkedin = async (req, res) => {
         .throw();
     }
     const postId = response.id;
-    const createPost = await createAccountSocialMedia(
+    const createPost = await createSocialAccountAddPost(
       PlatformEnum.LINKEDIN,
       brand,
       content,
