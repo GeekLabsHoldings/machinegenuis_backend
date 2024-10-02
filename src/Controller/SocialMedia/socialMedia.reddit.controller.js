@@ -6,32 +6,24 @@ import systemError from "../../Utils/Error/SystemError";
 import { PlatformEnum } from "../../Utils/SocialMedia/Platform";
 import redditQueueAddJob from "../../Utils/CronJobs/RedisQueue/reddit.social";
 import axios from "axios";
+import { getAccount } from "../../Service/Operations/BrandCreation.service";
+
 const cron = require("node-cron");
 
-export async function AddAnAccount(req, res) {
-  try {
 
-    await RedditServices.saveAccount(req)
-
-    res.json({ message: "done" });
-  } catch (error) {
-    console.error("Error adding group:", error);
-    return systemError.sendError(res, error);
-  }
-}
 
 export async function add_subreddit(req, res) {
   try {
     const { group_name, link, group_id, niche, brand, platform, engagement } =
       req.body;
-    console.log("group  name \n", group_name);
 
-    const acount = await RedditServices.getAccount(null, res);
+    const acount = await getAccount(req.body.brand, "REDDIT");
+    const account = acount.account
     const r = await RedditServices.getsnoowrap(
-      acount.appID,
-      acount.appSecret,
-      acount.username,
-      acount.password,
+      account.appID,
+      account.appSecret,
+      account.username,
+      account.password,
     );
 
     const subscribers = await RedditServices.getSubredditSubs(
@@ -70,7 +62,7 @@ export async function get_subreddits(req, res) {
 
 export async function get_subreddits_brand(req, res) {
   try {
-    const groups = await RedditServices.getSubredditsByBrand(req.body.brand);
+    const groups = await RedditServices.getSubredditsByBrand(req.params.id);
 
     res.json({ groups });
   } catch (error) {
@@ -81,7 +73,7 @@ export async function get_subreddits_brand(req, res) {
 
 export const BrandRedditSubs = async (req, res) => {
   try {
-    const subs = await RedditServices.GetSubCount(req.body.brand);
+    const subs = await RedditServices.GetSubCount(req.params.id);
     console.log(subs);
     res.json({ subscribers: subs });
   } catch (error) {
@@ -124,8 +116,8 @@ export const CampaignBroadcast = async (req, res) => {
 export const CampaignByBrand = async (req,res) => {
   try {
 
-    let { title, text, url, brand,  delay, starttime } = req.body;
-    const groups = await RedditServices.getSubredditsByBrand(brand);
+    let { title, text, url, delay, starttime } = req.body;
+    const groups = await RedditServices.getSubredditsByBrand(req.params.id);
     delay = Math.max(delay, 10000);
     starttime = starttime - Date.now();
     if (starttime<=0)
@@ -151,12 +143,13 @@ export const CampaignByBrand = async (req,res) => {
 
 export const DeletePost = async (req, ) => {
   try {
-    const acount = await RedditServices.getAccount(req.body.brand);
+    const acount = await getAccount(req.body.brand,"REDDIT");
+    const account = acount.account
     const r = await RedditServices.getsnoowrap(
-      acount.appID,
-      acount.appSecret,
-      acount.username,
-      acount.password
+      account.appID,
+      account.appSecret,
+      account.username,
+      account.password
     );
 
     const m = await RedditServices.DeleteRedditPost(r, req.body.messageId);
@@ -170,21 +163,33 @@ export const DeletePost = async (req, ) => {
 
 try {
   cron.schedule("0 */6 * * *", async () => {
-    const r = await RedditServices.getsnoowrap(
-      acount.appID,
-      acount.appSecret,
-      acount.username,
-      acount.password
-    );
+
+
     const groups = await RedditServices.getSubreddits();
     groups.forEach(async (group) => {
-      group.subscribers = await RedditServices.getSubredditSubs(
-        r,
-        group.group_name
-      );
-      group.save();
+      try {
+        const acount = await getAccount(req.body.brand,"REDDIT");
+        const account = acount.account
+        
+        const r = await RedditServices.getsnoowrap(
+
+          acount.appID,
+          acount.appSecret,
+          acount.username,
+          acount.password
+        );
+        group.subscribers = await RedditServices.getSubredditSubs(
+          r,
+          group.group_name
+        );
+        group.save();
+      } catch (error) {
+        
+      }
+     
     });
   });
-} catch (error) {}
+} catch (error) { console.log(error);
+}
 
 //===================================
