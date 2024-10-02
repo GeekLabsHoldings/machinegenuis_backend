@@ -5,7 +5,7 @@ import { ISubBrand, IBrand, IBrandWithSubs } from "../../Model/Operations/IBrand
 import { IAccount, IRedditAccountData, ITelegramAccountData, accountDataType } from "../../Model/Operations/IPostingAccounts_interface";
 import SocialPostingAccount from "../../Model/Operations/SocialPostingAccount.model";
 import crypto, { Encoding } from 'crypto';
-import Route53DomainChecker from "../AWS/Rout53/domains";
+import Route53DomainChecker, { ContactDetail } from "../AWS/Rout53/domains";
 
 
 
@@ -13,15 +13,28 @@ import Route53DomainChecker from "../AWS/Rout53/domains";
 
 // import { Request, Response } from 'express';
 
-export const addBrandWithSubandAccounts = async () => {
+export const addBrandWithSubandAccounts = async (brandData: IBrand,
+   subBrands:{subbrand:ISubBrand, accounts:accountDataType[]}[],
+    accounts:accountDataType[]) => {
+
+      console.log("adding brand with all data")
   const session = await startSession();
   try {
     session.startTransaction();
 
-    const newbrand = new BrandsModel({});
+    const newbrand = new BrandsModel({...brandData});
+    const Brand = await newbrand.save()
+    for(const sub of subBrands){
+      const subbrand = await createSubBrand(Brand._id, sub.subbrand)
+      for (const acc of sub.accounts){
+          const account = await addOrDeleteAccount(subbrand._id, acc)
+      }
+    }
 
-
-
+    for (const acc of accounts){
+      const account = await addOrDeleteAccount(Brand._id, acc)
+    }
+    return Brand
     await session.commitTransaction();
   } catch (error) {
     await session.abortTransaction();
@@ -33,39 +46,63 @@ export const addBrandWithSubandAccounts = async () => {
 
 
 export const getAllBrands = async () => {
-  const brands = await BrandsModel.find({ type: { $ne: 'subbrand' } });
 
-  console.log(brands)
-  const brandswithData: { brand: IBrand, subBrands: ISubBrand[], accounts:accountDataType[] }[] = []
-  for (const brand of brands) {
-    if (brand._id) {
-      const subBrands = await getAllSubBrands(brand._id)
-      const accounts = await getAccounts(brand._id)
-      brandswithData.push({ brand: brand, subBrands: subBrands, accounts:accounts })
+  try {
+    const brands = await BrandsModel.find({ type: { $ne: 'subbrand' } });
+
+    //console.log(brands)
+    const brandswithData: { brand: IBrand, subBrands: ISubBrand[], accounts:accountDataType[] }[] = []
+    for (const brand of brands) {
+      if (brand._id) {
+        const subBrands = await getAllSubBrands(brand._id)
+        const accounts = await getAccounts(brand._id)
+        brandswithData.push({ brand: brand, subBrands: subBrands, accounts:accounts })
+      }
+  
     }
-
+    return brandswithData
+  } catch (error) {
+    console.log(error);
+    
   }
-  return brandswithData
+
+ 
 };
 
 export const getBrandById = async (id: string) => {
-  const brand: IBrand | null = await BrandsModel.findById(id);
 
-  let brandwithData: { brand: IBrand, subBrands: ISubBrand[] } | null = null
-  if (brand?._id) {
-    let subBrands: ISubBrand[] = await getAllSubBrands(brand._id)
-    brandwithData = { brand: brand, subBrands: subBrands }
+
+  try {
+    const brand: IBrand | null = await BrandsModel.findById(id);
+
+    let brandwithData: { brand: IBrand, subBrands: ISubBrand[] } | null = null
+    if (brand?._id) {
+      let subBrands: ISubBrand[] = await getAllSubBrands(brand._id)
+      brandwithData = { brand: brand, subBrands: subBrands }
+    }
+    return brandwithData    
+  } catch (error) {
+    console.log(error);
   }
-  return brandwithData
 };
 
 export const createBrand = async (brandData: IBrand) => {
-  const newBrand = new BrandsModel(brandData);
-  return await newBrand.save();
+
+  try {
+    const newBrand = new BrandsModel(brandData);
+    return await newBrand.save();
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const updateBrand = async (id: string, brandData: Partial<IBrand>) => {
-  return await BrandsModel.findByIdAndUpdate(id, brandData, { new: true });
+ 
+  try {
+    return await BrandsModel.findByIdAndUpdate(id, brandData, { new: true });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const deleteBrand = async (id: string) => {
@@ -120,6 +157,16 @@ export async function checkAndSuggest(domainName:string) {
 }
 
 
+export async function registerDomain(domainName: string,DurationInYears:number, contactDetails: ContactDetail) {
+  const checker = new Route53DomainChecker();
+
+  const result = await checker.registerDomain(domainName,DurationInYears, contactDetails);
+  console.log(`Is domain result is ${result}`);
+
+  return result
+
+}
+
 
 
 
@@ -131,6 +178,10 @@ export const getAccounts = async (id: string, ) => {
   const data :accountDataType[] = []
   for(const account of accounts){
       const decrypted = decrypt(account.token)
+      if (account.platform == "TELEGRAM"){
+        data.push({platform:account.platform, account:{token:decrypted||" "}})
+        continue
+      }    
       const obj = JSON.parse(String(decrypted))
       data.push({platform:account.platform, account:obj})
   }
@@ -143,6 +194,10 @@ export const getAccount = async (id: string, platform:string) => {
   const account = await SocialPostingAccount.findOne({brand: id, platform:platform});
   if (account){
     let decrypted = decrypt(account.token)
+
+    if (account.platform == "TELEGRAM")
+        return {platform:account.platform, account:{token:decrypted||" "}}
+
     let obj = JSON.parse(String(decrypted))
   
     return {platform:account.platform, account:obj}
@@ -163,19 +218,35 @@ export const addOrDeleteAccount = async (id: string, accountData: accountDataTyp
     } else {
       console.log('Account not found.');
     }
+    if (accountData.platform != "TELEGRAM" ){
+      let payload = { ...accountData.account };
+      let payloadStr = JSON.stringify(payload)
+      const token = encrypt(payloadStr)
+      //console.log("encryption\t",accountData, payload, payloadStr, token)
+      const Account = new SocialPostingAccount({
+        token: token,
+        platform: accountData.platform,
+        brand: id
+      });
+      const acc = await Account.save()
+      console.log('Account added successfully!');
+      return acc
+    }
+    else if(accountData.platform == "TELEGRAM" && "token" in accountData.account){
+      let payload = accountData.account.token ;
+      const token = encrypt(payload)
+      const Account = new SocialPostingAccount({
+        token: token,
+        platform: accountData.platform,
+        brand: id
+      });
+      const acc = await Account.save()
+      console.log('Account added successfully!');
+      return acc
+    }
+    
 
-    let payload = { ...accountData.account };
-    let payloadStr = JSON.stringify(payload)
-    const token = encrypt(payloadStr)
 
-    const Account = new SocialPostingAccount({
-      token: token,
-      platform: accountData.platform,
-      brand: id
-    });
-
-    Account.save()
-    console.log('Account added successfully!');
   } catch (error) {
     console.log(error)
   }
@@ -188,7 +259,7 @@ export const addOrDeleteAccount = async (id: string, accountData: accountDataTyp
 
 
 function encrypt(text: string): string | null {
-  const sk: String | undefined = process.env.ENCRYPTION_SECRET_KEY
+  const sk: String | undefined = process.env.SECRET_KEY
   if (sk) {
     const secretKey = Buffer.from(sk, 'hex');
 
@@ -202,13 +273,14 @@ function encrypt(text: string): string | null {
 
 
 function decrypt(encryptedData: string): string | null {
-  const sk: String | undefined = process.env.ENCRYPTION_SECRET_KEY
+  const sk: String | undefined = process.env.SECRET_KEY
   if (sk) {
     const secretKey = Buffer.from(sk, 'hex');
     const decipher = crypto.createDecipheriv('aes-256-ecb', secretKey, null); // No IV for ECB
     let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
-  
+    
     decrypted += decipher.final('utf8');
+
     return decrypted;
   }
   return null

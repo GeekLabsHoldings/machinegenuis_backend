@@ -1,6 +1,6 @@
 import Queue from "bull";
 import * as RedditServices from "../../../Service/SocialMedia/reddit.Service";
-
+import { getAccount } from "../../../Service/Operations/BrandCreation.service";
 
 function delay_(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -20,20 +20,30 @@ redditQueue.on('error', (err) => {
     console.error('Queue error:', err);
   });
 
-redditQueue.process((job) => {
-  console.log("Processing job: \t\n");
-  // use job.data to do your function
-  job.data.groups.forEach(async (group)=>{
-   
-    const acount = await RedditServices.getAccount(group.brand);
-    const r = await RedditServices.getsnoowrap(acount.appID, acount.appSecret, acount.username, acount.password);
-    const m = await RedditServices.CreateRedditPost(r, job.data.title, job.data.text, job.data.url,  group.group_id)
-    console.log("reddit post \n", m)
-    if (m && m.name)
-      await RedditServices.AddRedditPostDB(m.name, group.group_name, group.group_id, Date.now(), group.brand)
 
-    delay_(job.data.delay)
-  })
+
+redditQueue.process((job) => {
+
+  try {
+    console.log("Processing job: \t\n");
+    // use job.data to do your function
+    job.data.groups.forEach(async (group)=>{
+     
+      const acount = await getAccount(group.brand, "REDDIT");
+      const account = acount.account
+      console.log("this is account in reddit queue", )
+      const r = await RedditServices.getsnoowrap(account.appID, account.appSecret, account.username, account.password);
+      const m = await RedditServices.CreateRedditPost(r, job.data.title, job.data.text, job.data.url,  group.group_id)
+      console.log("reddit post \n", m)
+      if (m && m.name)
+        await RedditServices.AddRedditPostDB(m.name, group.group_name, group.group_id, Date.now(), group.brand)
+  
+      delay_(job.data.delay)
+    })
+  } catch (error) {
+    console.log(Error);
+  }
+
 });
 
 const redditQueueAddJob =  (data, delay) => {
