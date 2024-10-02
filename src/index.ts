@@ -12,7 +12,7 @@ const server = app.listen(port, async () => {
     await DBConnection();
     startAgenda();
     console.log(`Server is Running And DB Connected http://localhost:${port}`);
-    if (process.env.NODE_ENV === "PROD") startCronJobs();
+    startCronJobs();
 
   } catch (error) {
     console.log(error);
