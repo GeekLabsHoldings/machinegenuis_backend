@@ -34,9 +34,6 @@ twitterRouter.post(
   "/add-reply-to-tweet/:_id",
   socialMediaController.addReplyToTweet
 );
-twitterRouter.post(
-  "/generate-hashtags",
-  socialMediaController.generateHashtags
-);
+
 
 export default twitterRouter;
