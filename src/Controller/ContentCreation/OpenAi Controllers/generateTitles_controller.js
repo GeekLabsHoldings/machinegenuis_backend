@@ -14,6 +14,7 @@ const generateTitles = async (content, myPrompt) => {
             model: "gpt-4o",
             messages: [
                 { role: "user", content: prompt.trim() },
+                { role: "system", content: prompt.trim() },
             ],
         });
 
