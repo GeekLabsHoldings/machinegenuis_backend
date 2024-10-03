@@ -214,6 +214,7 @@ export const addOrChangeAcount = async (req: Request, res: Response) => {
       return  res.json(result);
     }
     else if (req.body.platform=="TWITTER"){
+      console.log(req.body)
       accountData = {platform:req.body.platform,
          account:{ConsumerKey:req.body.ConsumerKey, ConsumerSecret:req.body.ConsumerSecret,
           AccessToken:req.body.AccessToken, TokenSecret:req.body.TokenSecret, BearerToken:req.body.BearerToken}}
@@ -222,8 +223,8 @@ export const addOrChangeAcount = async (req: Request, res: Response) => {
     }
     else if (req.body.platform=="FACEBOOK"){
       accountData = {platform:req.body.platform,
-        account:{token:req.body.token, pageID:req.body.owner,}}
-        
+        account:{token:req.body.token, pageID:req.body.pageID,}}
+
      const result = await brandService.addOrDeleteAccount(req.params.id, accountData);
      return  res.json(result);
     }
