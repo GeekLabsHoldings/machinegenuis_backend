@@ -47,8 +47,7 @@ const SubBrandSchema = new Schema<ISubBrand>({
 
 const BrandsModel = model<IBrand>(SchemaTypesReference.Brands, BrandSchema);
 // Create the SubBrand model as a discriminator of Brand
-const SubBrand = BrandsModel.discriminator<ISubBrand>('subbrand', SubBrandSchema);
-
+export const SubBrandModel = BrandsModel.discriminator<ISubBrand>('subbrand', SubBrandSchema);
 
 
 
