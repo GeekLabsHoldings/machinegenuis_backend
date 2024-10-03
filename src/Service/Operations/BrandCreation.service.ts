@@ -4,18 +4,14 @@ import BrandType from "../../Model/Operations/IBrand_interface";
 import {
   ISubBrand,
   IBrand,
-  IBrandWithSubs,
 } from "../../Model/Operations/IBrand_interface";
 import {
-  IAccount,
-  IRedditAccountData,
-  ITelegramAccountData,
+  
   accountDataType,
 } from "../../Model/Operations/IPostingAccounts_interface";
 import SocialPostingAccount from "../../Model/Operations/SocialPostingAccount.model";
 import crypto, { Encoding } from "crypto";
 import Route53DomainChecker, { ContactDetail } from "../AWS/Rout53/domains";
-import seenModel from "../../Model/Chat/seen.model";
 
 // import { Request, Response } from 'express';
 
@@ -81,8 +77,10 @@ export const getAllBrands = async (skip?:number, limit?:number) => {
 export const getBrands = async (skip:number, limit:number) => {
   try {
     //const brands = await BrandsModel.find({ }).skip(skip).limit(limit);
+
     const brands = await BrandsModel.find().skip(skip||0).limit(limit||999999);
     return brands;
+
   } catch (error) {
     console.log(error);
   }
@@ -253,7 +251,10 @@ export const getAccounts = async (id: string) => {
   }
   return data;
 };
-
+export const checkBrand = async (brand: string) => {
+  const brands = await BrandsModel.findById(brand);
+  return brands;
+};
 export const getAccount = async (id: string, platform: string) => {
   // Implement account retrieval logic
   const brand = await BrandsModel.findById(id)

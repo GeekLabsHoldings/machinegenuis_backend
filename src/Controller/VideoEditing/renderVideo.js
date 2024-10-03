@@ -258,7 +258,7 @@ const renderVideo = async (req, res) => {
     const options = { source: template, modifications: {} };
     
     console.log('Rendering video, please wait...');
-    const renders = await creatomateClient.render(options , 1800 );
+    const renders = await creatomateClient.render(options , 3000 );
     const videoUrl = renders[0].url;
 
     return res.status(200).json({

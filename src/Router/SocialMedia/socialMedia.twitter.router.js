@@ -3,11 +3,11 @@ import * as socialMediaController from "../../Controller/SocialMedia/socialMedia
 
 const twitterRouter = Router();
 twitterRouter.post(
-  "/add-account",
+  "/add-account/:brand",
   socialMediaController.addSocialAccountTwitter
 );
 twitterRouter.put(
-  "/edit-account/:_id",
+  "/edit-account/:_id/:brand",
   socialMediaController.editTwitterAccount
 );
 twitterRouter.patch(
@@ -34,9 +34,6 @@ twitterRouter.post(
   "/add-reply-to-tweet/:_id",
   socialMediaController.addReplyToTweet
 );
-twitterRouter.post(
-  "/generate-hashtags",
-  socialMediaController.generateHashtags
-);
+
 
 export default twitterRouter;

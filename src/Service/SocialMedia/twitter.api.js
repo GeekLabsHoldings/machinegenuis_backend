@@ -23,24 +23,16 @@ export const TwitterSocialMediaAddPost = async ({
 
   try {
     const tweet = await client.v2.tweet({
-      text: content,
+      text: content || "",
       media: mediaId
         ? {
             media_ids: [mediaId],
           }
         : undefined,
     });
-    if (tweet.status && tweet.status === 403) {
-      return systemError
-        .setStatus(403)
-        .getMessage(ErrorMessages.TWEET_IS_ALREADY_EXIST);
-    }
-    return {
-      message: "Tweet posted successfully",
-      tweet,
-    };
+    return { tweet, success: 200, message: "Tweet posted successfully" };
   } catch (error) {
-    console.error("Error posting tweet:", error);
+    return error;
   }
 };
 export const getUserByUsername = async (userName, BearerToken) => {

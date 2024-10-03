@@ -57,6 +57,9 @@ enum ErrorMessages {
   PROMPT_NOT_FOUND = "PROMPT_NOT_FOUND",
   INVALID_EMAILS = "INVALID_EMAILS",
   ACCOUNT_ALREADY_EXIST_IN_BRAND = "ACCOUNT_ALREADY_EXIST_IN_BRAND",
-  NULL = "NULL"
+  LIMIT_TEXT = "Limit text 280",
+  DUPLICATE_TWEET = "You are not allowed to create a Tweet with duplicate content.",
+  TWITTER_ACCOUNT_NOT_FOUNd = "TWITTER ACCOUNT NOT FOUND",
+  NULL = "NULL",
 }
 export { ErrorMessages };

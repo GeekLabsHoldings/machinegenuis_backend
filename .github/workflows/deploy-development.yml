@@ -3,7 +3,7 @@ name: Deploy to AWS Elastic Beanstalk
 on:
   push:
     branches:
-      - main    
+    - test-production
 
 jobs:
   deploy:
@@ -21,14 +21,14 @@ jobs:
     - name: Install dependencies
       run: yarn install
 
-
     - name: Build project
+
       run: yarn build
 
-
     - name: Create ZIP file
+
       run: zip -r deployment-package.zip package.json .platform dist
-    
+
     - name: List files
       run: ls -la
 
@@ -38,8 +38,8 @@ jobs:
         echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> .env
         echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
         echo "EB_APP_NAME=${{ secrets.EB_APP_NAME }}" >> .env
-        echo "EB_ENV_NAME=${{ secrets.EB_ENV_NAME }}" >> .env
-       
+        echo "EB_ENV_NAME_DEVELOPMENT=${{ secrets.EB_ENV_NAME_DEVELOPMENT}}" >> .env
+
 
     - name: Install AWS CLI
       run: |
@@ -54,7 +54,7 @@ jobs:
         aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         application_name: ${{ secrets.EB_APP_NAME }}
-        environment_name: ${{ secrets.EB_ENV_NAME }}
+        environment_name: ${{ secrets.EB_ENV_NAME_DEVELOPMENT}}
         region: ${{ secrets.AWS_REGION }}
         version_label: "machine-genius -${{ github.run_number }}"
         deployment_package: deployment-package.zip

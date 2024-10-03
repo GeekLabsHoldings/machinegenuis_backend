@@ -5,7 +5,7 @@ import socialAccountModel from "../../Model/SocialMedia/SocialMediaAccount.model
 
 export const createSocialAccountAddPost = async (
   platform,
-  brand,
+  brandId,
   content,
   userId,
   postId
@@ -13,7 +13,7 @@ export const createSocialAccountAddPost = async (
   try {
     const createPost = await socialMediaModel.create({
       platform,
-      brand,
+      brandId,
       content,
       employeeId: userId,
       postId,

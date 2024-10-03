@@ -22,7 +22,8 @@ const handleSearchImg = async (searchImgKeyword) => {
       && !url.includes('www.politico.com')
       && !url.includes('newsobserver')
       && !url.includes("usnews")
-      && !url.includes("macleans")); 
+      && !url.includes("macleans")
+      && !url.includes("www.intel.com")); 
 
     return filteredImageUrls;
   } catch (error) {
@@ -31,27 +32,35 @@ const handleSearchImg = async (searchImgKeyword) => {
   }
 };
 
-const getImg = async (req, res) => {
-  try {
-    const { searchImgKeyword } = req.body;
-    if (!searchImgKeyword) {
-      return res
-        .status(400)
-        .json({ success: false, error: "No image name provided" });
-    }
-    const images = await handleSearchImg(searchImgKeyword);
+const handleSearchImgNew = async (searchImgKeyword) => {
+  const clientId = '2EXTEjC2SflA_MDUCG1v9_XdTMzHTVvmx6FlEgOywNo';
+  const url = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(searchImgKeyword)}&per_page=20&client_id=${clientId}`;
 
-    return res.json({ success: true, images });
+  try {
+    const response = await axios.get(url);
+
+    if (response.status === 200 && response.data.results.length > 0) {
+      const imageUrls = response.data.results.map(image => image.urls.raw);
+      return imageUrls;
+    } else {
+      console.log("No images found for the search term.");
+      return [];
+    }
   } catch (error) {
-    console.error("Error in getImg:", error);
-    return res
-      .status(500)
-      .json({ success: false, error: "Something went wrong!" });
+    if (error.response) {
+      console.error(`Error fetching images from Unsplash: ${error.response.status} - ${error.response.data.errors}`);
+    } else if (error.request) {
+      console.error("No response received from Unsplash:", error.request);
+    } else {
+      console.error("Error in setting up the request:", error.message);
+    }
+    throw error;
   }
 };
 
+
 module.exports =
 {
-    getImg,
-    handleSearchImg
+    handleSearchImg,
+    handleSearchImgNew
 }
