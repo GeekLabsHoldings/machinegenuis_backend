@@ -266,7 +266,7 @@ export const getAccount = async (id: string, platform: string) => {
   });
   if (account) {
     let decrypted = decrypt(account.token);
-    console.log("encryption\t", decrypted, account.token)
+    //console.log("encryption\t", decrypted, account.token)
     if (account.platform == "TELEGRAM")
       return {
         platform: account.platform,
@@ -291,7 +291,7 @@ export const addOrDeleteAccount = async (
       platform: accountData.platform.toUpperCase(),
       brand: id,
     }, { session });
-    console.log(accountData)
+    //console.log(accountData)
     if (result.deletedCount === 1) {
       console.log("Account deleted successfully!");
     } else {
