@@ -77,19 +77,10 @@ export const getAllBrands = async (skip?:number, limit?:number) => {
 export const getBrands = async (skip:number, limit:number) => {
   try {
     //const brands = await BrandsModel.find({ }).skip(skip).limit(limit);
-    const brands = await BrandsModel.find({ type: { $ne: "subbrand" } }).skip(skip||0).limit(limit||999999);
-    const brandswithData: (ISubBrand|IBrand)[] = [];
-    for (const brand of brands) {
-      if (brand._id) {
-        const subBrands = await getAllSubBrands(brand._id);
-        
-        if (subBrands && subBrands.length >0){
-          // console.log(subBrands)
-          brandswithData.push(...subBrands)
-        }else{
-          brandswithData.push(brand)
-        }}}
-    return brandswithData;
+
+    const brands = await BrandsModel.find().skip(skip||0).limit(limit||999999);
+    return brands;
+
   } catch (error) {
     console.log(error);
   }
@@ -276,7 +267,7 @@ export const getAccount = async (id: string, platform: string) => {
   });
   if (account) {
     let decrypted = decrypt(account.token);
-
+    console.log("encryption\t", decrypted, account.token)
     if (account.platform == "TELEGRAM")
       return {
         platform: account.platform,
@@ -311,7 +302,7 @@ export const addOrDeleteAccount = async (
       let payload = { ...accountData.account };
       let payloadStr = JSON.stringify(payload);
       const token = encrypt(payloadStr);
-      console.log("encryption\t", accountData, payload, payloadStr, token)
+      
       const Account = new SocialPostingAccount({
         token: token,
         platform: accountData.platform,
@@ -357,7 +348,7 @@ export function decrypt(encryptedData: string): string | null {
     const secretKey = Buffer.from(sk, "hex");
     const decipher = crypto.createDecipheriv("aes-256-ecb", secretKey, null); // No IV for ECB
     let decrypted = decipher.update(encryptedData, "hex", "utf8");
-
+    
     decrypted += decipher.final("utf8");
 
     return decrypted;
