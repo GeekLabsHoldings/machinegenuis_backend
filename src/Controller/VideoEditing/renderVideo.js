@@ -111,49 +111,6 @@ const renderVideo = async (req, res) => {
     };
     template.elements[0].elements.push(track1Element);  
 
-    const track4Elements = [
-      {
-        "id": "ec20c61f-f0af-4c98-aa5f-65653c5b7a1a",
-        "type": "image",
-        "track": 4,
-        "time": currentTime - 1.2,
-        "duration": totalDuration,
-        "x": "93.6257%",
-        "y": "10.2028%",
-        "width": "8.0154%",
-        "height": "14.4895%",
-        "clip": true,
-        "animations": [
-          {
-            "time": 0.077,
-            "duration": 1.566,
-            "transition": true,
-            "type": "slide",
-            "direction": "90°"
-          }
-        ],
-        "source": "207563f8-29f0-4440-94c0-7a063c1c24ff"
-      },
-      {
-        "id": "d1102837-3761-459a-9868-67e6a2e5a619",
-        "type": "video",
-        "track": 4,
-        "time": template.duration - 15, 
-        "duration": 20, 
-        "source": "fdd26979-7b5a-4fee-b2bd-d8c7dec8c93c",
-        "animations": [
-          {
-            "time": 0.077,
-            "duration": 1.566,
-            "transition": true,
-            "type": "slide",
-            "direction": "90°"
-          }
-        ]
-      }
-    ];
-    template.elements[0].elements.push(...track4Elements);
-
     paragraphJson.forEach((paragraph, index) => {
       const { text, keywordsAndImages, audioPath, videoPath } = paragraph;
       const audioDuration = audioPath ? audioPath.duration || 15 : 15;
@@ -254,6 +211,49 @@ const renderVideo = async (req, res) => {
       currentTime += duration + timePadding;
     });
 
+    const track4Elements = [
+      {
+        "id": "ec20c61f-f0af-4c98-aa5f-65653c5b7a1a",
+        "type": "image",
+        "track": 4,
+        "time": currentTime - 1.2,
+        "duration": totalDuration,
+        "x": "93.6257%",
+        "y": "10.2028%",
+        "width": "8.0154%",
+        "height": "14.4895%",
+        "clip": true,
+        "animations": [
+          {
+            "time": 0.077,
+            "duration": 1.566,
+            "transition": true,
+            "type": "slide",
+            "direction": "90°"
+          }
+        ],
+        "source": "207563f8-29f0-4440-94c0-7a063c1c24ff"
+      },
+      {
+        "id": "d1102837-3761-459a-9868-67e6a2e5a619",
+        "type": "video",
+        "track": 4,
+        "time": template.duration - 15, 
+        "duration": 20, 
+        "source": "fdd26979-7b5a-4fee-b2bd-d8c7dec8c93c",
+        "animations": [
+          {
+            "time": 0.077,
+            "duration": 1.566,
+            "transition": true,
+            "type": "slide",
+            "direction": "90°"
+          }
+        ]
+      }
+    ];
+    
+    template.elements[0].elements.push(...track4Elements);
     const creatomateClient = new Creatomate.Client(process.env.CREATOMATE_API_KEY);
     const options = { source: template, modifications: {} };
     
