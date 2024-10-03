@@ -41,8 +41,9 @@ export const addBrandWithSubandAccounts = async (
     for (const acc of accounts) {
       const account = await addOrDeleteAccount(Brand._id, acc, session);
     }
-    return Brand;
     await session.commitTransaction();
+    return Brand;
+    
   } catch (error) {
     await session.abortTransaction();
     console.log(error);
@@ -80,25 +81,7 @@ export const getAllBrands = async (skip?:number, limit?:number) => {
 export const getBrands = async (skip:number, limit:number) => {
   try {
     const brands = await BrandsModel.find({ }).skip(skip).limit(limit);
-
-    //console.log(brands)
-    const brandswithData: {
-      brand: IBrand|ISubBrand;
-      subBrands: ISubBrand[];
-      accounts: accountDataType[];
-    }[] = [];
-    for (const brand of brands) {
-      if (brand._id) {
-        const subBrands = await getAllSubBrands(brand._id);
-        const accounts = await getAccounts(brand._id);
-        brandswithData.push({
-          brand: brand,
-          subBrands: subBrands,
-          accounts: accounts,
-        });
-      }
-    }
-    return brandswithData;
+    return brands;
   } catch (error) {
     console.log(error);
   }
@@ -134,16 +117,39 @@ export const updateBrand = async (id: string, brandData: Partial<IBrand>) => {
   }
 };
 export const deleteBrand = async (id: string) => {
-  return await BrandsModel.findByIdAndDelete(id);
+  const session = await startSession();
+  try {
+    session.startTransaction();
+    await SocialPostingAccount.deleteMany({brand:id}).session(session)
+    await SubBrandModel.deleteMany({parentId:id}).session(session)
+
+    const d =  await BrandsModel.findByIdAndDelete(id).session(session);
+
+    await session.commitTransaction();
+    return d
+  }  catch (error) {
+    await session.abortTransaction();
+    console.log(error);
+  } finally {
+    session.endSession();
+  }
 };
 export const getAllSubBrands = async (
   parentId: string,
   skip?:number,
   limit?:number
 ):Promise<ISubBrand[]> => {
+  const brand = await BrandsModel.findById(parentId)
+  if(!brand){
+    return []
+  }
   return await SubBrandModel.find({ type: "subbrand", parentId }).skip(skip||0).limit(limit||0);
 };
 export const getSubBrandById = async (parentId: string, id: string, skip:number, limit:number) => {
+  const brand = await BrandsModel.findById(parentId)
+  if(!brand){
+    return null
+  }
   return await BrandsModel.findOne({ _id: id, type: "subbrand", parentId }).skip(skip).limit(limit);
 };
 export const createSubBrand = async (
@@ -170,11 +176,29 @@ export const updateSubBrand = async (
   );
 };
 export const deleteSubBrand = async (parentId: string, id: string) => {
-  return await BrandsModel.findOneAndDelete({
-    _id: id,
-    type: "subbrand",
-    parentId,
-  });
+
+
+  const session = await startSession();
+  try {
+    session.startTransaction();
+    await SocialPostingAccount.deleteMany({brand:id}).session(session)
+    await SubBrandModel.deleteMany({parentId:id}).session(session)
+
+    await session.commitTransaction();
+    await session.commitTransaction();
+    const d = await BrandsModel.findOneAndDelete({
+      _id: id,
+      type: "subbrand",
+      parentId,
+    });
+    return d
+
+  }  catch (error) {
+    await session.abortTransaction();
+    console.log(error);
+  } finally {
+    session.endSession();
+  }
 };
 export async function checkAndSuggest(domainName: string) {
   const checker = new Route53DomainChecker();
@@ -207,6 +231,10 @@ export async function registerDomain(
 // Placeholder for account-related functions
 export const getAccounts = async (id: string) => {
   // Implement account retrieval logic
+  const brand = await BrandsModel.findById(id)
+  if(!brand){
+    return []
+  }
   const accounts = await SocialPostingAccount.find({ brand: id });
 
   const data: accountDataType[] = [];
@@ -227,6 +255,10 @@ export const getAccounts = async (id: string) => {
 
 export const getAccount = async (id: string, platform: string) => {
   // Implement account retrieval logic
+  const brand = await BrandsModel.findById(id)
+  if(!brand){
+    return null
+  }
   const account = await SocialPostingAccount.findOne({
     brand: id,
     platform: platform,
@@ -255,7 +287,7 @@ export const addOrDeleteAccount = async (
   // Implement account addition or deletion logic
   try {
     const result = await SocialPostingAccount.deleteOne({
-      platform: accountData.platform,
+      platform: accountData.platform.toUpperCase(),
       brand: id,
     }, { session });
 
