@@ -6,7 +6,7 @@ import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
 import axios from "axios";
 import { OAuth } from "oauth";
 
-export const TwitterSocialMediaAddPost = async ({
+export const TwitterSocialMedia = async ({
   content,
   mediaId,
   appKey,
