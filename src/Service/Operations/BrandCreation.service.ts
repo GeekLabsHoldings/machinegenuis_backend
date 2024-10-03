@@ -88,7 +88,7 @@ export const getBrands = async (skip:number, limit:number) => {
         const subBrands = await getAllSubBrands(brand._id);
         
         if (subBrands && subBrands.length >0){
-          console.log(subBrands)
+          // console.log(subBrands)
           brandswithData.push(...subBrands)
         }else{
           brandswithData.push(brand)
@@ -155,7 +155,7 @@ export const getAllSubBrands = async (
   if(!brand){
     return []
   }
-  return await SubBrandModel.find({ type: "subbrand", parentId }).skip(skip||0).limit(limit||0);
+  return await SubBrandModel.find({ type: "subbrand", parentId }).skip(skip||0).limit(limit||9999999);
 };
 export const getSubBrandById = async (parentId: string, id: string, skip:number, limit:number) => {
   const brand = await BrandsModel.findById(parentId)
