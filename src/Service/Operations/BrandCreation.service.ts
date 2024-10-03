@@ -80,8 +80,20 @@ export const getAllBrands = async (skip?:number, limit?:number) => {
 
 export const getBrands = async (skip:number, limit:number) => {
   try {
-    const brands = await BrandsModel.find({ }).skip(skip).limit(limit);
-    return brands;
+    //const brands = await BrandsModel.find({ }).skip(skip).limit(limit);
+    const brands = await BrandsModel.find({ type: { $ne: "subbrand" } }).skip(skip||0).limit(limit||999999);
+    const brandswithData: (ISubBrand|IBrand)[] = [];
+    for (const brand of brands) {
+      if (brand._id) {
+        const subBrands = await getAllSubBrands(brand._id);
+        
+        if (subBrands && subBrands.length >0){
+          console.log(subBrands)
+          brandswithData.push(...subBrands)
+        }else{
+          brandswithData.push(brand)
+        }}}
+    return brandswithData;
   } catch (error) {
     console.log(error);
   }
