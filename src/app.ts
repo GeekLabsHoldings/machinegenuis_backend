@@ -39,6 +39,7 @@ app.get("/test-delay", async (req, res) => {
   await delay(45 * 60 * 1000);
   return res.json("Done it work");
 });
+
 app.use(`/${RouterEnum.authentication}`, AuthenticationRouter);
 app.use(`/${RouterEnum.unAuthorizer}`, unAuthorizerApis);
 app.use(`/${RouterEnum.calendly}`, CalendlyRouter);
