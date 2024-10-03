@@ -1,4 +1,6 @@
-import BrandsModel, {SubBrandModel} from "../../Model/Operations/BrandCreation.model";
+import BrandsModel, {
+  SubBrandModel,
+} from "../../Model/Operations/BrandCreation.model";
 import { ClientSession, Types, startSession } from "mongoose";
 import BrandType from "../../Model/Operations/IBrand_interface";
 import {
@@ -50,9 +52,11 @@ export const addBrandWithSubandAccounts = async (
     session.endSession();
   }
 };
-export const getAllBrands = async (skip?:number, limit?:number) => {
+export const getAllBrands = async (skip?: number, limit?: number) => {
   try {
-    const brands = await BrandsModel.find({ type: { $ne: "subbrand" } }).skip(skip||0).limit(limit||0);
+    const brands = await BrandsModel.find({ type: { $ne: "subbrand" } })
+      .skip(skip || 0)
+      .limit(limit || 0);
 
     //console.log(brands)
     const brandswithData: {
@@ -77,13 +81,13 @@ export const getAllBrands = async (skip?:number, limit?:number) => {
   }
 };
 
-export const getBrands = async (skip:number, limit:number) => {
+export const getBrands = async (skip: number, limit: number) => {
   try {
-    const brands = await BrandsModel.find({ }).skip(skip).limit(limit);
+    const brands = await BrandsModel.find({}).skip(skip).limit(limit);
 
     //console.log(brands)
     const brandswithData: {
-      brand: IBrand|ISubBrand;
+      brand: IBrand | ISubBrand;
       subBrands: ISubBrand[];
       accounts: accountDataType[];
     }[] = [];
@@ -138,13 +142,22 @@ export const deleteBrand = async (id: string) => {
 };
 export const getAllSubBrands = async (
   parentId: string,
-  skip?:number,
-  limit?:number
-):Promise<ISubBrand[]> => {
-  return await SubBrandModel.find({ type: "subbrand", parentId }).skip(skip||0).limit(limit||0);
+  skip?: number,
+  limit?: number
+): Promise<ISubBrand[]> => {
+  return await SubBrandModel.find({ type: "subbrand", parentId })
+    .skip(skip || 0)
+    .limit(limit || 0);
 };
-export const getSubBrandById = async (parentId: string, id: string, skip:number, limit:number) => {
-  return await BrandsModel.findOne({ _id: id, type: "subbrand", parentId }).skip(skip).limit(limit);
+export const getSubBrandById = async (
+  parentId: string,
+  id: string,
+  skip: number,
+  limit: number
+) => {
+  return await BrandsModel.findOne({ _id: id, type: "subbrand", parentId })
+    .skip(skip)
+    .limit(limit);
 };
 export const createSubBrand = async (
   parentId: string,
@@ -224,7 +237,10 @@ export const getAccounts = async (id: string) => {
   }
   return data;
 };
-
+export const checkBrand = async (brand: string) => {
+  const brands = await BrandsModel.findById(brand);
+  return brands;
+};
 export const getAccount = async (id: string, platform: string) => {
   // Implement account retrieval logic
   const account = await SocialPostingAccount.findOne({
@@ -254,10 +270,13 @@ export const addOrDeleteAccount = async (
 ) => {
   // Implement account addition or deletion logic
   try {
-    const result = await SocialPostingAccount.deleteOne({
-      platform: accountData.platform,
-      brand: id,
-    }, { session });
+    const result = await SocialPostingAccount.deleteOne(
+      {
+        platform: accountData.platform,
+        brand: id,
+      },
+      { session }
+    );
 
     if (result.deletedCount === 1) {
       console.log("Account deleted successfully!");
@@ -268,7 +287,7 @@ export const addOrDeleteAccount = async (
       let payload = { ...accountData.account };
       let payloadStr = JSON.stringify(payload);
       const token = encrypt(payloadStr);
-      console.log("encryption\t", accountData, payload, payloadStr, token)
+      console.log("encryption\t", accountData, payload, payloadStr, token);
       const Account = new SocialPostingAccount({
         token: token,
         platform: accountData.platform,

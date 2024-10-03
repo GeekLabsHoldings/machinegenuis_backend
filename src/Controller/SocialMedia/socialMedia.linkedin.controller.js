@@ -7,7 +7,10 @@ import { createSocialAccountAddPost } from "../../Service/SocialMedia/socialMedi
 import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
 import systemError from "../../Utils/Error/SystemError";
 import { PlatformEnum } from "../../Utils/SocialMedia/Platform";
-import { getAccount } from "../../Service/Operations/BrandCreation.service";
+import {
+  checkBrand,
+  getAccount,
+} from "../../Service/Operations/BrandCreation.service";
 export const getDataLinkedin = async (req, res) => {
   try {
     const { brand } = req.params;
@@ -18,7 +21,15 @@ export const getDataLinkedin = async (req, res) => {
         .throw();
     }
     // Call registerUpload and get the asset + uploadUrl
+    const brands = await checkBrand(brand);
+    if (!brands) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.BRAND_NOT_FOUND)
+        .throw();
+    }
     const LinkedInAccount = await getAccount(brand, PlatformEnum.LINKEDIN);
+    console.log("LinkedTest", LinkedInAccount);
     const { asset, uploadUrl } = await registerUpload(
       LinkedInAccount.account.owner,
       LinkedInAccount.account.token
@@ -41,11 +52,7 @@ export const getDataLinkedin = async (req, res) => {
       },
     });
   } catch (error) {
-    // Handle errors and respond with error message
-    return res.status(400).json({
-      success: false,
-      message: `Failed to register upload: ${error.message}`,
-    });
+    return systemError.sendError(res, error);
   }
 };
 export const addPostSocialMediaLinkedin = async (req, res) => {
@@ -59,6 +66,13 @@ export const addPostSocialMediaLinkedin = async (req, res) => {
       .throw();
   }
   try {
+    const brands = await checkBrand(brandId);
+    if (!brands) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.BRAND_NOT_FOUND)
+        .throw();
+    }
     const LinkedInAccount = await getAccount(brandId, PlatformEnum.LINKEDIN);
     const response = await postToLinkedIn(
       content,
