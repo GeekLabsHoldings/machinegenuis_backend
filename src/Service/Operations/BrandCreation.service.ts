@@ -1,4 +1,4 @@
-import BrandsModel from "../../Model/Operations/BrandCreation.model";
+import BrandsModel, {SubBrandModel} from "../../Model/Operations/BrandCreation.model";
 import { ClientSession, Types, startSession } from "mongoose";
 import BrandType from "../../Model/Operations/IBrand_interface";
 import {
@@ -50,9 +50,9 @@ export const addBrandWithSubandAccounts = async (
     session.endSession();
   }
 };
-export const getAllBrands = async () => {
+export const getAllBrands = async (skip?:number, limit?:number) => {
   try {
-    const brands = await BrandsModel.find({ type: { $ne: "subbrand" } });
+    const brands = await BrandsModel.find({ type: { $ne: "subbrand" } }).skip(skip||0).limit(limit||0);
 
     //console.log(brands)
     const brandswithData: {
@@ -76,6 +76,34 @@ export const getAllBrands = async () => {
     console.log(error);
   }
 };
+
+export const getBrands = async (skip:number, limit:number) => {
+  try {
+    const brands = await BrandsModel.find({ }).skip(skip).limit(limit);
+
+    //console.log(brands)
+    const brandswithData: {
+      brand: IBrand|ISubBrand;
+      subBrands: ISubBrand[];
+      accounts: accountDataType[];
+    }[] = [];
+    for (const brand of brands) {
+      if (brand._id) {
+        const subBrands = await getAllSubBrands(brand._id);
+        const accounts = await getAccounts(brand._id);
+        brandswithData.push({
+          brand: brand,
+          subBrands: subBrands,
+          accounts: accounts,
+        });
+      }
+    }
+    return brandswithData;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export const getBrandById = async (id: string) => {
   try {
     const brand: IBrand | null = await BrandsModel.findById(id);
@@ -109,12 +137,14 @@ export const deleteBrand = async (id: string) => {
   return await BrandsModel.findByIdAndDelete(id);
 };
 export const getAllSubBrands = async (
-  parentId: string
-): Promise<ISubBrand[]> => {
-  return await BrandsModel.find({ type: "subbrand", parentId });
+  parentId: string,
+  skip?:number,
+  limit?:number
+):Promise<ISubBrand[]> => {
+  return await SubBrandModel.find({ type: "subbrand", parentId }).skip(skip||0).limit(limit||0);
 };
-export const getSubBrandById = async (parentId: string, id: string) => {
-  return await BrandsModel.findOne({ _id: id, type: "subbrand", parentId });
+export const getSubBrandById = async (parentId: string, id: string, skip:number, limit:number) => {
+  return await BrandsModel.findOne({ _id: id, type: "subbrand", parentId }).skip(skip).limit(limit);
 };
 export const createSubBrand = async (
   parentId: string,

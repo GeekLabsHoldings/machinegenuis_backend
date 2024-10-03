@@ -11,7 +11,10 @@ import { IBrand, ISubBrand } from "../../Model/Operations/IBrand_interface";
 
 export const getAllBrands = async (req: Request, res: Response) => {
   try {
-    const brands = await brandService.getAllBrands();
+      const page = parseInt(String(req.query.page)) || 1; // Default to page 1 if not provided
+      const limit = parseInt(String(req.query.limit)) || 10; // Default to 10 items per page if not provided
+      const skip = (page - 1) * limit;
+    const brands = await brandService.getAllBrands(skip, limit);
     // console.log(brands)
     res.json(brands);
   } catch (error) {
@@ -19,6 +22,19 @@ export const getAllBrands = async (req: Request, res: Response) => {
   }
 };
 
+
+export const getBrands = async (req: Request, res: Response) => {
+  try {
+    const page = parseInt(String(req.query.page)) || 1; // Default to page 1 if not provided
+    const limit = parseInt(String(req.query.limit)) || 10; // Default to 10 items per page if not provided
+    const skip = (page - 1) * limit;
+    const brands = await brandService.getBrands(skip, limit);
+    // console.log(brands)
+    res.json(brands);
+  } catch (error) {
+    return systemError.sendError(res, error);
+  }
+};
 
 
 export const getBrand = async (req: Request, res: Response) => {
@@ -99,7 +115,10 @@ export const getAllSubBrands = async (req: Request, res: Response) => {
 
 export const getSubBrand = async (req: Request, res: Response) => {
   try {
-    const subBrand = await brandService.getSubBrandById(req.params.parentId, req.params.id);
+    const page = parseInt(String(req.query.page)) || 1; // Default to page 1 if not provided
+    const limit = parseInt(String(req.query.limit)) || 10; // Default to 10 items per page if not provided
+    const skip = (page - 1) * limit;
+    const subBrand = await brandService.getSubBrandById(req.params.parentId, req.params.id, page, skip);
     if (!subBrand) {
       return res.status(404).json({ message: 'Sub-brand not found' });
     }
