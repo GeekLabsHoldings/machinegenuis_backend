@@ -94,6 +94,7 @@ export const editBrand = async (req: Request, res: Response) => {
 
 export const deleteBrand = async (req: Request, res: Response) => {
   try {
+
     const deletedBrand = await brandService.deleteBrand(req.params.id);
     if (!deletedBrand) {
       return res.status(404).json({ message: 'Brand not found' });
@@ -107,6 +108,9 @@ export const deleteBrand = async (req: Request, res: Response) => {
 export const getAllSubBrands = async (req: Request, res: Response) => {
   try {
     const subBrands = await brandService.getAllSubBrands(req.params.parentId);
+    if (!subBrands || subBrands.length == 0) {
+      return res.status(404).json({ message: 'Brand not found' });
+    }
     res.json(subBrands);
   } catch (error) {
     return systemError.sendError(res, error);
@@ -163,7 +167,11 @@ export const deleteSubBrand = async (req: Request, res: Response) => {
 
 export const getAccounts = async (req: Request, res: Response) => {
   try {
+    
     const account = await brandService.getAccounts(req.params.id);
+    if (!account || account.length ==0) {
+      return res.status(404).json({ message: 'account not found' });
+    }
     res.json(account);
   } catch (error) {
     console.log(error)
@@ -176,6 +184,9 @@ export const getAccounts = async (req: Request, res: Response) => {
 export const getAccount = async (req: Request, res: Response) => {
   try {
     const account = await brandService.getAccount(req.params.id, String(req.query.platform));
+    if (!account) {
+      return res.status(404).json({ message: 'account not found' });
+    }
     res.json(account);
   } catch (error) {
     console.log(error)
