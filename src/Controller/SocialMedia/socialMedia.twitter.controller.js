@@ -31,7 +31,7 @@ import OpenAiService from "../../Service/OpenAi/OpenAiService";
 import { campaignListEnum } from "../../Utils/SocialMedia/campaign";
 import PromptService from "../../Service/Prompt/PromptService";
 import socialCommentModel from "../../Model/SocialMedia/Twitter.SocialMedia.tweets.model";
-import { getAccount } from "../../Service/Operations/BrandCreation.service";
+import { checkBrand, getAccount } from "../../Service/Operations/BrandCreation.service";
 
 function decrypt(encryptedText) {
   const algorithm = "aes-256-cbc";
@@ -56,6 +56,13 @@ export const addPostSocialMediaTwitter = async (req, res) => {
     const { content, mediaId } = req.body;
     const { brandId } = req.params;
     const userId = req.body.currentUser._id;
+    const brands = await checkBrand(brandId);
+    if (!brands) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.BRAND_NOT_FOUND)
+        .throw();
+    }
     const twitterData = await getAccount(brandId, PlatformEnum.TWITTER);
     if (!twitterData) {
       return systemError
@@ -141,6 +148,13 @@ export const addSocialAccountTwitter = async (req, res) => {
         .setMessage(ErrorMessages.INVALID_SOCIAL_MEDIA_TYPE)
         .throw();
     }
+    const brands = await checkBrand(brand);
+    if (!brands) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.BRAND_NOT_FOUND)
+        .throw();
+    }
     const checkAccount = await checkAccountBrand(brand, userName);
     if (checkAccount)
       return res.json({ message: "ACCOUNT_ALREADY_EXIST_IN_BRAND" });
@@ -195,10 +209,15 @@ export const editTwitterAccount = async (req, res) => {
       delayBetweenGroups,
       longPauseAfterCount,
     } = req.body;
-    console.log(req.body);
-    console.log(req.params);
     
     
+    const brands = await checkBrand(brand);
+    if (!brands) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.BRAND_NOT_FOUND)
+        .throw();
+    }
     if (userName && twitterAccount.userName !== userName) {
       const twitterData = await getAccount(brand, PlatformEnum.TWITTER);
       if (!twitterData) {
