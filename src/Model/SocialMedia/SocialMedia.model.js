@@ -4,10 +4,12 @@ import { platform, type } from "os";
 import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
 import { EnumStringRequired } from "../../Utils/Schemas";
 import { PlatformArr } from "../../Utils/SocialMedia/Platform";
-import { brandArr } from "../../Utils/SocialMedia/Brand";
 const socialMediaSchema = new Schema({
   platform: EnumStringRequired(PlatformArr),
-  brand: EnumStringRequired(brandArr),
+  brandId: {
+    type: Types.ObjectId,
+    ref: SchemaTypesReference.SocialPostingAccount,
+  },
   content: {
     type: String,
   },
