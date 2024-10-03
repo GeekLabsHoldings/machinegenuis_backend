@@ -1,14 +1,16 @@
 import { Schema, model, Types } from "mongoose";
 import { PlatformArr } from "../../Utils/SocialMedia/Platform";
 import { EnumStringRequired, RequiredUniqueString } from "../../Utils/Schemas";
-import { brandArr } from "../../Utils/SocialMedia/Brand";
 import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
 import { campaignListArr } from "../../Utils/SocialMedia/campaign";
 
 const socialAccountSchema = new Schema(
   {
     sharingList: EnumStringRequired(PlatformArr),
-    brand: EnumStringRequired(brandArr),
+    brand: {
+      type: Types.ObjectId,
+      ref: SchemaTypesReference.SocialPostingAccount,
+    },
     userName: {
       type: String,
       required: true,
