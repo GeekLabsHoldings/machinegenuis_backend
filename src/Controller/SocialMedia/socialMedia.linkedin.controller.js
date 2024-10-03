@@ -20,7 +20,6 @@ export const getDataLinkedin = async (req, res) => {
         .setMessage(ErrorMessages.DATA_IS_REQUIRED)
         .throw();
     }
-    // Call registerUpload and get the asset + uploadUrl
     const brands = await checkBrand(brand);
     if (!brands) {
       return systemError
