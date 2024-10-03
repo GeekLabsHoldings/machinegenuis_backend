@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 
-export const textPhotoToFacebook = async ({accessToken, message}) => {
-  const url = `https://graph.facebook.com/v20.0/${process.env.FACEBOOK_PAGE_ID}/feed`;
+export const textPhotoToFacebook = async ({accessToken, message,FACEBOOK_PAGE_ID}) => {
+  const url = `https://graph.facebook.com/v20.0/${FACEBOOK_PAGE_ID}/feed`;
 
   try {
     const response = await axios.post(url, {
@@ -35,8 +35,8 @@ export const textPhotoToFacebook = async ({accessToken, message}) => {
     throw error;
   }
 };
-export const postPhotoToFacebook = async ({accessToken, message, imageUrl}) => {
-    const url = `https://graph.facebook.com/v20.0/${process.env.FACEBOOK_PAGE_ID}/photos`;
+export const postPhotoToFacebook = async ({accessToken, message, imageUrl ,FACEBOOK_PAGE_ID}) => {
+    const url = `https://graph.facebook.com/v20.0/${FACEBOOK_PAGE_ID}/photos`;
   
     try {
       const response = await axios.post(url, {

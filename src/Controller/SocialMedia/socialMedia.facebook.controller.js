@@ -1,5 +1,12 @@
 import S3_services from "../../Service/AWS/S3_Bucket/presinedURL";
-import { postPhotoToFacebook, textPhotoToFacebook } from "../../Service/SocialMedia/facebook.service";
+import {
+  checkBrand,
+  getAccount,
+} from "../../Service/Operations/BrandCreation.service";
+import {
+  postPhotoToFacebook,
+  textPhotoToFacebook,
+} from "../../Service/SocialMedia/facebook.service";
 import { submitRedditPost } from "../../Service/SocialMedia/reddit.Service";
 import { createSocialAccountAddPost } from "../../Service/SocialMedia/socialMedia.service";
 import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
@@ -34,32 +41,42 @@ export const getPreSignedURL = async (req, res) => {
 };
 
 export const addPostSocialMediaFacebookText = async (req, res, next) => {
-  const { brand, content, token } = req.body;
+  const { brandId } = req.params;
+  const { content } = req.body;
   const userId = req.body.currentUser._id;
-  if ((!content || !brand, !token)) {
+  if (!content || !brandId) {
     return systemError
       .setStatus(400)
       .setMessage(ErrorMessages.DATA_IS_REQUIRED)
       .throw();
   }
   try {
+    const brands = await checkBrand(brandId);
+    if (!brands) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.BRAND_NOT_FOUND)
+        .throw();
+    }
+    const facebookData = await getAccount(brandId, PlatformEnum.FACEBOOK);
     const response = await textPhotoToFacebook({
-      accessToken: token,
+      accessToken: facebookData.account.token,
+      FACEBOOK_PAGE_ID: facebookData.account.pageID,
       message: content,
     });
-    if (response?.message?.startsWith('Error')) {
-        return res.json({message:response.message});
-      }
+    if (response?.message?.startsWith("Error")) {
+      return res.json({ message: response.message });
+    }
     if (!response) {
       return systemError
         .setStatus(400)
-        .setMessage(ErrorMessages.INVALID_REDDIT_API)
+        .setMessage(ErrorMessages.INVALID_FACEBOOK_API)
         .throw();
     }
     const postId = response.id;
     const createPost = await createSocialAccountAddPost(
-      PlatformEnum.REDDIT,
-      brand,
+      PlatformEnum.FACEBOOK,
+      brandId,
       content,
       userId,
       postId
@@ -67,7 +84,7 @@ export const addPostSocialMediaFacebookText = async (req, res, next) => {
     if (!createPost) {
       return systemError
         .setStatus(400)
-        .setMessage(ErrorMessages.CAN_NOT_CREATE_REDDIT_POST)
+        .setMessage(ErrorMessages.CAN_NOT_CREATE_FACEBOOK_POST)
         .throw();
     }
     return res.status(200).json({
@@ -80,33 +97,43 @@ export const addPostSocialMediaFacebookText = async (req, res, next) => {
 };
 
 export const addPostSocialMediaFacebookPhoto = async (req, res, next) => {
-  const { brand, content, token, url } = req.body;
+  const { brandId } = req.params;
+  const { content, url } = req.body;
   const userId = req.body.currentUser._id;
-  if ((!content || !brand, !token, !url)) {
+  if (!content || !brandId || !url) {
     return systemError
       .setStatus(400)
       .setMessage(ErrorMessages.DATA_IS_REQUIRED)
       .throw();
   }
   try {
+    const brands = await checkBrand(brandId);
+    if (!brands) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.BRAND_NOT_FOUND)
+        .throw();
+    }
+    const facebookData = await getAccount(brandId, PlatformEnum.FACEBOOK);
     const response = await postPhotoToFacebook({
-      accessToken: token,
+      accessToken: facebookData.account.token,
       message: content,
-      imageUrl:url
+      imageUrl: url,
+      FACEBOOK_PAGE_ID: facebookData.account.pageID,
     });
-    if (response?.message?.startsWith('Error')) {
-        return res.json({message:response.message});
-      }
+    if (response?.message?.startsWith("Error")) {
+      return res.json({ message: response.message });
+    }
     if (!response) {
       return systemError
         .setStatus(400)
-        .setMessage(ErrorMessages.INVALID_REDDIT_API)
+        .setMessage(ErrorMessages.INVALID_FACEBOOK_API)
         .throw();
     }
     const postId = response.id;
     const createPost = await createSocialAccountAddPost(
       PlatformEnum.FACEBOOK,
-      brand,
+      brandId,
       content,
       userId,
       postId
@@ -114,7 +141,7 @@ export const addPostSocialMediaFacebookPhoto = async (req, res, next) => {
     if (!createPost) {
       return systemError
         .setStatus(400)
-        .setMessage(ErrorMessages.CAN_NOT_CREATE_REDDIT_POST)
+        .setMessage(ErrorMessages.CAN_NOT_CREATE_FACEBOOK_POST)
         .throw();
     }
     return res.status(200).json({
