@@ -7,10 +7,22 @@ import { createSocialAccountAddPost } from "../../Service/SocialMedia/socialMedi
 import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
 import systemError from "../../Utils/Error/SystemError";
 import { PlatformEnum } from "../../Utils/SocialMedia/Platform";
+import { getAccount } from "../../Service/Operations/BrandCreation.service";
 export const getDataLinkedin = async (req, res) => {
   try {
+    const { brand } = req.params;
+    if (!brand) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.DATA_IS_REQUIRED)
+        .throw();
+    }
     // Call registerUpload and get the asset + uploadUrl
-    const { asset, uploadUrl } = await registerUpload();
+    const LinkedInAccount = await getAccount(brand, PlatformEnum.LINKEDIN);
+    const { asset, uploadUrl } = await registerUpload(
+      LinkedInAccount.account.owner,
+      LinkedInAccount.account.token
+    );
 
     if (!asset || !uploadUrl) {
       return systemError
@@ -25,7 +37,7 @@ export const getDataLinkedin = async (req, res) => {
       data: {
         asset,
         uploadUrl,
-        linkedIn_Access_Token: process.env.LINKEDIN_ACCESS_TOKEN,
+        LinkedIn_Token: LinkedInAccount.account.token,
       },
     });
   } catch (error) {
@@ -36,18 +48,24 @@ export const getDataLinkedin = async (req, res) => {
     });
   }
 };
-
 export const addPostSocialMediaLinkedin = async (req, res) => {
-  const { brand, content, asset } = req.body;
+  const { content, asset } = req.body;
+  const { brandId } = req.params;
   const userId = req.body.currentUser._id;
-  if (!brand) {
+  if (!brandId) {
     return systemError
       .setStatus(400)
       .setMessage(ErrorMessages.DATA_IS_REQUIRED)
       .throw();
   }
   try {
-    const response = await postToLinkedIn(content, asset);
+    const LinkedInAccount = await getAccount(brandId, PlatformEnum.LINKEDIN);
+    const response = await postToLinkedIn(
+      content,
+      asset,
+      LinkedInAccount.account.owner,
+      LinkedInAccount.account.token
+    );
     if (!response || !response.id) {
       return systemError
         .setStatus(400)
@@ -57,7 +75,7 @@ export const addPostSocialMediaLinkedin = async (req, res) => {
     const postId = response.id;
     const createPost = await createSocialAccountAddPost(
       PlatformEnum.LINKEDIN,
-      brand,
+      brandId,
       content,
       userId,
       postId
