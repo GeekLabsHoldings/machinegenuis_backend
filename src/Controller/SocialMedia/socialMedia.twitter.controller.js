@@ -53,15 +53,9 @@ function decrypt(encryptedText) {
 }
 export const addPostSocialMediaTwitter = async (req, res) => {
   try {
-    const {content, mediaId } = req.body;
-    const {brandId} = req.params
+    const { content, mediaId } = req.body;
+    const { brandId } = req.params;
     const userId = req.body.currentUser._id;
-    if (!brandId || !content) {
-      return systemError
-        .setStatus(400)
-        .setMessage(ErrorMessages.DATA_IS_REQUIRED)
-        .throw();
-    }
     const twitterData = await getAccount(brandId, PlatformEnum.TWITTER);
     if (!twitterData) {
       return systemError
@@ -69,36 +63,53 @@ export const addPostSocialMediaTwitter = async (req, res) => {
         .setMessage(ErrorMessages.BRAND_NOT_FOUND)
         .throw();
     }
-    console.log(twitterData);
-    
     const response = await TwitterSocialMediaAddPost({
       content,
-      appKey: decryptedAppKey,
-      appSecret: decryptedAppSecret,
-      accessToken: decryptedAccessToken,
-      accessSecret: decryptedAccessSecret,
+      appKey: twitterData.account.ConsumerKey,
+      appSecret: twitterData.account.ConsumerSecret,
+      accessToken: twitterData.account.AccessToken,
+      accessSecret: twitterData.account.TokenSecret,
       mediaId,
     });
-    const createPost = await createSocialAccountAddPost(
-      PlatformEnum.TWITTER,
-      brandId,
-      content,
-      userId,
-      response.tweet.data.id
-    );
-    return res.status(200).json({
-      tweet: response,
-      result: createPost,
-    });
+    if (
+      response?.data?.detail ===
+      "You are not allowed to create a Tweet with duplicate content."
+    ) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.DUPLICATE_TWEET)
+        .throw();
+    }
+    if (
+      response?.data?.detail === "You are not permitted to perform this action."
+    ) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.LIMIT_TEXT)
+        .throw();
+    }
+    if (response.success === 200) {
+      const createPost = await createSocialAccountAddPost(
+        PlatformEnum.TWITTER,
+        brandId,
+        content,
+        userId,
+        response.tweet.data.id
+      );
+      return res.status(200).json({
+        response,
+        result: createPost,
+      });
+    }
   } catch (error) {
     return systemError.sendError(res, error);
   }
 };
 export const addSocialAccountTwitter = async (req, res) => {
   try {
+    const { brand } = req.params;
     const {
       sharingList,
-      brand,
       accountName,
       userName,
       accountLink,
@@ -133,17 +144,16 @@ export const addSocialAccountTwitter = async (req, res) => {
     const checkAccount = await checkAccountBrand(brand, userName);
     if (checkAccount)
       return res.json({ message: "ACCOUNT_ALREADY_EXIST_IN_BRAND" });
-    const twitterData = await getTwitterData(brand);
+    const twitterData = await getAccount(brand, PlatformEnum.TWITTER);
     if (!twitterData) {
       return systemError
         .setStatus(400)
         .setMessage(ErrorMessages.BRAND_NOT_FOUND)
         .throw();
     }
-    const { token } = twitterData;
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    const BearerToken = decrypt(decodedToken.bearerToken);
-    const response = await getUserByUsername(userName, BearerToken);
+    console.log(twitterData);
+    
+    const response = await getUserByUsername(userName, twitterData.account.BearerToken);
     const account_id = response.data.id;
 
     const socialAccount = await createSocialAccount(
@@ -166,15 +176,17 @@ export const addSocialAccountTwitter = async (req, res) => {
 };
 export const editTwitterAccount = async (req, res) => {
   try {
-    const { _id } = req.params;
+    const { _id ,brand} = req.params;
     const twitterAccount = await getTwitterAccount(_id);
 
     if (!twitterAccount) {
-      return res.json({ message: "Twitter account not found" });
-    }
+      return systemError
+      .setStatus(400)
+      .setMessage(ErrorMessages.TWITTER_ACCOUNT_NOT_FOUNd)
+      .throw();
+  }
     const {
       accountName,
-      brand,
       sharingList,
       userName,
       accountLink,
@@ -183,21 +195,19 @@ export const editTwitterAccount = async (req, res) => {
       delayBetweenGroups,
       longPauseAfterCount,
     } = req.body;
+    console.log(req.body);
+    console.log(req.params);
+    
+    
     if (userName && twitterAccount.userName !== userName) {
-      const twitterData = await getTwitterData(brand);
-
+      const twitterData = await getAccount(brand, PlatformEnum.TWITTER);
       if (!twitterData) {
         return systemError
           .setStatus(400)
           .setMessage(ErrorMessages.BRAND_NOT_FOUND)
           .throw();
       }
-      const decodedToken = jwt.verify(
-        twitterData.token,
-        process.env.JWT_SECRET
-      );
-      const BearerToken = decrypt(decodedToken.bearerToken);
-      const response = await getUserByUsername(userName, BearerToken);
+      const response = await getUserByUsername(userName, twitterData.account.BearerToken);
       twitterAccount.account_id = response.data.id;
       twitterAccount.userName = userName;
     }
@@ -284,9 +294,9 @@ export const generateNewReply = async (req, res) => {
   }
 };
 export const addReplyToTweet = async (req, res) => {
-  const { _id } = req.params;
+  const { _id , brand} = req.params;
   try {
-    const { brand, tweetId, reply } = req.body;
+    const {tweetId, reply } = req.body;
     const tweet = await getTweetById(_id);
     if (!tweet) {
       return systemError
@@ -294,24 +304,15 @@ export const addReplyToTweet = async (req, res) => {
         .setMessage(ErrorMessages.ACCOUNT_NOT_FOUND)
         .throw();
     }
-    const twitterData = await getTwitterData(tweet.brand);
-    const { token } = twitterData;
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    const decryptedAppKey = decrypt(decodedToken.appKey);
-    const decryptedAppSecret = decrypt(decodedToken.appSecret);
-    const decryptedAccessToken = decrypt(decodedToken.accessToken);
-    const decryptedAccessSecret = decrypt(decodedToken.accessSecret);
-    const decryptedBearerToken = decrypt(decodedToken.bearerToken);
+    const twitterData = await getAccount(brand, PlatformEnum.TWITTER);
     const tweetReply = await addReply(
-      decryptedAppKey,
-      decryptedAppSecret,
-      decryptedAccessToken,
-      decryptedAccessSecret,
+      twitterData.account.ConsumerKey,
+      twitterData.account.ConsumerSecret,
+      twitterData.account.AccessToken,
+      twitterData.account.AccessToken,
       reply,
       tweetId
     );
-    console.log("------->", tweetReply.data.status);
-
     if (tweetReply.message === "Reply posted successfully") {
       await deleteTweet(_id);
     }

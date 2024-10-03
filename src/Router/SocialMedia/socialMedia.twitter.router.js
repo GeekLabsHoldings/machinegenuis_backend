@@ -3,11 +3,11 @@ import * as socialMediaController from "../../Controller/SocialMedia/socialMedia
 
 const twitterRouter = Router();
 twitterRouter.post(
-  "/add-account",
+  "/add-account/:brand",
   socialMediaController.addSocialAccountTwitter
 );
 twitterRouter.put(
-  "/edit-account/:_id",
+  "/edit-account/:_id/:brand",
   socialMediaController.editTwitterAccount
 );
 twitterRouter.patch(
