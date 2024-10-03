@@ -260,7 +260,10 @@ export const getAccounts = async (id: string) => {
   }
   return data;
 };
-
+export const checkBrand = async (brand: string) => {
+  const brands = await BrandsModel.findById(brand);
+  return brands;
+};
 export const getAccount = async (id: string, platform: string) => {
   // Implement account retrieval logic
   const brand = await BrandsModel.findById(id)
