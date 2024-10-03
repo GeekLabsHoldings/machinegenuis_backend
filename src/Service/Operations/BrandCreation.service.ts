@@ -267,7 +267,7 @@ export const getAccount = async (id: string, platform: string) => {
   });
   if (account) {
     let decrypted = decrypt(account.token);
-    console.log("encryption\t", decrypted, account.token)
+    //console.log("encryption\t", decrypted, account.token)
     if (account.platform == "TELEGRAM")
       return {
         platform: account.platform,
@@ -292,7 +292,7 @@ export const addOrDeleteAccount = async (
       platform: accountData.platform.toUpperCase(),
       brand: id,
     }, { session });
-
+    //console.log(accountData)
     if (result.deletedCount === 1) {
       console.log("Account deleted successfully!");
     } else {
@@ -348,7 +348,6 @@ export function decrypt(encryptedData: string): string | null {
     const secretKey = Buffer.from(sk, "hex");
     const decipher = crypto.createDecipheriv("aes-256-ecb", secretKey, null); // No IV for ECB
     let decrypted = decipher.update(encryptedData, "hex", "utf8");
-    
     decrypted += decipher.final("utf8");
 
     return decrypted;
