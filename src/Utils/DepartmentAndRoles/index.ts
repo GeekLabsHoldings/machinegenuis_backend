@@ -6,6 +6,8 @@ enum DepartmentEnum {
     Accounting = "accounting",
     CEO = "ceo",
     VideoEditing = "VideoEditing"
+
+
 }
 enum RoleEnum {
     ContentWriter = "ContentWriter",

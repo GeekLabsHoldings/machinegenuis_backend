@@ -9,11 +9,69 @@ import crypto from 'crypto';
 import { getAccount } from "../Operations/BrandCreation.service";
 import { log } from "console";
 
+// Secret key (32 bytes for AES-256)
+
+function encrypt(text) {
+
+  try {
+    const secretKey =  Buffer.from(process.env.ENCRYPTION_SECRET_KEY, 'hex');
+
+    const cipher = crypto.createCipheriv('aes-256-ecb', secretKey, null); // No IV for ECB
+    let encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return encrypted;
+  } catch (error) {
+    console.log(error)
+  }
+
+}
+
+// Decrypt function using AES-256-ECB
+function decrypt(encryptedData) {
+  try {
+  const secretKey =  Buffer.from(process.env.ENCRYPTION_SECRET_KEY, 'hex');
+  const decipher = crypto.createDecipheriv('aes-256-ecb', secretKey, null); // No IV for ECB
+  let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
+  } catch (error) {
+    console.log(error)
+  }
+  
+}
 
 
 
 
+export async function saveAccount(req,res){
 
+  try {
+    const result = await SocialPostingAccount.deleteOne({ platform:"TELEGRAM", brand:req.body.brand});
+  
+    if (result.deletedCount === 1) {
+      console.log('Message deleted successfully!');
+    } else {
+      console.log('Message not found.');
+    }
+  
+
+    const token = encrypt(req.body.token);
+  
+    const redditAccount = new SocialPostingAccount({
+      token: token, 
+      platform: "TELEGRAM",
+      brand:req.body.brand
+    });
+  
+    redditAccount.save()
+  } catch (error) {
+    console.log(error)
+  }
+  
+  
+}
+  
+  
   
   
 
@@ -177,11 +235,10 @@ export const sendMessageToAll = (
   ms
 ) => {
   chatIds.forEach(async(chatId) => {
-    
+
     try {
       let acountToken = await getAccount(chatId.brand, "TELEGRAM");
       acountToken = acountToken.account.token
-      console.log("telegram account token \n", acountToken)
       const tb =  new TelegramB(acountToken)
       console.log("group_id  ", chatId.group_id,"chat_ brand",chatId.brand, "account token", acountToken);
       
