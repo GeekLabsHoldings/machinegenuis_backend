@@ -33,7 +33,7 @@ const split = async function (data) {
       segments.push({
         part: part,
         "time duration": `${startTime}:${endTime}`,
-        transcription: { content: recappedContent },
+        transcription: { content: recappedContent.content },
       });
 
       startTime = endTime;
