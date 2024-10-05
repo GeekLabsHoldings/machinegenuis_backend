@@ -44,7 +44,7 @@ export async function add_channel(req, res) {
     const { group_name, link, group_id, niche, brand, platform, engagement } =
       req.body;
 
-    let acountToken = await getAccount(group.brand, "TELEGRAM");
+    let acountToken = await getAccount(brand, "TELEGRAM");
     acountToken = acountToken.token
     const tb =  new TelegramB(acountToken)
     const subscribers = await tb.bot.getChatMemberCount(group_id);
