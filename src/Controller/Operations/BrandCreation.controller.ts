@@ -197,23 +197,22 @@ export const getAccount = async (req: Request, res: Response) => {
 
 export const addOrChangeAcount = async (req: Request, res: Response) => {
   try {
-
     //appID:string, appSecret:string, username:string, password:string, brand:string|Types.ObjectId
     let accountData:accountDataType
-    if (req.body.platform=="REDDIT"){
+    if (req.body.platform.toUpperCase()=="REDDIT"){
       accountData = {platform:req.body.platform,
          account:{appID:req.body.appID, appSecret:req.body.appSecret,
            username:req.body.username, password:req.body.password}}
       const result = await brandService.addOrDeleteAccount(req.params.id, accountData);
       return  res.json(result);
     }
-    else if (req.body.platform=="LINKEDIN"){
+    else if (req.body.platform.toUpperCase()=="LINKEDIN"){
       accountData = {platform:req.body.platform,
          account:{token:req.body.token, owner:req.body.owner,}}
       const result = await brandService.addOrDeleteAccount(req.params.id, accountData);
       return  res.json(result);
     }
-    else if (req.body.platform=="TWITTER"){
+    else if (req.body.platform.toUpperCase()=="TWITTER"){
       console.log(req.body)
       accountData = {platform:req.body.platform,
          account:{ConsumerKey:req.body.ConsumerKey, ConsumerSecret:req.body.ConsumerSecret,
@@ -221,20 +220,20 @@ export const addOrChangeAcount = async (req: Request, res: Response) => {
       const result = await brandService.addOrDeleteAccount(req.params.id, accountData);
       return  res.json(result);
     }
-    else if (req.body.platform=="FACEBOOK"){
+    else if (req.body.platform.toUpperCase()=="FACEBOOK"){
       accountData = {platform:req.body.platform,
         account:{token:req.body.token, pageID:req.body.pageID,}}
 
      const result = await brandService.addOrDeleteAccount(req.params.id, accountData);
      return  res.json(result);
     }
-    else if (req.body.platform=="TELEGRAM"){
+    else if (req.body.platform.toUpperCase()=="TELEGRAM"){
       accountData = {platform:req.body.platform,
          account:{token:req.body.token}}
       const result = await brandService.addOrDeleteAccount(req.params.id, accountData);
       return  res.json(result);
     }
-    return res.json({message:"error adding account check Platform and the correct Inputs for the platform"});
+    return res.status(400).json({message:"error adding account check Platform and the correct Inputs for the platform"});
   } catch (error) {
     return systemError.sendError(res, error);
   }

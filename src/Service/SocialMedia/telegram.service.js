@@ -124,9 +124,8 @@ brand
     const channels = await SocialMediaGroups.find({brand:brand, platform:"TELEGRAM"})
 
     let sum=0
-    console.log(channels, brand)
-    channels.forEach(channel=>{
-      sum+=channel.subscribers})
+    // console.log(channels, brand)
+    channels.forEach(channel=>sum+=Number(channel.subscribers))
   
     return sum;
 
