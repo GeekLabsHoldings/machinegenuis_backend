@@ -19,6 +19,7 @@ import {
   deleteAccountTwitter,
   deleteTweet,
   existAccount,
+  getAllAccounts,
   getAllTweetsMustApprove,
   getAndUpdateTweetComment,
   getPromptWithPlatform,
@@ -31,7 +32,10 @@ import OpenAiService from "../../Service/OpenAi/OpenAiService";
 import { campaignListEnum } from "../../Utils/SocialMedia/campaign";
 import PromptService from "../../Service/Prompt/PromptService";
 import socialCommentModel from "../../Model/SocialMedia/Twitter.SocialMedia.tweets.model";
-import { checkBrand, getAccount } from "../../Service/Operations/BrandCreation.service";
+import {
+  checkBrand,
+  getAccount,
+} from "../../Service/Operations/BrandCreation.service";
 export const addPostSocialMediaTwitter = async (req, res) => {
   try {
     const { content, mediaId } = req.body;
@@ -129,7 +133,7 @@ export const addSocialAccountTwitter = async (req, res) => {
         .setMessage(ErrorMessages.INVALID_SOCIAL_MEDIA_TYPE)
         .throw();
     }
-    const brands = await checkBrand(brand);  
+    const brands = await checkBrand(brand);
     if (!brands) {
       return systemError
         .setStatus(400)
@@ -145,8 +149,11 @@ export const addSocialAccountTwitter = async (req, res) => {
         .setStatus(400)
         .setMessage(ErrorMessages.BRAND_NOT_FOUND)
         .throw();
-    }    
-    const response = await getUserByUsername(userName, twitterData.account.BearerToken);
+    }
+    const response = await getUserByUsername(
+      userName,
+      twitterData.account.BearerToken
+    );
     const account_id = response.data.id;
 
     const socialAccount = await createSocialAccount(
@@ -170,15 +177,15 @@ export const addSocialAccountTwitter = async (req, res) => {
 };
 export const editTwitterAccount = async (req, res) => {
   try {
-    const { _id ,brand} = req.params;
+    const { _id, brand } = req.params;
     const twitterAccount = await getTwitterAccount(_id);
 
     if (!twitterAccount) {
       return systemError
-      .setStatus(400)
-      .setMessage(ErrorMessages.TWITTER_ACCOUNT_NOT_FOUNd)
-      .throw();
-  }
+        .setStatus(400)
+        .setMessage(ErrorMessages.TWITTER_ACCOUNT_NOT_FOUNd)
+        .throw();
+    }
     const {
       accountName,
       sharingList,
@@ -189,8 +196,7 @@ export const editTwitterAccount = async (req, res) => {
       delayBetweenGroups,
       longPauseAfterCount,
     } = req.body;
-    
-    
+
     const brands = await checkBrand(brand);
     if (!brands) {
       return systemError
@@ -206,7 +212,10 @@ export const editTwitterAccount = async (req, res) => {
           .setMessage(ErrorMessages.BRAND_NOT_FOUND)
           .throw();
       }
-      const response = await getUserByUsername(userName, twitterData.account.BearerToken);
+      const response = await getUserByUsername(
+        userName,
+        twitterData.account.BearerToken
+      );
       twitterAccount.account_id = response.data.id;
       twitterAccount.userName = userName;
     }
@@ -227,6 +236,14 @@ export const editTwitterAccount = async (req, res) => {
       return res.status(400).json({ message: "Account name already exists" });
     }
     return systemError.sendError(res, error);
+  }
+};
+export const getAllAccountsTwitter = async (req, res) => {
+  try {
+    const accounts = await getAllAccounts();
+    return res.json({ result: accounts });
+  } catch (error) {
+    return;
   }
 };
 export const editCampaignTwitterAccount = async (req, res) => {
@@ -293,9 +310,9 @@ export const generateNewReply = async (req, res) => {
   }
 };
 export const addReplyToTweet = async (req, res) => {
-  const { _id , brand} = req.params;
+  const { _id, brand } = req.params;
   try {
-    const {tweetId, reply } = req.body;
+    const { tweetId, reply } = req.body;
     const tweet = await getTweetById(_id);
     if (!tweet) {
       return systemError

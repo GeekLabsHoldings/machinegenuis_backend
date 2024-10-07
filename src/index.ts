@@ -3,7 +3,7 @@ import "dotenv/config";
 import { DBConnection } from "./DbSetup/DbConfig";
 import createIo from "./socketIo";
 import startCronJobs from "./Utils/CronJobs/startCronJobs";
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 4001;
 import "./Utils/CronJobs/TweetsQueue/queue";
 import { startAgenda } from "./Model/Operations/BroadCast/BroadCastAgenda";
 

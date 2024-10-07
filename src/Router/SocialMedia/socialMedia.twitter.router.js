@@ -34,6 +34,9 @@ twitterRouter.post(
   "/add-reply-to-tweet/:_id",
   socialMediaController.addReplyToTweet
 );
-
+twitterRouter.get(
+  "/get-all-accounts",
+  socialMediaController.getAllAccountsTwitter
+);
 
 export default twitterRouter;
