@@ -12,6 +12,7 @@ const controllerSplitAndGenerate = require('../../Service/VideoEditingModule/spl
 const controllerRegenrateAudio = require('../../Service/VideoEditingModule/splitContent')
 const controllerReplaceWords = require('../../Controller/VideoEditing/addWord')
 const controllerGetContent = require('../../Controller/VideoEditing/getContent')
+const controllerEnhanceImage = require('../../Controller/VideoEditing/regenerateImg')
 
 Video_editing_router.get('/get-all-content', get_all_content);
 Video_editing_router.post('/render-video', controllerRenderVideo.renderVideo);
@@ -22,5 +23,6 @@ Video_editing_router.post('/test-audio', controllerSplitAndGenerate.testAudio);
 Video_editing_router.post('/regenrate-audio', controllerRegenrateAudio.regenrateAudio);
 Video_editing_router.post('/replace-words', controllerReplaceWords.addWordToReplace);
 Video_editing_router.post('/find-replace', controllerReplaceWords.findToReplace);
+Video_editing_router.post('/enhance-img', controllerEnhanceImage.editImage);
 
 export default Video_editing_router

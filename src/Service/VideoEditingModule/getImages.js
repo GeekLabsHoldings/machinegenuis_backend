@@ -1,5 +1,6 @@
 require("dotenv").config();
 const axios = require('axios');
+const serviceEnhanceImg = require('../../Service/VideoEditingModule/enahnceImg');
 
 const handleSearchImg = async (searchImgKeyword) => {
   try {
@@ -12,7 +13,29 @@ const handleSearchImg = async (searchImgKeyword) => {
       }
     });
 
+
     const imageResults = response.data.images_results || [];
+
+    const regenerateImgs = async (imageResults) => {
+      const enhancedImages = [];
+      
+      for (let i = 0; i < imageResults.length; i++) {
+          const url = imageResults[i];
+          console.log("url.original----> " + url.original);
+          
+          try {
+              const enhanced = await serviceEnhanceImg.enhanceImg(url.original);
+              enhancedImages.push(enhanced);
+              console.log("enhancedImages--->" + enhancedImages);
+          } catch (error) {
+              console.error('Error enhancing image:', error.message);
+          }
+      }
+
+      console.log("enhancedImages--->" + enhancedImages);
+      return enhancedImages;
+      
+    };
 
     const filteredImageUrls = imageResults
       .filter(image => image.original && image.original_width < 900 && image.original_width > 600 && image.original_height < 800 && image.original_height > 400) 
@@ -25,7 +48,10 @@ const handleSearchImg = async (searchImgKeyword) => {
       && !url.includes("macleans")
       && !url.includes("www.intel.com")); 
 
-    return filteredImageUrls;
+      
+    const enhancedImages = await regenerateImgs(imageResults.slice(0,10));
+    return enhancedImages;
+    
   } catch (error) {
     console.error("Error getting image:", error);
     throw error;
