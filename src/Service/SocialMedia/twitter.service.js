@@ -2,9 +2,7 @@ import promptsModel from "../../Model/ContentCreation/Prompts/prompts_model";
 import { socialMediaModel } from "../../Model/SocialMedia/SocialMedia.model";
 import socialAccountModel from "../../Model/SocialMedia/SocialMediaAccount.model";
 import socialCommentModel from "../../Model/SocialMedia/Twitter.SocialMedia.tweets.model";
-import twitterModel from "../../Model/SocialMedia/TwitterData.model";
 import { campaignListEnum } from "../../Utils/SocialMedia/campaign";
-
 export const createAccountTwitter = async (
   platform,
   brand,
@@ -27,12 +25,7 @@ export const createAccountTwitter = async (
     console.log("=============", { error });
   }
 };
-export const createTwitterAccountSecret = async (brand, token) => {
-  await twitterModel.create({
-    brand,
-    token,
-  });
-};
+
 export const existAccount = async (accountName) => {
   const Exist = await socialAccountModel.findOne({
     accountName,

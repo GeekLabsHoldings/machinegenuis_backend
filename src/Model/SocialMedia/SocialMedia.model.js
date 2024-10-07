@@ -8,7 +8,7 @@ const socialMediaSchema = new Schema({
   platform: EnumStringRequired(PlatformArr),
   brandId: {
     type: Types.ObjectId,
-    ref: SchemaTypesReference.SocialPostingAccount,
+    ref: SchemaTypesReference.Brands,
   },
   content: {
     type: String,
