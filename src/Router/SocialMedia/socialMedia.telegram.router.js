@@ -13,5 +13,5 @@ TelegramRouter.get("/list-telegram-channels-brand/:id",telegramController.get_ch
 TelegramRouter.post("/campaign-broadcast",telegramController.campaign);
 TelegramRouter.post("/campaign-brand/:id",telegramController.campaignByBrand);
 TelegramRouter.post("/delete-message",telegramController.deleteMessage);
-TelegramRouter.get("/subscripers/:id",telegramController.get_subscripers);
+TelegramRouter.get("/subscripers/",telegramController.get_subscripers);
 export default TelegramRouter;

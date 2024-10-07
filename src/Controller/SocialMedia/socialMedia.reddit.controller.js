@@ -6,7 +6,7 @@ import systemError from "../../Utils/Error/SystemError";
 import { PlatformEnum } from "../../Utils/SocialMedia/Platform";
 import redditQueueAddJob from "../../Utils/CronJobs/RedisQueue/reddit.social";
 import axios from "axios";
-import { getAccount } from "../../Service/Operations/BrandCreation.service";
+import { getAccount, getBrands } from "../../Service/Operations/BrandCreation.service";
 
 const cron = require("node-cron");
 
@@ -73,9 +73,13 @@ export async function get_subreddits_brand(req, res) {
 
 export const BrandRedditSubs = async (req, res) => {
   try {
-    const subs = await RedditServices.GetSubCount(req.params.id);
-    console.log(subs);
-    res.json({ subscribers: subs });
+    const brands = await getBrands(0, 99999999999999)
+    const output = []
+    for(const brand of brands){
+      const subs = await RedditServices.GetSubCount(brand._id);
+      output.push({id:brand._id, name:brand.name, description:brand.description, date:brand.aquisition_date, niche:brand.niche, subscribers:subs, engagement:96})
+    }
+    res.json(output);
   } catch (error) {
     return systemError.sendError(res, error);
   }

@@ -7,6 +7,8 @@ import {
   getSignedUrl,
   S3RequestPresigner,
 } from "@aws-sdk/s3-request-presigner";
+const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 
 class S3_services {
   /////methods////
@@ -49,5 +51,24 @@ class S3_services {
     const jsonData = JSON.parse(stringData);
     return jsonData;
   }
+
+
+
+  // createPresignedUrlWithClient__ = async ({ region, bucket, key }) => {
+  //   const client = new S3Client({ region });
+  //   const command = new GetObjectCommand({
+  //     Bucket: bucket,
+  //     Key: key,
+  //     ACL: "public-read-write",
+  //   });
+
+  //   const preSignedURL = await createPresignedUrlForViewing({
+  //     region: 'your-region',
+  //     bucket: 'your-bucket-name',
+  //     key: 'path-to-your-image.jpg'
+  //   });
+
+  //   return await getSignedUrl(client, command, { expiresIn: 360000 });
+  // };
 }
 export default S3_services;
