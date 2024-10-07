@@ -86,6 +86,26 @@ export const getBrands = async (skip:number, limit:number) => {
   }
 };
 
+
+
+export const getBrandsByPlatform = async (platform:string, skip:number, limit:number) => {
+  try{
+  const accounts = await SocialPostingAccount.find({platform:platform}).skip(skip||0).limit(limit||999999);
+  const brands : (IBrand|ISubBrand)[] = []
+  for(const acc of accounts){
+    const b = await BrandsModel.findById(acc.brand)
+    if (b)
+      brands.push(b)
+  }
+  return brands;
+
+} catch (error) {
+  console.log(error);
+}
+};
+
+
+
 export const getBrandById = async (id: string) => {
   try {
     const brand: IBrand | null = await BrandsModel.findById(id);
