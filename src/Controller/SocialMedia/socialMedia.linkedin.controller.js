@@ -11,6 +11,7 @@ import {
   checkBrand,
   getAccount,
 } from "../../Service/Operations/BrandCreation.service";
+import { LinkedInQueueAdd } from "../../Utils/CronJobs/linkedInQueue/linkedIn.Queue";
 export const getDataLinkedin = async (req, res) => {
   try {
     const { brand } = req.params;
@@ -55,7 +56,7 @@ export const getDataLinkedin = async (req, res) => {
   }
 };
 export const addPostSocialMediaLinkedin = async (req, res) => {
-  const { content, asset } = req.body;
+  const { content, asset ,startTime} = req.body;
   const { brandId } = req.params;
   const userId = req.body.currentUser._id;
   if (!brandId) {
@@ -73,35 +74,15 @@ export const addPostSocialMediaLinkedin = async (req, res) => {
         .throw();
     }
     const LinkedInAccount = await getAccount(brandId, PlatformEnum.LINKEDIN);
-    const response = await postToLinkedIn(
-      content,
-      asset,
-      LinkedInAccount.account.owner,
-      LinkedInAccount.account.token
-    );
-    if (!response || !response.id) {
+    if(!LinkedInAccount){
       return systemError
-        .setStatus(400)
-        .setMessage(ErrorMessages.INVALID_LINKEDIN_API)
-        .throw();
+      .setStatus(400)
+      .setMessage(ErrorMessages.ACCOUNT_NOT_FOUND)
+      .throw();
     }
-    const postId = response.id;
-    const createPost = await createSocialAccountAddPost(
-      PlatformEnum.LINKEDIN,
-      brandId,
-      content,
-      userId,
-      postId
-    );
-    if (!createPost) {
-      return systemError
-        .setStatus(400)
-        .setMessage(ErrorMessages.CAN_NOT_CREATE_LINKEDIN_ACCOUNT)
-        .throw();
-    }
+    await LinkedInQueueAdd(content, asset, brandId, userId,startTime);
     return res.status(200).json({
-      result: createPost,
-      linkedinPost: response,
+      message:"Success"
     });
   } catch (error) {
     const errorMessage =
