@@ -32,13 +32,15 @@ import OpenAiService from "../../Service/OpenAi/OpenAiService";
 import { campaignListEnum } from "../../Utils/SocialMedia/campaign";
 import PromptService from "../../Service/Prompt/PromptService";
 import socialCommentModel from "../../Model/SocialMedia/Twitter.SocialMedia.tweets.model";
+
 import {
   checkBrand,
   getAccount,
 } from "../../Service/Operations/BrandCreation.service";
+import { twitterQueueAdd } from "../../Utils/CronJobs/TweetsQueue/twitterPostQueue";
 export const addPostSocialMediaTwitter = async (req, res) => {
   try {
-    const { content, mediaId } = req.body;
+    const { content, asset, mediaId, startTime } = req.body;
     const { brandId } = req.params;
     const userId = req.body.currentUser._id;
     const brands = await checkBrand(brandId);
@@ -52,47 +54,11 @@ export const addPostSocialMediaTwitter = async (req, res) => {
     if (!twitterData) {
       return systemError
         .setStatus(400)
-        .setMessage(ErrorMessages.BRAND_NOT_FOUND)
+        .setMessage(ErrorMessages.TWITTER_ACCOUNT_NOT_FOUND)
         .throw();
     }
-    const response = await TwitterSocialMediaAddPost({
-      content,
-      appKey: twitterData.account.ConsumerKey,
-      appSecret: twitterData.account.ConsumerSecret,
-      accessToken: twitterData.account.AccessToken,
-      accessSecret: twitterData.account.TokenSecret,
-      mediaId,
-    });
-    if (
-      response?.data?.detail ===
-      "You are not allowed to create a Tweet with duplicate content."
-    ) {
-      return systemError
-        .setStatus(400)
-        .setMessage(ErrorMessages.DUPLICATE_TWEET)
-        .throw();
-    }
-    if (
-      response?.data?.detail === "You are not permitted to perform this action."
-    ) {
-      return systemError
-        .setStatus(400)
-        .setMessage(ErrorMessages.LIMIT_TEXT)
-        .throw();
-    }
-    if (response.success === 200) {
-      const createPost = await createSocialAccountAddPost(
-        PlatformEnum.TWITTER,
-        brandId,
-        content,
-        userId,
-        response.tweet.data.id
-      );
-      return res.status(200).json({
-        response,
-        result: createPost,
-      });
-    }
+    await twitterQueueAdd(content, asset, startTime, brandId, userId);
+    return res.status(200).json({ message: "Success" });
   } catch (error) {
     return systemError.sendError(res, error);
   }
@@ -183,7 +149,7 @@ export const editTwitterAccount = async (req, res) => {
     if (!twitterAccount) {
       return systemError
         .setStatus(400)
-        .setMessage(ErrorMessages.TWITTER_ACCOUNT_NOT_FOUNd)
+        .setMessage(ErrorMessages.TWITTER_ACCOUNT_NOT_FOUND)
         .throw();
     }
     const {

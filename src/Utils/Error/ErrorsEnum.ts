@@ -60,7 +60,7 @@ enum ErrorMessages {
   ACCOUNT_ALREADY_EXIST_IN_BRAND = "ACCOUNT_ALREADY_EXIST_IN_BRAND",
   LIMIT_TEXT = "Limit text 280",
   DUPLICATE_TWEET = "You are not allowed to create a Tweet with duplicate content.",
-  TWITTER_ACCOUNT_NOT_FOUNd = "TWITTER ACCOUNT NOT FOUND",
+  TWITTER_ACCOUNT_NOT_FOUND = "TWITTER ACCOUNT NOT FOUND",
   NULL = "NULL",
 }
 export { ErrorMessages };
