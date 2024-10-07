@@ -14,7 +14,9 @@ const enhanceImg = async (input) => {
                     "resizing": {
                         "width": 800,
                         "height": 800,
-                        "fit": "crop"
+                        "fit": { 
+                            "crop": "center" 
+                        }
                     },
                     "adjustments": {
                         "hdr": 60,
