@@ -1,5 +1,7 @@
 require("dotenv").config();
 const axios = require('axios');
+const serviceEnhanceImg = require('../../Service/VideoEditingModule/enahnceImg');
+const { url } = require("inspector");
 
 const handleSearchImg = async (searchImgKeyword) => {
   try {
@@ -12,7 +14,15 @@ const handleSearchImg = async (searchImgKeyword) => {
       }
     });
 
+
     const imageResults = response.data.images_results || [];
+
+    const regenerateImgs = await Promise.all(imageResults.map(async (url) => {
+      console.log("url.original----> " + url.original);
+      
+      const enahanced = await serviceEnhanceImg.enhanceImg(url.original)
+      return enahanced
+    }));
 
     const filteredImageUrls = imageResults
       .filter(image => image.original && image.original_width < 900 && image.original_width > 600 && image.original_height < 800 && image.original_height > 400) 
@@ -25,7 +35,9 @@ const handleSearchImg = async (searchImgKeyword) => {
       && !url.includes("macleans")
       && !url.includes("www.intel.com")); 
 
-    return filteredImageUrls;
+      
+      
+    return regenerateImgs;
   } catch (error) {
     console.error("Error getting image:", error);
     throw error;
