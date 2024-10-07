@@ -129,9 +129,7 @@ export const addSocialAccountTwitter = async (req, res) => {
         .setMessage(ErrorMessages.INVALID_SOCIAL_MEDIA_TYPE)
         .throw();
     }
-    const brands = await checkBrand(brand);
-    console.log("niche:----->",brands.niche);
-    
+    const brands = await checkBrand(brand);  
     if (!brands) {
       return systemError
         .setStatus(400)
