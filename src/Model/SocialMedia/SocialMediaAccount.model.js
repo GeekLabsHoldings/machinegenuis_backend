@@ -9,7 +9,7 @@ const socialAccountSchema = new Schema(
     sharingList: EnumStringRequired(PlatformArr),
     brand: {
       type: Types.ObjectId,
-      ref: SchemaTypesReference.SocialPostingAccount,
+      ref: SchemaTypesReference.Brands,
     },
     userName: {
       type: String,
@@ -36,7 +36,10 @@ const socialAccountSchema = new Schema(
       default: 1,
     },
 
-    niche: String,
+    niche: {
+      type: String,
+      required: true,
+    },
     campaignType: EnumStringRequired(campaignListArr),
   },
   { timestamps: true }

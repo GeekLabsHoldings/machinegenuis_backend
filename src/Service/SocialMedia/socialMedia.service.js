@@ -1,8 +1,6 @@
 import { platform } from "os";
 import { socialMediaModel } from "../../Model/SocialMedia/SocialMedia.model";
-import twitterModel from "../../Model/SocialMedia/TwitterData.model";
 import socialAccountModel from "../../Model/SocialMedia/SocialMediaAccount.model";
-
 export const createSocialAccountAddPost = async (
   platform,
   brandId,
@@ -34,7 +32,8 @@ export const createSocialAccount = async (
   employeeId,
   delayBetweenPosts,
   delayBetweenGroups,
-  longPauseAfterCount
+  longPauseAfterCount,
+  niche
 ) => {
   const socialAccount = await socialAccountModel.create({
     sharingList,
@@ -47,7 +46,8 @@ export const createSocialAccount = async (
     employeeId,
     delayBetweenPosts,
     delayBetweenGroups,
-    longPauseAfterCount
+    longPauseAfterCount,
+    niche,
   });
   return socialAccount;
 };

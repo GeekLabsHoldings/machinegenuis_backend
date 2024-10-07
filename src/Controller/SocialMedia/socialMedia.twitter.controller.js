@@ -129,7 +129,7 @@ export const addSocialAccountTwitter = async (req, res) => {
         .setMessage(ErrorMessages.INVALID_SOCIAL_MEDIA_TYPE)
         .throw();
     }
-    const brands = await checkBrand(brand);
+    const brands = await checkBrand(brand);  
     if (!brands) {
       return systemError
         .setStatus(400)
@@ -145,9 +145,7 @@ export const addSocialAccountTwitter = async (req, res) => {
         .setStatus(400)
         .setMessage(ErrorMessages.BRAND_NOT_FOUND)
         .throw();
-    }
-    console.log(twitterData);
-    
+    }    
     const response = await getUserByUsername(userName, twitterData.account.BearerToken);
     const account_id = response.data.id;
 
@@ -162,7 +160,8 @@ export const addSocialAccountTwitter = async (req, res) => {
       employeeId,
       delayBetweenPosts,
       delayBetweenGroups,
-      longPauseAfterCount
+      longPauseAfterCount,
+      brands.niche
     );
     return res.status(200).json({ result: socialAccount });
   } catch (error) {
