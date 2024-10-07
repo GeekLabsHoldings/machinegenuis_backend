@@ -11,6 +11,7 @@ const server = app.listen(port, async () => {
   try {
     await DBConnection();
     startAgenda();
+    
     console.log(`Server is Running And DB Connected http://localhost:${port}`);
     startCronJobs();
 
