@@ -13,7 +13,7 @@ import systemError from "../../Utils/Error/SystemError";
 const crypto = require('crypto');
 const cron = require('node-cron');
 import telegramQueueAddJob from "../../Utils/CronJobs/RedisQueue/telegram.social";
-import { getAccount } from "../../Service/Operations/BrandCreation.service";
+import { getAccount, getBrands } from "../../Service/Operations/BrandCreation.service";
 
 export class TelegramB { 
   constructor(token){
@@ -183,9 +183,14 @@ export async function deleteMessage(req, res) {
 export async function get_subscripers(req, res) {
   try {
     // console.log(req.body.brand);
-
-    const subs = await GetSubCount(req.params.id);
-    res.json({ subscribers: subs });
+    const brands = await getBrands(0, 99999999999999)
+    const output = []
+    for(const brand of brands){
+      const subs = await GetSubCount(brand._id);
+      output.push({id:brand._id, name:brand.name, description:brand.description, date:brand.aquisition_date, niche:brand.niche, subscribers:subs, engagement:96})
+    }
+    
+    res.json(output);
   } catch (error) {
     return systemError.sendError(res, error);
   }
