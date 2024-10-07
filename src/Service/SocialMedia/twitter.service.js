@@ -55,3 +55,7 @@ export const getTweetById = async (_id) => {
 export const deleteTweet = async (_id) => {
   await socialCommentModel.deleteOne({ _id });
 };
+export const getAllAccounts = async () => {
+  const accounts = await socialAccountModel.find({});
+  return accounts;
+};

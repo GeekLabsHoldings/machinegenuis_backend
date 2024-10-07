@@ -37,6 +37,23 @@ export const getBrands = async (req: Request, res: Response) => {
 };
 
 
+
+
+export const getBrandsByPlatform = async (req: Request, res: Response) => {
+  try {
+    const page = parseInt(String(req.query.page)) || 1; // Default to page 1 if not provided
+    const limit = parseInt(String(req.query.limit)) || 10; // Default to 10 items per page if not provided
+    const skip = (page - 1) * limit;
+    const brands = await brandService.getBrandsByPlatform(req.body.platform, skip, limit);
+    // console.log(brands)
+    res.json(brands);
+  } catch (error) {
+    return systemError.sendError(res, error);
+  }
+};
+
+
+
 export const getBrand = async (req: Request, res: Response) => {
   try {
     const brand = await brandService.getBrandById(req.params.id);

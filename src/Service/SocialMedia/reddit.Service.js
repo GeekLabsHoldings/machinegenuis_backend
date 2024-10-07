@@ -18,7 +18,7 @@ const snoowrap = require('snoowrap');
 const jwt = require('jsonwebtoken');
 
 
-const userAgent = 'app:v1.0.0 (by a nerdy person)'
+const userAgent = 'geek_app:node:v1.2.11 (by a geek)'
 
 
 // export const submitRedditPost = async ({token, title, text, subreddit}) => {
@@ -244,10 +244,8 @@ brand
   try {
     const channels = await SocialMediaGroups.find({brand:brand, platform:"REDDIT"})
 
-    let sum=0
-    // console.log(channels, brand)
-    channels.forEach(channel=>{sum+= Number(channel.subscribers)})
-  
+    const sum = channels.reduce((total, channel) => total + Number(channel.subscribers), 0);
+    
     return sum;
   } catch (error) {
     console.log(error)
