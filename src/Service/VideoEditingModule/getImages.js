@@ -18,8 +18,8 @@ const handleSearchImg = async (searchImgKeyword) => {
 
     const regenerateImgs = async (imageResults) => {
       const enhancedImages = [];
-
-      for (let i = 0; i < imageResults.length ; i++) {
+      
+      for (let i = 0; i < imageResults.length; i++) {
           const url = imageResults[i];
           console.log("url.original----> " + url.original);
           
@@ -49,7 +49,7 @@ const handleSearchImg = async (searchImgKeyword) => {
       && !url.includes("www.intel.com")); 
 
       
-    const enhancedImages = await regenerateImgs(imageResults);
+    const enhancedImages = await regenerateImgs(imageResults.slice(0,10));
     return enhancedImages;
     
   } catch (error) {
