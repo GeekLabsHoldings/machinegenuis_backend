@@ -395,7 +395,7 @@ export const addOrDeleteAccount = async (
       "token" in accountData.account
     ) {
       let payload = accountData.account.token;
-      const token = encrypt(payload);
+      const token = encrypt(payload||"");
       const Account = new SocialPostingAccount({
         token: token,
         platform: accountData.platform,
@@ -409,6 +409,26 @@ export const addOrDeleteAccount = async (
     console.log(error);
   }
 };
+
+
+export const deleteAccount = async (acc_id: string) => {
+  try {
+    const delAccount = await SocialPostingAccount.findByIdAndDelete(acc_id);
+    if (delAccount) {
+      console.log('Account deleted successfully:', delAccount);
+      return delAccount
+    } else {
+      console.log('No account found with the provided ID.');
+      return null
+    }
+    
+  } catch (error) {
+    console.log('Error deleting account:', error);
+  }
+};
+
+
+
 function encrypt(text: string): string | null {
   const sk: String | undefined = process.env.SECRET_KEY;
   if (sk) {
@@ -433,3 +453,16 @@ export function decrypt(encryptedData: string): string | null {
   }
   return null;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

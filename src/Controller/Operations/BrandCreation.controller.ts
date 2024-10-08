@@ -288,7 +288,8 @@ export const addOrChangeAcount = async (req: Request, res: Response) => {
     }
     else if (req.body.platform.toUpperCase()=="FACEBOOK"){
       accountData = {platform:req.body.platform,
-        account:{token:req.body.token, pageID:req.body.pageID,}}
+        account:{token:req.body.token, pageID:req.body.pageID, 
+          email:req.body.email, password:req.body.password, cookies:req.body.cookies}}
 
      const result = await brandService.addOrDeleteAccount(req.params.id, accountData);
      return  res.json(result);
@@ -306,6 +307,25 @@ export const addOrChangeAcount = async (req: Request, res: Response) => {
 };
 
 
+export const deleteAccount = async(req: Request, res: Response) =>{
+      try {
+        const result = await brandService.deleteAccount(String(req.body.acc_id));
+        if (result){
+          return  res.json(result);
+        }
+        else{
+          return  res.status(404).json({message:"account not found"});
+        }
+        
+      } catch (error) {
+        return systemError.sendError(res, error);
+      }
+}
+
+
+
+
+// Domains ============================================================
 export const checkDomains = async (req: Request, res: Response) => {
   try {
     const result = await brandService.checkAndSuggest(req.body.domainName);
