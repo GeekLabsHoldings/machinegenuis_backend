@@ -16,7 +16,7 @@ SocialSittingsRouter.post("/:g_id/delete", brandController.deletGroup);
 SocialSittingsRouter.get("/get-posts", brandController.getAllPosts);
 SocialSittingsRouter.post("/add-posts", brandController.addPost);
 SocialSittingsRouter.get("/:id/get-posts-brand", brandController.getPostByBrand);
-SocialSittingsRouter.post("/:id/delete", brandController.deletpost);
+SocialSittingsRouter.post("/:id/delete-post", brandController.deletpost);
 
 
 export default SocialSittingsRouter

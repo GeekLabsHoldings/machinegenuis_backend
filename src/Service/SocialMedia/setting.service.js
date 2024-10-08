@@ -64,9 +64,9 @@ export const addGroup = async (group_id, group_name, link, platform, brand) => {
 
 
 
-export async function addPost(content, date, platform, engagement, id) {
+export async function addPost(postid, group_id ,content, date, platform, engagement, id) {
     try {
-        const newpost = SocialMediaPosts({content:content, timestamp:date, platform:platform, brand:id, })
+        const newpost = SocialMediaPosts({post_id:postid, group_id:group_id ,content:content, timestamp:date, platform:platform, engagement:engagement, brand:id, })
         const post = await newpost.save()
         return post
     } catch (error) {
@@ -103,7 +103,10 @@ export async function deletPost(id) {
 
 export async function getPost(skip,limit) {
     try {
-        const posts = await SocialMediaPosts.find({}).skip(skip||0).limit(limit||999999);
+      const posts = await SocialMediaPosts.find({})
+      .sort({ timestamp: -1 }) // Sort by 'timestamp' field in descending order for newest first
+      .skip(skip)
+      .limit(limit);
         return posts
     } catch (error) {
         console.log('Error deleting account:', error);
@@ -116,7 +119,7 @@ export async function getPost(skip,limit) {
 
 export async function getPostsByBrand(id,skip,limit) {
     try {
-        const posts = await SocialMediaPosts.find({brand:id}).skip(skip||0).limit(limit||999999);
+        const posts = await SocialMediaPosts.find({brand:id}).skip(skip||0).limit(limit||999999).sort({ timestamp: -1 });
         return posts
     } catch (error) {
         console.log('Error deleting account:', error);

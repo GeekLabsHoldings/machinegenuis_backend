@@ -4,6 +4,9 @@ import { hash } from "bcrypt";
 import { Schema, model, Types } from "mongoose";
 import { platform, type } from "os";
 import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
+import { PlatformArr, PlatformEnum } from "../../Utils/SocialMedia/Platform";
+import { EnumStringRequired } from "../../Utils/Schemas";
+
 
 // models/Group.js
 const mongoose = require("mongoose");
@@ -29,9 +32,13 @@ const SocialMediaPostsSchema = new mongoose.Schema({
     required: true,
     default: 0,
   },
-  platform: Types.ObjectId,
+  platform: EnumStringRequired(PlatformArr),
 
-
+  timestamp: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
   brand: {
     type: String,
     required: true,
