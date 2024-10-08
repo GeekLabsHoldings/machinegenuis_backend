@@ -39,6 +39,7 @@ import {
 } from "../../Service/Operations/BrandCreation.service";
 import { twitterQueueAdd } from "../../Utils/CronJobs/TweetsQueue/twitterPostQueue";
 import { systemPromptEnum } from "../../Utils/Prompt";
+import socialAccountModel from "../../Model/SocialMedia/SocialMediaAccount.model";
 export const addPostSocialMediaTwitter = async (req, res) => {
   try {
     const { content, asset, mediaId, startTime } = req.body;
@@ -162,6 +163,7 @@ export const editTwitterAccount = async (req, res) => {
       delayBetweenPosts,
       delayBetweenGroups,
       longPauseAfterCount,
+      status
     } = req.body;
 
     const brands = await checkBrand(brand);
@@ -190,6 +192,7 @@ export const editTwitterAccount = async (req, res) => {
     twitterAccount.accountName = accountName || twitterAccount.accountName;
     twitterAccount.accountLink = accountLink || twitterAccount.accountLink;
     twitterAccount.campaignType = campaignType || twitterAccount.campaignType;
+    twitterAccount.status = status || twitterAccount.status;
     twitterAccount.delayBetweenPosts =
       delayBetweenPosts || twitterAccount.delayBetweenPosts;
     twitterAccount.delayBetweenGroups =
@@ -288,16 +291,25 @@ export const addReplyToTweet = async (req, res) => {
         .throw();
     }
     const twitterData = await getAccount(brand, PlatformEnum.TWITTER);
+    if (!twitterData) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.BRAND_NOT_FOUND)
+        .throw();
+    }
     const tweetReply = await addReply(
       twitterData.account.ConsumerKey,
       twitterData.account.ConsumerSecret,
       twitterData.account.AccessToken,
-      twitterData.account.AccessToken,
+      twitterData.account.TokenSecret,
       reply,
       tweetId
     );
     if (tweetReply.message === "Reply posted successfully") {
       await deleteTweet(_id);
+      const account = await socialAccountModel.findOne({userName:tweet.accountName});
+      account.comments = account.comments + 1;
+      await account.save();
     }
 
     return res.status(200).json({ result: tweetReply });

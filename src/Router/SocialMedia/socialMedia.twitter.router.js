@@ -31,7 +31,7 @@ twitterRouter.post(
   socialMediaController.generateNewReply
 );
 twitterRouter.post(
-  "/add-reply-to-tweet/:_id",
+  "/add-reply-to-tweet/:_id/:brand",
   socialMediaController.addReplyToTweet
 );
 twitterRouter.get(

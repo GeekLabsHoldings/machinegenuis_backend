@@ -1,8 +1,9 @@
 import { Schema, model, Types } from "mongoose";
 import { PlatformArr } from "../../Utils/SocialMedia/Platform";
-import { EnumStringRequired, RequiredUniqueString } from "../../Utils/Schemas";
+import { EnumStringNotRequired, EnumStringRequired, RequiredNumber, RequiredUniqueString } from "../../Utils/Schemas";
 import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
 import { campaignListArr } from "../../Utils/SocialMedia/campaign";
+import { statusListArr } from "../../Utils/SocialMedia/status";
 
 const socialAccountSchema = new Schema(
   {
@@ -40,6 +41,8 @@ const socialAccountSchema = new Schema(
       type: String,
       required: true,
     },
+    status:EnumStringRequired(statusListArr),
+    comments:{type:Number,default:0},
     campaignType: EnumStringRequired(campaignListArr),
     followers: String,
   },
