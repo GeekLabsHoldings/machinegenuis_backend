@@ -10,23 +10,22 @@ const enhanceImg = async (input) => {
             'https://api.claid.ai/v1-beta1/image/edit',
             {
                 input,
-                "operations": {
-                    "resizing": {
-                        "width": 800,
-                        "height": 800,
-                        "fit": { 
-                            "crop": "center" 
-                        }
-                    },
-                    "adjustments": {
-                        "hdr": 60,
-                        "sharpness": 40
+               "operations": {
+                "restorations": {
+                    "upscale": "smart_enhance"
+                },
+                "resizing": {
+                    "width": 1280 ,
+                    "height": 720,
+                    "fit": {
+                        "crop": "smart"
                     }
+                }
                 },
                 "output": {
                     "format": {
-                    "type": "jpeg",
-                    "quality": 90
+                        "type": "jpeg",
+                        "quality": 90
                     }
                 }
             },
