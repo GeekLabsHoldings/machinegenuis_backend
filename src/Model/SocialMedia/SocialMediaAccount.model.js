@@ -41,6 +41,7 @@ const socialAccountSchema = new Schema(
       required: true,
     },
     campaignType: EnumStringRequired(campaignListArr),
+    followers: String,
   },
   { timestamps: true }
 );

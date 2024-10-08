@@ -16,6 +16,7 @@ enum RouterEnum {
     Accounting = DepartmentEnum.Accounting,
     VideoEditing = DepartmentEnum.VideoEditing,
     CEO = DepartmentEnum.CEO,
+    CustomerService = DepartmentEnum.CustomerService
 }
 
 export default RouterEnum;

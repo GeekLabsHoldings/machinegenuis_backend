@@ -8,6 +8,7 @@ import TelegramRouter from "./socialMedia.telegram.router";
 import { generateHashtags, generatePost } from "../../Controller/SocialMedia/socialMedia.twitter.controller";
 import SocialSittingsRouter from "./socialMedia.settings.router";
 
+
 const socialMediaRouter = Router();
 
 socialMediaRouter.use("/twitter", twitterRouter);
@@ -21,6 +22,8 @@ socialMediaRouter.post(
     "/generate-hashtags",
     generateHashtags
   );
-
-
+  socialMediaRouter.post(
+    "/generate-posts",
+    generatePost
+  );
 export default socialMediaRouter;
