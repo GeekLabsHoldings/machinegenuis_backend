@@ -12,6 +12,7 @@ import {
 import SocialPostingAccount from "../../Model/Operations/SocialPostingAccount.model";
 import crypto, { Encoding } from "crypto";
 import Route53DomainChecker, { ContactDetail } from "../AWS/Rout53/domains";
+import { log } from "console";
 
 // import { Request, Response } from 'express';
 
@@ -27,13 +28,13 @@ export const addBrandWithSubandAccounts = async (
 
     const newbrand = new BrandsModel({ ...brandData });
     const Brand = await newbrand.save({ session });
+  
     for (const sub of subBrands) {
-      const subbrand = await createSubBrand(Brand._id, sub.subbrand, session);
+      const subbrand = await createSubBrand(Brand._id, {...sub.subbrand, niche:Brand.niche}, session, false);
       for (const acc of sub.accounts) {
-        const account = await addOrDeleteAccount(subbrand._id, acc, session);
+        if (subbrand && subbrand._id){const account = await addOrDeleteAccount(subbrand._id, acc, session);}    
       }
     }
-
     for (const acc of accounts) {
       const account = await addOrDeleteAccount(Brand._id, acc, session);
     }
@@ -123,6 +124,8 @@ export const getBrands = async (skip:number, limit:number) => {
 export const getBrandsByPlatform = async (platform:string, skip:number, limit:number) => {
   try{
   const accounts = await SocialPostingAccount.find({platform:platform}).skip(skip||0).limit(limit||999999);
+ // console.log(`getBrandsByPlatform ${accounts}`);
+  
   const brands : (IBrand|ISubBrand)[] = []
   for(const acc of accounts){
     const b = await BrandsModel.findById(acc.brand)
@@ -203,18 +206,42 @@ export const getSubBrandById = async (parentId: string, id: string, skip:number,
   }
   return await BrandsModel.findOne({ _id: id, type: "subbrand", parentId }).skip(skip).limit(limit);
 };
+
+
+
 export const createSubBrand = async (
   parentId: string,
   subBrandData: ISubBrand,
-  session?: ClientSession
+  session?: ClientSession,
+  f: boolean = true
 ) => {
-  const newSubBrand = new BrandsModel({
-    ...subBrandData,
-    type: "subbrand",
-    parentId,
-  });
-  return await newSubBrand.save({ session });
+
+  if (!f){
+    const newSubBrand = new BrandsModel({
+      ...subBrandData,
+      type: "subbrand",
+      parentId,
+    });
+    return await newSubBrand.save({ session });
+  }else{
+    const Brand = await BrandsModel.findOne({_id:parentId})
+    console.log(`creating subbrand for ${Brand?._id}`);
+    
+    if(Brand){
+      const newSubBrand = new BrandsModel({
+        ...subBrandData,
+        type: "subbrand",
+        parentId,
+      });
+    return await newSubBrand.save({ session });
+    }
+    return null
+  }
+
 };
+
+
+
 export const updateSubBrand = async (
   parentId: string,
   id: string,
