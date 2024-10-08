@@ -47,6 +47,9 @@ export const addBrandWithSubandAccounts = async (
     session.endSession();
   }
 };
+
+
+
 export const getAllBrands = async (skip?:number, limit?:number) => {
   try {
     const brands = await BrandsModel.find({ type: { $ne: "subbrand" } }).skip(skip||0).limit(limit||0);
@@ -73,6 +76,35 @@ export const getAllBrands = async (skip?:number, limit?:number) => {
     console.log(error);
   }
 };
+
+
+
+
+export const getSingularBrands = async (skip:number, limit:number) => {
+  try {
+    const brands = await BrandsModel.find({}).skip(skip || 0).limit(limit || 999999);
+
+    const singular = await Promise.all(
+      brands.map(async (brand) => {
+        const b = await SubBrandModel.findOne({ parentId: brand._id });
+        // If sub-brand exists (b), return false, otherwise true
+        return b ? false : brand;
+      })
+    );
+    
+    // Filter out the `false` values (those with children)
+    const result = singular.filter(brand => brand !== false);
+    
+    return result;
+    
+
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+
 
 export const getBrands = async (skip:number, limit:number) => {
   try {
