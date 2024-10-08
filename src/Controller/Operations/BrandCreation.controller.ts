@@ -6,6 +6,8 @@ import { startSession } from "mongoose";
 import { ContactDetail } from "../../Service/AWS/Rout53/domains"; 
 import { accountDataType } from "../../Model/Operations/IPostingAccounts_interface";
 import { IBrand, ISubBrand } from "../../Model/Operations/IBrand_interface";
+import { ImportVolumeCommand } from "@aws-sdk/client-ec2";
+import { PlatformArr } from "../../Utils/SocialMedia/Platform";
 
 
 
@@ -54,6 +56,30 @@ export const getBrandsByPlatform = async (req: Request, res: Response) => {
 
 
 
+
+
+export const getAllBrandsByPlatform = async (req: Request, res: Response) => {
+  try {
+    const page = parseInt(String(req.query.page)) || 1; // Default to page 1 if not provided
+    const limit = parseInt(String(req.query.limit)) || 10; // Default to 10 items per page if not provided
+    const skip = (page - 1) * limit;
+    const allBrands: {platform: string, brands:(IBrand|ISubBrand)[]}[] = []
+    for(const platform of PlatformArr){
+      const brands = await brandService.getBrandsByPlatform(platform, skip, limit);
+      if(brands && brands.length)
+        allBrands.push({platform:platform, brands:brands})
+    }
+    
+    // console.log(brands)
+    res.json(allBrands);
+  } catch (error) {
+    return systemError.sendError(res, error);
+  }
+};
+
+
+
+
 export const getBrand = async (req: Request, res: Response) => {
   try {
     const brand = await brandService.getBrandById(req.params.id);
@@ -66,6 +92,23 @@ export const getBrand = async (req: Request, res: Response) => {
   }
 };
 
+
+
+
+export const getSingularBrands = async (req: Request, res: Response) => {
+  try {
+    const page = parseInt(String(req.query.page)) || 1; // Default to page 1 if not provided
+    const limit = parseInt(String(req.query.limit)) || 10; // Default to 10 items per page if not provided
+    const skip = (page - 1) * limit;
+    const brand = await brandService.getSingularBrands(skip, limit);
+    if (!brand) {
+      return res.status(404).json({ message: 'Brand not found' });
+    }
+    res.json(brand);
+  } catch (error) {
+    return systemError.sendError(res, error);
+  }
+};
 
 
 export const addBrand = async (req: Request, res: Response) => {

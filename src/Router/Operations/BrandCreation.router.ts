@@ -13,8 +13,11 @@ BrandCreationRouter.post("/register-domain", brandController.registerDomain);
 BrandCreationRouter.post("/add-brand-all-data", brandController.addBrandWithAllData);
 BrandCreationRouter.post("/add-brand", brandController.addBrand);
 BrandCreationRouter.get("/get-brands", brandController.getAllBrands);
-BrandCreationRouter.get("/get-brands-platform", brandController.getBrandsByPlatform);   
 BrandCreationRouter.get("/get-all-brands", brandController.getBrands);
+BrandCreationRouter.get("/get-singular-brands", brandController.getSingularBrands);
+BrandCreationRouter.get("/get-brands-platform", brandController.getBrandsByPlatform);   
+BrandCreationRouter.get("/get-all-brands-platform", brandController.getAllBrandsByPlatform); 
+
 BrandCreationRouter.get("/:id", brandController.getBrand);
 BrandCreationRouter.post("/:id/edit-brand", brandController.editBrand);
 BrandCreationRouter.post("/:id/delete-brand", brandController.deleteBrand);
