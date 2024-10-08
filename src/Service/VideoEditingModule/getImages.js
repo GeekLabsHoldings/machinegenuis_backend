@@ -31,26 +31,15 @@ const handleSearchImg = async (searchImgKeyword) => {
               console.error('Error enhancing image:', error.message);
           }
       }
-
-      console.log("enhancedImages--->" + enhancedImages);
       return enhancedImages;
       
     };
 
-    const filteredImageUrls = imageResults
-      .filter(image => image.original && image.original_width < 900 && image.original_width > 600 && image.original_height < 800 && image.original_height > 400) 
-      .map(image => image.original) 
-      .filter(url => !url.includes('fbsbx')
-      && !url.includes('www.consilium.europa.eu')
-      && !url.includes('www.politico.com')
-      && !url.includes('newsobserver')
-      && !url.includes("usnews")
-      && !url.includes("macleans")
-      && !url.includes("www.intel.com")); 
+    const filteredImageUrls = imageResults.map(image => image.original) 
 
       
-    const enhancedImages = await regenerateImgs(imageResults.slice(0,10));
-    return enhancedImages;
+    // const enhancedImages = await regenerateImgs(imageResults.slice(0,10));
+    return filteredImageUrls;
     
   } catch (error) {
     console.error("Error getting image:", error);

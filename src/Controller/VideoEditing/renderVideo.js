@@ -1,5 +1,7 @@
 const Creatomate = require('creatomate');
 require("dotenv").config();
+const serviceEnhanceImg = require('../../Service/VideoEditingModule/enahnceImg');
+
 
 const renderVideo = async (req, res) => {
   try {
@@ -24,68 +26,74 @@ const renderVideo = async (req, res) => {
     let currentTime = 0;
 
     // adding to slide 1
-    slide1Json.forEach((slide1, index) => {
-      const { title, keywordsAndImages, audioPath} = slide1;
+    for (let index = 0; index < slide1Json.length; index++) {
+      const slide1 = slide1Json[index];
+      const { title, keywordsAndImages, audioPath } = slide1;
       const audioDuration = audioPath ? audioPath.duration || 15 : 15;
-      template.elements[1].duration = audioDuration + 5
 
-      template.elements[1].elements[0].source = String(keywordsAndImages[0].imageUrl[0])
-      template.elements[1].elements[2].text = title
-      template.elements[1].elements[3].source = String(audioPath.url)
-      template.elements[1].elements[3].duration = audioDuration
+      template.elements[1].duration = audioDuration + 5;
+      template.elements[1].elements[0].source = await serviceEnhanceImg.enhanceImg(String(keywordsAndImages[0].imageUrl[0]));
+      template.elements[1].elements[2].text = title;
+      template.elements[1].elements[3].source = String(audioPath.url);
+      template.elements[1].elements[3].duration = audioDuration;
 
-      currentTime += audioDuration ;
-    });
+      currentTime += audioDuration;
+    }
 
     // adding to slide 2
-    slide2Json.forEach((slide2, index) => {
-      const { title, keywordsAndImages, audioPath} = slide2;
+    for (let index = 0; index < slide2Json.length; index++) {
+      const slide2 = slide2Json[index];
+      const { title, keywordsAndImages, audioPath } = slide2;
       const audioDuration = audioPath ? audioPath.duration || 15 : 15;
-      template.elements[2].time = currentTime 
-      template.elements[2].duration = audioDuration + 15
-      template.elements[2].x[0].time = template.elements[2].duration - 14
-      template.elements[2].x_scale[0].time = audioDuration - 7
 
-      template.elements[2].elements[3].source = String(keywordsAndImages[0].imageUrl[0])
-      template.elements[2].elements[5].text = title
-      template.elements[2].elements[6].source = String(audioPath.url)
-      template.elements[2].elements[6].duration = audioDuration
+      template.elements[2].time = currentTime;
+      template.elements[2].duration = audioDuration + 15;
+      template.elements[2].x[0].time = template.elements[2].duration - 14;
+      template.elements[2].x_scale[0].time = audioDuration - 7;
+
+      template.elements[2].elements[3].source = await serviceEnhanceImg.enhanceImg(String(keywordsAndImages[0].imageUrl[0]));
+      template.elements[2].elements[5].text = title;
+      template.elements[2].elements[6].source = String(audioPath.url);
+      template.elements[2].elements[6].duration = audioDuration;
 
       currentTime += audioDuration;
-    });
+    }
 
     // adding to slide 3
-    slide3Json.forEach((slide3, index) => {
-      const { title, keywordsAndImages, audioPath} = slide3;
+    for (let index = 0; index < slide3Json.length; index++) {
+      const slide3 = slide3Json[index];
+      const { title, keywordsAndImages, audioPath } = slide3;
       const audioDuration = audioPath ? audioPath.duration || 15 : 15;
-      template.elements[3].time = currentTime
-      template.elements[3].duration = audioDuration + 5
-      template.elements[3].y[0].time =  template.elements[3].duration - 5
 
-      template.elements[3].elements[0].source = String(keywordsAndImages[0].imageUrl[0])
-      template.elements[3].elements[1].source = String(keywordsAndImages[0].imageUrl[0])
-      template.elements[3].elements[6].text = title
-      template.elements[3].elements[7].source = String(audioPath.url)
-      template.elements[3].elements[7].duration = audioDuration
+      template.elements[3].time = currentTime;
+      template.elements[3].duration = audioDuration + 5;
+      template.elements[3].y[0].time = template.elements[3].duration - 5;
 
-      currentTime += audioDuration
-    });
-
-    // adding to slide 4
-    slide4Json.forEach((slide4, index) => {
-      const { title, keywordsAndImages, audioPath} = slide4;
-      const audioDuration = audioPath ? audioPath.duration || 15 : 15;
-      template.elements[4].time = currentTime
-      template.elements[4].duration = audioDuration + 5
-
-      template.elements[4].elements[3].source = String(keywordsAndImages[0].imageUrl[0])
-      template.elements[4].elements[3].duration = audioDuration + 2
-      template.elements[4].elements[6].text = title
-      template.elements[4].elements[7].source = String(audioPath.url)
-      template.elements[4].elements[7].duration = audioDuration
+      template.elements[3].elements[0].source = await serviceEnhanceImg.enhanceImg(String(keywordsAndImages[0].imageUrl[0]));
+      template.elements[3].elements[1].source = await serviceEnhanceImg.enhanceImg(String(keywordsAndImages[0].imageUrl[0]));
+      template.elements[3].elements[6].text = title;
+      template.elements[3].elements[7].source = String(audioPath.url);
+      template.elements[3].elements[7].duration = audioDuration;
 
       currentTime += audioDuration;
-    });
+    }
+
+    // adding to slide 4
+    for (let index = 0; index < slide4Json.length; index++) {
+      const slide4 = slide4Json[index];
+      const { title, keywordsAndImages, audioPath } = slide4;
+      const audioDuration = audioPath ? audioPath.duration || 15 : 15;
+
+      template.elements[4].time = currentTime;
+      template.elements[4].duration = audioDuration + 5;
+      template.elements[4].elements[3].source = await serviceEnhanceImg.enhanceImg(String(keywordsAndImages[0].imageUrl[0]));
+      template.elements[4].elements[3].duration = audioDuration + 2;
+      template.elements[4].elements[6].text = title;
+      template.elements[4].elements[7].source = String(audioPath.url);
+      template.elements[4].elements[7].duration = audioDuration;
+
+      currentTime += audioDuration;
+    }
 
     template.elements[5].time = currentTime + 1
     template.elements[5].duration = 6
@@ -111,60 +119,19 @@ const renderVideo = async (req, res) => {
     };
     template.elements[0].elements.push(track1Element);  
 
-    paragraphJson.forEach((paragraph, index) => {
-      const { text, keywordsAndImages, audioPath, videoPath } = paragraph;
-      const audioDuration = audioPath ? audioPath.duration || 15 : 15;
-      let duration = audioDuration;
-
-      if (videoPath) {
-        const videoElement = {
-          id: `video`,
-          type: "video",
-          track: 2,
-          time: currentTime,
-          source: videoPath, 
-          width: "60.1639%",
-            height: "58.8122%",
-            x_scale: [
-              { time: 0.077, value: "100%" },
-              { time: "end", value: "115%" }
-            ],
-            y_scale: [
-              { time: 0.077, value: "100%" },
-              { time: "end", value: "115%" }
-            ],
-            stroke_color: "#fdfdfd",
-            stroke_width: "1.5 vmin",
-            stroke_join: "miter",
-            shadow_color: "rgba(0,0,0,0.65)",
-            shadow_blur: "5.5 vmin",
-            shadow_x: "4 vmin",
-            shadow_y: "4 vmin",
-            clip: true,
-          animations: [
-            {
-              time: 0.077,
-              duration: 1.566,
-              transition: true,
-              type: "slide",
-              direction: "90°"
-            }
-          ]
-        };
-        template.elements[0].elements.push(videoElement);
-      } else {
-        // If no videoPath, proceed with adding images this is the normal condition the vid will render without videooooooos only images , audios
-        const imageUrls = keywordsAndImages[0].imageUrl;
-        const imageCount = Math.round(audioDuration / 10);
-
-        // Add image elements for each keyword's images
-        for (let i = 0; i < imageCount && i < imageUrls.length; i++) {
-          const imageElement = {
-            id: `image-${index}-${i}`,
-            type: "image",
+    async function processParagraphs(paragraphJson) {
+      for (const [index, paragraph] of paragraphJson.entries()) {
+        const { text, keywordsAndImages, audioPath, videoPath } = paragraph;
+        const audioDuration = audioPath ? audioPath.duration || 15 : 15;
+        let duration = audioDuration;
+    
+        if (videoPath) {
+          const videoElement = {
+            id: `video`,
+            type: "video",
             track: 2,
-            time: currentTime + i * 10,
-            duration: Math.min(10, audioDuration - i * 10),
+            time: currentTime,
+            source: videoPath, 
             width: "60.1639%",
             height: "58.8122%",
             x_scale: [
@@ -191,25 +158,72 @@ const renderVideo = async (req, res) => {
                 type: "slide",
                 direction: "90°"
               }
-            ],
-            source: imageUrls[i] 
+            ]
           };
-          template.elements[0].elements.push(imageElement);
+          template.elements[0].elements.push(videoElement);
+        } else {
+          // If no videoPath, proceed with adding images
+          const imageUrls = keywordsAndImages[0].imageUrl;
+          const imageCount = Math.round(audioDuration / 10);
+    
+          // Add image elements for each keyword's images
+          for (let i = 0; i < imageCount && i < imageUrls.length; i++) {
+            const imgSrc = await serviceEnhanceImg.enhanceImg(imageUrls[i]); // Await image enhancement
+            console.log("imgSrc-->" + imgSrc);
+            const imageElement = {
+              id: `image-${index}-${i}`,
+              type: "image",
+              track: 2,
+              time: currentTime + i * 10,
+              duration: Math.min(10, audioDuration - i * 10),
+              width: "60.1639%",
+              height: "58.8122%",
+              x_scale: [
+                { time: 0.077, value: "100%" },
+                { time: "end", value: "115%" }
+              ],
+              y_scale: [
+                { time: 0.077, value: "100%" },
+                { time: "end", value: "115%" }
+              ],
+              stroke_color: "#fdfdfd",
+              stroke_width: "1.5 vmin",
+              stroke_join: "miter",
+              shadow_color: "rgba(0,0,0,0.65)",
+              shadow_blur: "5.5 vmin",
+              shadow_x: "4 vmin",
+              shadow_y: "4 vmin",
+              clip: true,
+              animations: [
+                {
+                  time: 0.077,
+                  duration: 1.566,
+                  transition: true,
+                  type: "slide",
+                  direction: "90°"
+                }
+              ],
+              source: String(imgSrc)
+            };
+            template.elements[0].elements.push(imageElement);
+          }
         }
+    
+        const audioElement = {
+          id: `audio-${index}`,
+          type: "audio",
+          track: 3,
+          time: currentTime,
+          duration: audioDuration,
+          source: audioPath.url 
+        };
+        template.elements[0].elements.push(audioElement);
+    
+        currentTime += duration + timePadding;
       }
+    }
 
-      const audioElement = {
-        id: `audio-${index}`,
-        type: "audio",
-        track: 3,
-        time: currentTime,
-        duration: audioDuration,
-        source: audioPath.url 
-      };
-      template.elements[0].elements.push(audioElement);
-
-      currentTime += duration + timePadding;
-    });
+    await processParagraphs(paragraphJson)
 
     const track4Elements = [
       {
