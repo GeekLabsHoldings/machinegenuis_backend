@@ -46,7 +46,7 @@ export const getBrandsByPlatform = async (req: Request, res: Response) => {
     const page = parseInt(String(req.query.page)) || 1; // Default to page 1 if not provided
     const limit = parseInt(String(req.query.limit)) || 10; // Default to 10 items per page if not provided
     const skip = (page - 1) * limit;
-    const brands = await brandService.getBrandsByPlatform(req.body.platform, skip, limit);
+    const brands = await brandService.getBrandsByPlatform(String(req.query.platform), skip, limit);
     // console.log(brands)
     res.json(brands);
   } catch (error) {
@@ -65,8 +65,10 @@ export const getAllBrandsByPlatform = async (req: Request, res: Response) => {
     const skip = (page - 1) * limit;
     const allBrands: {platform: string, brands:(IBrand|ISubBrand)[]}[] = []
     for(const platform of PlatformArr){
+      
       const brands = await brandService.getBrandsByPlatform(platform, skip, limit);
-      if(brands && brands.length)
+      //console.log(`This is platform ${platform} for all this brands ${brands}`)
+      if(brands && brands.length>0)
         allBrands.push({platform:platform, brands:brands})
     }
     
@@ -195,11 +197,15 @@ export const getSubBrand = async (req: Request, res: Response) => {
 export const addSubBrand = async (req: Request, res: Response) => {
   try {
     const newSubBrand = await brandService.createSubBrand(req.params.parentId, req.body);
-    res.status(201).json(newSubBrand);
+    if (newSubBrand)
+      return res.status(201).json(newSubBrand);
+
+    return res.status(404).json({message:"brand not found"});
   } catch (error) {
     return systemError.sendError(res, error);
   }
 };
+
 
 export const editSubBrand = async (req: Request, res: Response) => {
   try {
