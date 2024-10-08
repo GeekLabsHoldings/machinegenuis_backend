@@ -38,7 +38,8 @@ const generateTitleAndContent = async (content, myPrompt) => {
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: "user", content: prompt }, { role: "system", content: prompt }
+      ],
     });
 
     const result = completion.choices[0].message.content.trim();
