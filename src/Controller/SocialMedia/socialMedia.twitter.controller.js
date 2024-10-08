@@ -38,6 +38,7 @@ import {
   getAccount,
 } from "../../Service/Operations/BrandCreation.service";
 import { twitterQueueAdd } from "../../Utils/CronJobs/TweetsQueue/twitterPostQueue";
+import { systemPromptEnum } from "../../Utils/Prompt";
 export const addPostSocialMediaTwitter = async (req, res) => {
   try {
     const { content, asset, mediaId, startTime } = req.body;
@@ -326,6 +327,28 @@ export const generateHashtags = async (req, res) => {
     );
     const hashTags = result.choices[0].message.content;
     return res.status(200).json({ hashTags });
+  } catch (error) {
+    return systemError.sendError(res, error);
+  }
+};
+export const generatePost = async (req, res) => {
+  try {
+    const { content } = req.body;
+    const openaiService = new OpenAiService();
+    const promptService = new PromptService();
+    const promptData = await promptService.getPromptData(
+      "socialMedia_content",
+      null
+    );
+
+    const prompt = promptData.prompt.replace("[[1]]", content);
+
+    const result = await openaiService.callOpenAiApi(
+      prompt,
+      ` ${systemPromptEnum.Array} . You are a representative of Machine Genius, a social media organization focused on multiple fields.`
+    );
+    const posts = JSON.parse(result.choices[0].message.content);
+    return res.status(200).json({ posts });
   } catch (error) {
     return systemError.sendError(res, error);
   }

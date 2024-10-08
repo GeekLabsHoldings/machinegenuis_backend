@@ -1,8 +1,6 @@
 import Queue from "bull";
 import SocialMediaNewsLetterController from "../../../Controller/SocialMedia/NewsLetter/SendNewsLetterStep/SocialMediaNewsLetterController";
 import "dotenv/config";
-console.log(Date.now() + 4 * 60000);
-
 const redisOptions = {
   host: process.env.REDIS_HOST!,
   port: parseInt(process.env.REDIS_PORT || "6379"),
