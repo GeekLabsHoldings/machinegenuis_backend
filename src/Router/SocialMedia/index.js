@@ -5,7 +5,7 @@ import redditRouter from "./socialMedia.reddit.router";
 import facebookRouter from "./socialMedia.facebook.router";
 import NewsLetterRouter from "./NewsLetterRouter";
 import TelegramRouter from "./socialMedia.telegram.router";
-import { generateHashtags } from "../../Controller/SocialMedia/socialMedia.twitter.controller";
+import { generateHashtags, generatePost } from "../../Controller/SocialMedia/socialMedia.twitter.controller";
 
 
 const socialMediaRouter = Router();
@@ -20,6 +20,8 @@ socialMediaRouter.post(
     "/generate-hashtags",
     generateHashtags
   );
-
-
+  socialMediaRouter.post(
+    "/generate-posts",
+    generatePost
+  );
 export default socialMediaRouter;
