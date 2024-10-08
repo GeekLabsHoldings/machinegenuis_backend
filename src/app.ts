@@ -17,6 +17,7 @@ import socialMediaRouter from "./Router/SocialMedia";
 import AdministrativeRouter from "./Router/Administrative";
 import AccountingRouter from "./Router/Accounting";
 import OperationRouter from "./Router/Operations";
+import CustomerServiceRouter from "./Router/CustomerService";
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Middleware for parsing request body
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -52,5 +53,6 @@ app.use(`/${RouterEnum.user}`, UserRouter);
 app.use(`/${RouterEnum.Administrative}`, AdministrativeRouter);
 app.use(`/${RouterEnum.Accounting}`, AccountingRouter);
 app.use(`/${RouterEnum.socialMedia}`, socialMediaRouter);
-app.use(`/${RouterEnum.CEO}`, OperationRouter)
+app.use(`/${RouterEnum.CEO}`, OperationRouter);
+app.use(`/${RouterEnum.CustomerService}`, CustomerServiceRouter)
 export { app };
