@@ -10,7 +10,7 @@ export interface IRedditAccountData {appID:string, appSecret:string, username:st
 export interface ITelegramAccountData {token:string,}  
 export interface ITwetterAccountData {ConsumerKey:string,ConsumerSecret:string,AccessToken:string,TokenSecret:string,BearerToken:string }  
 export interface ILinkedInAccountData {token:string,owner:string} 
-export interface IFacebookInAccountData {token:string,pageID:string} 
+export interface IFacebookInAccountData {token?:string,pageID?:string, email?:string, password?:string, cookies?:string[]} 
 
 export type accountDataType = 
 {platform:string,
