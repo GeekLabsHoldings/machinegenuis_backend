@@ -5,7 +5,8 @@ enum DepartmentEnum {
     Administrative = "administrative",
     Accounting = "accounting",
     CEO = "ceo",
-    VideoEditing = "VideoEditing"
+    VideoEditing = "VideoEditing",
+    CustomerService = 'customer-service'
 }
 enum RoleEnum {
     ContentWriter = "ContentWriter",
@@ -13,7 +14,8 @@ enum RoleEnum {
     CEO = "ceo",
     SocialMedia = "SocialMedia",
     Administrative = "administrative",
-    VideoEditor = "VideoEditor"
+    VideoEditor = "VideoEditor",
+    CustomerService = 'CustomerService'
 }
 
 const DepartmentRoles = {
@@ -23,7 +25,8 @@ const DepartmentRoles = {
     "social-media": ["SocialMedia"],
     administrative: ['administrative'],
     accounting: ['Payroll'],
-    VideoEditing: ['VideoEditor']
+    VideoEditing: ['VideoEditor'],
+    'customer-service': ['CustomerService']
 } as const;
 
 const Departments = Object.keys(DepartmentRoles)
