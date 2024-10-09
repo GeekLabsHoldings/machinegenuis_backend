@@ -1,9 +1,11 @@
 import S3_services from "../../Service/AWS/S3_Bucket/presinedURL";
 import {
+  addOrDeleteAccount,
   checkBrand,
   getAccount,
 } from "../../Service/Operations/BrandCreation.service";
 import {
+  getPageAccessToken,
   postPhotoToFacebook,
   textPhotoToFacebook,
 } from "../../Service/SocialMedia/facebook.service";
@@ -67,16 +69,37 @@ export const addPostSocialMediaFacebookText = async (req, res, next) => {
         .setMessage(ErrorMessages.ACCOUNT_NOT_FOUND)
         .throw();
     }
+    const response = await getPageAccessToken(
+      facebookData.account.pageID,
+      facebookData.account.longAccessToken
+    );
+if(response?.error?.code === 190 ){
+  return systemError
+  .setStatus(400)
+  .setMessage(ErrorMessages.FACEBOOK_TOKEN_EXPIRED)
+  .throw();
+}
+    const accountData = {
+      platform: PlatformEnum.FACEBOOK,
+      account: {
+        tokenPage: response.access_token,
+        longAccessToken: facebookData.account.longAccessToken,
+        pageID: facebookData.account.pageID,
+        email: facebookData.account.email,
+        password: facebookData.account.password,
+        cookies: facebookData.account.cookies,
+      },
+    };
+    await addOrDeleteAccount(brandId, accountData);
     await FacebookQueueAdd(content, startTime, brandId, userId);
 
     return res.status(200).json({
       message: "Success",
     });
   } catch (error) {
-    console.log(error);
+    return systemError.sendError(res, error);
   }
 };
-
 export const addPostSocialMediaFacebookPhoto = async (req, res, next) => {
   const { brandId } = req.params;
   const { content, url, startTime } = req.body;
@@ -102,11 +125,33 @@ export const addPostSocialMediaFacebookPhoto = async (req, res, next) => {
         .setMessage(ErrorMessages.ACCOUNT_NOT_FOUND)
         .throw();
     }
+    const response = await getPageAccessToken(
+      facebookData.account.pageID,
+      facebookData.account.longAccessToken
+    );
+if(response?.error?.code === 190 ){
+  return systemError
+  .setStatus(400)
+  .setMessage(ErrorMessages.FACEBOOK_TOKEN_EXPIRED)
+  .throw();
+}
+    const accountData = {
+      platform: PlatformEnum.FACEBOOK,
+      account: {
+        tokenPage: response.access_token,
+        longAccessToken: facebookData.account.longAccessToken,
+        pageID: facebookData.account.pageID,
+        email: facebookData.account.email,
+        password: facebookData.account.password,
+        cookies: facebookData.account.cookies,
+      },
+    };
+    await addOrDeleteAccount(brandId, accountData);
     await FacebookPhotoQueueAdd(content, url, startTime, brandId, userId);
     return res.status(200).json({
       message: "Success",
     });
   } catch (error) {
-    console.log(error);
+    return systemError.sendError(res, error);
   }
 };
