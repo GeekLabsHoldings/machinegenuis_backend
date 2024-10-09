@@ -53,6 +53,12 @@ const SocialMediaGroupsSchema = new mongoose.Schema({
     required: false,
     default: 0,
   },
+
+  personal: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 });
 
 // Create the model

@@ -25,7 +25,11 @@ SocialSittingsRouter.get("/get-campaigns", brandController.getAllCampaigns);
 SocialSittingsRouter.post("/add-campaigns", brandController.addCampaigns);
 SocialSittingsRouter.get("/:id/get-campaigns-brand", brandController.getCampaignByBrand);
 SocialSittingsRouter.post("/:id/delete-campaigns", brandController.deletCampaigns);
+SocialSittingsRouter.post("/:id/update-campaigns", brandController.updateCampaigns);
 
+
+//
+SocialSittingsRouter.get("/get-subscripers", brandController.get_subscripers);
 
 
 

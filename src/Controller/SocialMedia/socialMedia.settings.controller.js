@@ -20,8 +20,8 @@ export const addGroup = async (req , res ) => {
       return systemError.sendError(res, error);
     }
   };
-  
-  
+
+
   export const getGroups = async (req, res) => {
     try {
       const page = parseInt(String(req.query.page)) || 1; // Default to page 1 if not provided
@@ -168,6 +168,7 @@ export const getCampaignByBrand = async(req, res) =>{
 }
 
 
+
 export const addCampaigns = async(req, res) =>{
   try {
     log(req.body)
@@ -202,7 +203,7 @@ export const deletCampaigns = async(req, res) =>{
 
 export const updateCampaigns = async(req, res) =>{
   try {
-      const result = await brandService.deletCampaigns( req.params.id);
+      const result = await brandService.updateCampaigns( req.params.id);
       if(result){
         return res.json(result);
       }
@@ -211,4 +212,16 @@ export const updateCampaigns = async(req, res) =>{
       console.log(error);
       return systemError.sendError(res, error);
     }
+}
+
+
+
+export async function get_subscripers(req, res) {
+  try {
+    // console.log(req.body.brand);
+    const result = await brandService.GetSubCount();
+    res.json(result);
+  } catch (error) {
+    return systemError.sendError(res, error);
+  }
 }

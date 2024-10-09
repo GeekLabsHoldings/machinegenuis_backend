@@ -145,6 +145,40 @@ export const CampaignByBrand = async (req,res) => {
   }
 };
 
+
+
+export const CampaignByBrandPersonal = async (req,res) => {
+  try {
+
+    let { title, text, url, delay, starttime } = req.body;
+    const groups = await RedditServices.getSubredditsByBrand(req.params.id, true);
+    delay = Math.max(delay, 10000);
+    starttime = starttime - Date.now();
+    if (starttime<=0)
+      starttime = 1000
+
+    const imgurUrlPattern =
+    /^https:\/\/imgur\.com(\/[a-zA-Z0-9-_\/]*)?(#\/[a-zA-Z0-9-_\/]*)?$/;
+
+    if (url && !imgurUrlPattern.test(url)) {
+      return res.status(400).json({
+        message: "Invalid Imgur URL  make sure no file extension at the end",
+      });
+    }
+
+
+    redditQueueAddJob({groups, delay, title, text, url}, starttime);
+    
+    res.json({ message: "done" });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+
+
+
 export const DeletePost = async (req, ) => {
   try {
     const acount = await getAccount(req.body.brand,"REDDIT");
