@@ -2,6 +2,7 @@ import SocialMediaGroupsModel from "../../Model/SocialMedia/SocialMediaGroups.mo
 import SocialPostingAccount from "../../Model/Operations/SocialPostingAccount.model";
 import BrandsModel, {SubBrandModel} from "../../Model/Operations/BrandCreation.model";
 import SocialMediaPosts from "../../Model/SocialMedia/SocialMediaPosts.models";
+import SocialMediaGroupsModel from "../../Model/SocialMedia/SocialMediaGroups.model";
 import SocialMediaCampaigns from "../../Model/SocialMedia/campaign.socialmedia.model";
 import { timeStamp } from "console";
 
@@ -216,3 +217,60 @@ export async function getCampaignByBrand(id,skip,limit) {
       console.log('Error deleting account:', error);
   }
 }
+
+
+
+
+
+export const GetSubCount = async(
+  brand
+  )=>{
+  
+    try {
+      const result = await SocialMediaGroupsModel.aggregate([
+        {
+          $group: {
+            _id: { brand: "$brand", platform: "$platform" },
+            totalSubscribers: { $sum: "$subscribers" }
+          }
+        },
+        {
+          $group: {
+            _id: "$_id.brand",
+            platforms: {
+              $push: {
+                platform: "$_id.platform",
+                totalSubscribers: "$totalSubscribers"
+              }
+            }
+          }
+        },
+        {
+          $addFields: {
+            brand: "$_id"
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            brand: 1,
+            platforms: {
+              $arrayToObject: {
+                $map: {
+                  input: "$platforms",
+                  as: "platformInfo",
+                  in: {
+                    k: "$$platformInfo.platform",
+                    v: { totalSubscribers: "$$platformInfo.totalSubscribers" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]);
+      return result
+    } catch (error) {
+      console.log(error)
+    }
+  }

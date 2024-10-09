@@ -62,9 +62,9 @@ export const getChannels = async ()=>{
   }
 }
 
-export const getChannelsByBrand = async (brandName)=>{
+export const getChannelsByBrand = async (brandName, personal=false)=>{
   try {
-    const groups = await SocialMediaGroups.find({ brand: brandName, platform:"TELEGRAM" });
+    const groups = await SocialMediaGroups.find({ brand: brandName, personal:personal, platform:"TELEGRAM" });
     return groups
   } catch (error) {
     console.error('Error fetching telegram channels:', error);
