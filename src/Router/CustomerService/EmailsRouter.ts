@@ -60,4 +60,18 @@ EmailCustomerServiceRouter.get('/email-by-id/:emailId/:folderId', async (req: Re
     }
 });
 
+EmailCustomerServiceRouter.delete('/delete-email/:emailId/:folderId', async (req: Request, res: Response) => {
+    try {
+        const brand = req.query.brand as string || null;
+        const department = req.query.department as string || null;
+        const { emailId, folderId } = req.params;
+        const customerServiceController = new CustomerServiceController();
+        const result = await customerServiceController.deleteEmail(department, brand, emailId, folderId);
+        return res.json(result);
+    } catch (error) {
+        return systemError.sendError(res, error);
+    }
+});
+
+
 export default EmailCustomerServiceRouter;

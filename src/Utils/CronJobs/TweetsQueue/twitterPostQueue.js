@@ -4,6 +4,7 @@ import { getAccount } from "../../../Service/Operations/BrandCreation.service";
 import { PlatformEnum } from "../../SocialMedia/Platform";
 import moment from "../../../Utils/DateAndTime/index";
 import { TwitterSocialMediaAddPost } from "../../../Service/SocialMedia/twitter.api";
+import { createSocialAccountAddPost } from "../../../Service/SocialMedia/socialMedia.service";
 export const addPostQueue = new Queue("PostTweets", {
   redis: {
     host: process.env.REDIS_HOST,
@@ -51,6 +52,8 @@ addPostQueue.process(async (job) => {
     accessSecret: twitterData.account.TokenSecret,
     mediaId,
   });
+  console.log(response);
+  
   if (response.success === 200) {
     const createPost = await createSocialAccountAddPost(
       PlatformEnum.TWITTER,

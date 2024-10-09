@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import IZohoEmailModel from "../../Model/Zoho/Emails/IZohoEmails";
 import ZohoEmailsModel from "../../Model/Zoho/Emails/ZohoEmails";
 import IEmailsZohoModelService from "./IEmailsZohoModelService";
@@ -14,9 +15,14 @@ export default class EmailsZohoModelService implements IEmailsZohoModelService {
         return result;
     }
 
-    async getEmailAccount(department: string | null, brand: string | null): Promise<IZohoEmailModel | null> {
+    async getEmailAccount(department: string | null, brand: string | null): Promise<IZohoEmailModel & { _id: Types.ObjectId } | null> {
         const query = (department && brand) ? { department, brand } : (department) ? { department } : (brand) ? { brand } : {};
         const result = await ZohoEmailsModel.findOne(query);
+        return result;
+    }
+
+    async updateAccessToken(_id: string, accessToken: string, expiredIn: number): Promise<IZohoEmailModel | null> {
+        const result = await ZohoEmailsModel.findByIdAndUpdate(_id, { accessToken, expiredIn }, { new: true });
         return result;
     }
 

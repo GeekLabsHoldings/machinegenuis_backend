@@ -59,7 +59,7 @@ export const addPostSocialMediaTwitter = async (req, res) => {
         .setMessage(ErrorMessages.TWITTER_ACCOUNT_NOT_FOUND)
         .throw();
     }
-    await twitterQueueAdd(content, asset, startTime, brandId, userId);
+    await twitterQueueAdd(content, mediaId, brandId, userId, startTime);
     return res.status(200).json({ message: "Success" });
   } catch (error) {
     return systemError.sendError(res, error);
@@ -163,7 +163,7 @@ export const editTwitterAccount = async (req, res) => {
       delayBetweenPosts,
       delayBetweenGroups,
       longPauseAfterCount,
-      status
+      status,
     } = req.body;
 
     const brands = await checkBrand(brand);
@@ -307,7 +307,9 @@ export const addReplyToTweet = async (req, res) => {
     );
     if (tweetReply.message === "Reply posted successfully") {
       await deleteTweet(_id);
-      const account = await socialAccountModel.findOne({userName:tweet.accountName});
+      const account = await socialAccountModel.findOne({
+        userName: tweet.accountName,
+      });
       account.comments = account.comments + 1;
       await account.save();
     }

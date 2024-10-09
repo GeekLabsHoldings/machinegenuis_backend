@@ -11,7 +11,7 @@ export default interface IZohoEmailModel {
     clientId: string;
     clientSecret: string;
     refreshToken: string;
-    code: string;
-    scope: string;
+    accessToken: string;
+    expiredIn: number;
     department: Array<string>;
 }
