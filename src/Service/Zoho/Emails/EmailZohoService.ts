@@ -2,8 +2,8 @@ import UserZohoService from "../UserAndOrganization/UserAndOrganization";
 import IZohoEmailService, { IAllEmailData, IEmailData, ISendEmailData } from "./IEmailZohoService";
 
 export default class EmailZohoService extends UserZohoService implements IZohoEmailService {
-    constructor(client_id: string, client_secret: string, refreshAccessToken: string, organizationId: string) {
-        super(client_id, client_secret, refreshAccessToken, organizationId);
+    constructor(client_id: string, client_secret: string, organizationId: string) {
+        super(client_id, client_secret,organizationId);
     }
 
     async sendEmail(emailData: ISendEmailData, accountId: string): Promise<string> {

@@ -6,12 +6,10 @@ export default class UserZohoService implements IUserZohoService {
     axiosSetup: Axios;
     client_id: string;
     client_secret: string;
-    refreshAccessToken: string;
     organizationId: string;
-    constructor(client_id: string, client_secret: string, refreshAccessToken: string, organizationId: string) {
+    constructor(client_id: string, client_secret: string, organizationId: string) {
         this.client_id = client_id;
         this.client_secret = client_secret;
-        this.refreshAccessToken = refreshAccessToken;
         this.organizationId = organizationId;
         this.axiosSetup = axios.create({
             baseURL: "https://mail.zoho.com/api",
@@ -21,16 +19,21 @@ export default class UserZohoService implements IUserZohoService {
             }
         });
     }
-    async generateAccessToken(): Promise<void> {
+    async generateAccessToken(refreshAccessToken: string): Promise<string> {
         const result = await axios.post('https://accounts.zoho.com/oauth/v2/token', null, {
             params: {
                 client_id: this.client_id,
                 grant_type: 'refresh_token',
                 client_secret: this.client_secret,
-                refresh_token: this.refreshAccessToken
+                refresh_token: refreshAccessToken
             }
         });
         const accessToken = result.data.access_token;
+        this.axiosSetup.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+        return accessToken;
+    }
+
+    async setAccessToken(accessToken: string): Promise<void> {
         this.axiosSetup.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
     }
 

@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
 import IZohoEmailModel from "./IZohoEmails";
-import { EnumStringRequired, NotRequiredString, RefType, RequiredString } from "../../../Utils/Schemas";
+import { EnumStringRequired, NotRequiredNumber, NotRequiredString, RefType, RequiredString } from "../../../Utils/Schemas";
 import { SchemaTypesReference } from "../../../Utils/Schemas/SchemaTypesReference";
 import { Departments } from "../../../Utils/DepartmentAndRoles";
 
@@ -14,8 +14,8 @@ const ZohoEmailsSchema = new Schema<IZohoEmailModel>({
     refreshToken: NotRequiredString,
     clientId: NotRequiredString,
     clientSecret: NotRequiredString,
-    scope: NotRequiredString,
-    code: NotRequiredString,
+    accessToken: NotRequiredString,
+    expiredIn: NotRequiredNumber,
     domain: RequiredString
 })
 

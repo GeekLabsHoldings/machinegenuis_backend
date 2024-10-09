@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import BrandsModel from "../../Model/Operations/BrandCreation.model";
 import { startSession } from "mongoose";
 import { PlatformArr } from "../../Utils/SocialMedia/Platform";
+import { log } from "console";
 
 
 
@@ -100,7 +101,10 @@ export const getPostByBrand = async(req, res) =>{
 
 export const addPost = async(req, res) =>{
     try {
-        const result = await brandService.addPost(...req.body, req.params.id);
+      log(req.body)
+        const {postid, group_id ,content, date, platform, engagement, id} = req.body
+
+        const result = await brandService.addPost(postid, group_id ,content, date, platform, engagement, id);
         if(result){
           return res.json(result);
         }

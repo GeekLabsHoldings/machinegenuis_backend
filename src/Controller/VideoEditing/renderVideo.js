@@ -91,6 +91,7 @@ const renderVideo = async (req, res) => {
     template.elements[5].duration = 6
 
     currentTime += template.elements[5].duration;
+    const bodyStartTime = currentTime
   
     // adding elements to body
     const track1Element = {
@@ -216,7 +217,7 @@ const renderVideo = async (req, res) => {
         "id": "ec20c61f-f0af-4c98-aa5f-65653c5b7a1a",
         "type": "image",
         "track": 4,
-        "time": currentTime - 1.2,
+        "time": bodyStartTime - 1.2,
         "duration": totalDuration,
         "x": "93.6257%",
         "y": "10.2028%",
