@@ -8,6 +8,7 @@ import {
   getPageAccessToken,
   postPhotoToFacebook,
   textPhotoToFacebook,
+  GetSubCount
 } from "../../Service/SocialMedia/facebook.service";
 import { submitRedditPost } from "../../Service/SocialMedia/reddit.Service";
 import { createSocialAccountAddPost } from "../../Service/SocialMedia/socialMedia.service";
@@ -17,6 +18,7 @@ import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
 import systemError from "../../Utils/Error/SystemError";
 import { PlatformEnum } from "../../Utils/SocialMedia/Platform";
 import { error } from "console";
+import { getBrands } from "../../Service/Operations/BrandCreation.service";
 require("dotenv").config();
 
 export const getPreSignedURL = async (req, res) => {
@@ -151,6 +153,22 @@ if(response?.error?.code === 190 ){
     return res.status(200).json({
       message: "Success",
     });
+  } catch (error) {
+    return systemError.sendError(res, error);
+  }
+};
+
+
+
+export const BrandSubs = async (req, res) => {
+  try {
+    const brands = await getBrands(0, 99999999999999)
+    const output = []
+    for(const brand of brands){
+      const subs = await GetSubCount(brand._id);
+      output.push({id:brand._id, name:brand.name, description:brand.description, date:brand.aquisition_date, niche:brand.niche, subscribers:subs, engagement:96})
+    }
+    res.json(output);
   } catch (error) {
     return systemError.sendError(res, error);
   }

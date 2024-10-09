@@ -1,4 +1,6 @@
 import axios from "axios";
+import SocialMediaGroupsModel from "../../Model/SocialMedia/SocialMediaGroups.model";
+
 export const getPageAccessToken = async (pageId, accessToken) => {
   const url = `https://graph.facebook.com/v16.0/${pageId}?fields=access_token&access_token=${accessToken}`;
 
@@ -107,3 +109,21 @@ export const postPhotoToFacebook = async ({
     throw error;
   }
 };
+
+
+
+export const GetSubCount = async(
+  brand
+  )=>{
+  
+    try {
+      const channels = await SocialMediaGroupsModel.find({brand:brand, platform:"FACEBOOK"})
+  
+      const sum = channels.reduce((total, channel) => total + Number(channel.subscribers), 0);
+      
+      return sum;
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  
