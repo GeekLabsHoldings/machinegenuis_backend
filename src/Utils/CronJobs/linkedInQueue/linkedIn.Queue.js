@@ -5,6 +5,7 @@ import { PlatformEnum } from "../../SocialMedia/Platform";
 import moment from "../../../Utils/DateAndTime/index";
 import { TwitterSocialMediaAddPost } from "../../../Service/SocialMedia/twitter.api";
 import { postToLinkedIn } from "../../../Service/SocialMedia/LinkedinService";
+import { createSocialAccountAddPost } from "../../../Service/SocialMedia/socialMedia.service";
 export const addPostQueue = new Queue("LinkedInPost", {
   redis: {
     host: process.env.REDIS_HOST,
