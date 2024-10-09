@@ -11,6 +11,7 @@ export interface ICreateUserBody {
     mobileNumber: string;
 }
 export default interface IUserZohoService {
-    generateAccessToken(refreshAccessToken: string): Promise<void>;
-    addNewUser(userData:ICreateUserBody): Promise<ICreateUserBody>;
+    generateAccessToken(refreshAccessToken: string): Promise<string>;
+    setAccessToken(accessToken: string): Promise<void>
+    addNewUser(userData: ICreateUserBody): Promise<ICreateUserBody>;
 }
