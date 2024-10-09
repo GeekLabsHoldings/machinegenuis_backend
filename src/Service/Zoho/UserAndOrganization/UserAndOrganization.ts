@@ -29,7 +29,7 @@ export default class UserZohoService implements IUserZohoService {
             }
         });
         const accessToken = result.data.access_token;
-        this.axiosSetup.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+        await this.setAccessToken(accessToken);
         return accessToken;
     }
 
