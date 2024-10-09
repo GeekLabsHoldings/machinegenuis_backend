@@ -19,4 +19,19 @@ SocialSittingsRouter.get("/:id/get-posts-brand", brandController.getPostByBrand)
 SocialSittingsRouter.post("/:id/delete-post", brandController.deletpost);
 
 
+
+// campaigns
+SocialSittingsRouter.get("/get-campaigns", brandController.getAllCampaigns);
+SocialSittingsRouter.post("/add-campaigns", brandController.addCampaigns);
+SocialSittingsRouter.get("/:id/get-campaigns-brand", brandController.getCampaignByBrand);
+SocialSittingsRouter.post("/:id/delete-campaigns", brandController.deletCampaigns);
+
+
+
+
+
+
+
+
+
 export default SocialSittingsRouter

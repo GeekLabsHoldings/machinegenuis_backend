@@ -8,47 +8,47 @@ import { EnumStringRequired } from "../../Utils/Schemas";
 const mongoose = require("mongoose");
 
 // Define the schema
-const SocialMediaPostsSchema = new mongoose.Schema({
-  post_id: {
+const CampaignSchema = new mongoose.Schema({
+  content: {
     type: String,
     required: false,
     trim: true,
   },
-  content: {
-    type: String,
+  
+  platform: EnumStringRequired(PlatformArr),
+
+  timestamp: {
+    type: Number,
     required: false,
     trim: true,
   },
 
   engagment: {
     type: Number,
-    required: false,
-    trim: true,
-    default: 0,
-  },
-  
-  group_id:  { type:  String}
-  ,
-  timestamp: {
-    type: Number,
     required: true,
     default: 0,
   },
 
-  platform: EnumStringRequired(PlatformArr),
-  timestamp: {
+  posts_shared: {
     type: Number,
     required: true,
     default: 0,
   },
+  
   brand: {
-    type: String,
+    type: Types.ObjectId,
     required: true,
     trim:true
+  },
+
+  status: {
+    type: String,
+    required: false,
+    trim: true,
   },
 });
 
 // Create the model
-const SocialMediaPosts = mongoose.model(SchemaTypesReference.SocialMediaPosts, SocialMediaPostsSchema);
+const SocialMediaCampaigns = mongoose.model(SchemaTypesReference.Campaigns, CampaignSchema);
 
-export default SocialMediaPosts;
+export default SocialMediaCampaigns;
