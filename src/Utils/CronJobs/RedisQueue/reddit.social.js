@@ -46,7 +46,7 @@ redditQueue.process((job) => {
 
 });
 
-const redditQueueAddJob =  (data, delay) => {
+const  redditQueueAddJob =  (data, delay) => {
 
   redditQueue.add(data,{delay:delay});
   console.log("reddit Job added success");

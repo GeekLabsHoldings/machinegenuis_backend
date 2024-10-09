@@ -5,7 +5,7 @@ enum DepartmentEnum {
     Administrative = "administrative",
     Accounting = "accounting",
     CEO = "ceo",
-    VideoEditing = "VideoEditing",
+    VideoEditing = "video-editing",
     CustomerService = 'customer-service'
 }
 enum RoleEnum {
@@ -25,7 +25,7 @@ const DepartmentRoles = {
     "social-media": ["SocialMedia"],
     administrative: ['administrative'],
     accounting: ['Payroll'],
-    VideoEditing: ['VideoEditor'],
+    "video-editing": ['VideoEditor'],
     'customer-service': ['CustomerService']
 } as const;
 

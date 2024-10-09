@@ -151,7 +151,33 @@ export async function campaignByBrand(req, res) {
 }
 
 
+export async function campaignByBrandPersonal(req, res) {
+  try {
+    const chatIds = await getChannelsByBrand(req.params.id, true);
+    const message = req.body.message;
+    const file_url = req.body.file_url;
+    const captionText = req.body.captionText;
+    const file_type = req.body.file_type;
+    let delay = req.body.delay;
+    let starttime = req.body.starttime;
 
+    starttime = starttime - Date.now();
+
+    if (starttime<=0)
+        starttime = 10000
+    telegramQueueAddJob({TelegramB, message, chatIds, file_type, file_url, captionText, delay}, starttime)
+    
+
+    res.json({
+      message: message,
+      file: file_url,
+      captionText: captionText,
+      chatIds: chatIds,
+    });
+  } catch (error) {
+    return systemError.sendError(res, error);
+  }
+}
 
 
 export async function deleteMessage(req, res) {
