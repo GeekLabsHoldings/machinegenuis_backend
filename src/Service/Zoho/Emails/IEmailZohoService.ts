@@ -30,12 +30,14 @@ export interface IAllEmailData {
 }
 export interface IEmailData {
     messageId: string,
-    content: string
+    content: string,
+    header: object
 }
 export default interface IZohoEmailService {
-    sendEmail(emailData: ISendEmailData, accountId: string): Promise<string>
-    replayEmail(emailData: ISendEmailData, emailId: string, action: string, accountId: string): Promise<string>
-    getAllEmails(accountId: string): Promise<IAllEmailData[]>
-    getEmailById(accountId: string, folderId: string, emailId: string): Promise<IEmailData>
+    sendEmail(emailData: ISendEmailData): Promise<string>
+    replayEmail(emailData: ISendEmailData, action: string, accountId: string): Promise<string>
+    getAllEmails(): Promise<IAllEmailData[]>
+    getEmailById(folderId: string, emailId: string): Promise<IEmailData>
+    getEmailHeaders(folderId: string, messageId: string): Promise<object>
 
 }
