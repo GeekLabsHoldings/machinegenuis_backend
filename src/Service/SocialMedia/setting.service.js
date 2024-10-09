@@ -5,7 +5,7 @@ import SocialMediaPosts from "../../Model/SocialMedia/SocialMediaPosts.models";
 import SocialMediaGroupsModel from "../../Model/SocialMedia/SocialMediaGroups.model";
 import SocialMediaCampaigns from "../../Model/SocialMedia/campaign.socialmedia.model";
 import { timeStamp } from "console";
-
+import { PlatformArr } from "../../Utils/SocialMedia/Platform";
 
 
 
@@ -225,7 +225,7 @@ export async function getCampaignByBrand(id,skip,limit) {
 export const GetSubCount = async(
   brand
   )=>{
-  
+    const platforms = ["FACEBOOK", "TELEGRAM", "REDDIT"]; 
     try {
       const result = await SocialMediaGroupsModel.aggregate([
         {
@@ -247,6 +247,36 @@ export const GetSubCount = async(
         },
         {
           $addFields: {
+            platforms: {
+              $map: {
+                input: platforms,
+                as: "platform",
+                in: {
+                  platform: "$$platform",
+                  totalSubscribers: {
+                    $ifNull: [
+                      {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: "$platforms",
+                              as: "p",
+                              cond: { $eq: ["$$p.platform", "$$platform"] }
+                            }
+                          },
+                          0
+                        ]
+                      },
+                      { totalSubscribers: 0 }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          $addFields: {
             brand: "$_id"
           }
         },
@@ -261,7 +291,7 @@ export const GetSubCount = async(
                   as: "platformInfo",
                   in: {
                     k: "$$platformInfo.platform",
-                    v: { totalSubscribers: "$$platformInfo.totalSubscribers" }
+                    v: { totalSubscribers: "$$platformInfo.totalSubscribers.totalSubscribers" }
                   }
                 }
               }
@@ -269,6 +299,9 @@ export const GetSubCount = async(
           }
         }
       ]);
+      
+      
+      
       return result
     } catch (error) {
       console.log(error)
