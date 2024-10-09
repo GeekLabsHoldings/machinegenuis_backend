@@ -31,7 +31,7 @@ addPostQueue.process(async (job) => {
   const {content, url ,brandId ,userId} = job.data;
   const facebookData = await getAccount(brandId, PlatformEnum.FACEBOOK);
   const response = await postPhotoToFacebook({
-    accessToken: facebookData.account.token,
+    accessToken: facebookData.account.tokenPage,
     message: content,
     imageUrl: url,
     FACEBOOK_PAGE_ID: facebookData.account.pageID,
