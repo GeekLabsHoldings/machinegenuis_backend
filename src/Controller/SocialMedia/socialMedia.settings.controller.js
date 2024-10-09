@@ -63,7 +63,7 @@ export const addGroup = async (req , res ) => {
     }
   };
   
-
+//===============================================================================
 export const getAllPosts = async(req, res) =>{
     try {
 
@@ -127,4 +127,88 @@ export const deletpost = async(req, res) =>{
         console.log(error);
         return systemError.sendError(res, error);
       }
+}
+
+//==========================================================================
+
+
+
+export const getAllCampaigns = async(req, res) =>{
+  try {
+
+      const page = parseInt(String(req.query.page)) || 1; // Default to page 1 if not provided
+      const limit = parseInt(String(req.query.limit)) || 10; // Default to 10 items per page if not provided
+      const skip = (page - 1) * limit;
+      const result = await brandService.getAllCampaigns(skip, limit);
+      if(result){
+        return res.json(result);
+      }
+      res.status(404).json({message:"group account"});
+    } catch (error) {
+      console.log(error);
+      return systemError.sendError(res, error);
+    }
+}
+
+
+export const getCampaignByBrand = async(req, res) =>{
+  try {
+      const page = parseInt(String(req.query.page)) || 1; // Default to page 1 if not provided
+      const limit = parseInt(String(req.query.limit)) || 10; // Default to 10 items per page if not provided
+      const skip = (page - 1) * limit;
+      const result = await brandService.getCampaignByBrand(req.params.id, skip, limit);
+      if(result){
+        return res.json(result);
+      }
+      res.status(404).json({message:"group account"});
+    } catch (error) {
+      console.log(error);
+      return systemError.sendError(res, error);
+    }
+}
+
+
+export const addCampaigns = async(req, res) =>{
+  try {
+    log(req.body)
+      const {status, posts_shared ,content, date, platform, engagement, id} = req.body
+
+      const result = await brandService.addCampaigns(status, posts_shared, content, date, platform, engagement, id);
+      if(result){
+        return res.json(result);
+      }
+      res.status(404).json({message:"group account"});
+    } catch (error) {
+      console.log(error);
+      return systemError.sendError(res, error);
+    }
+}
+
+
+export const deletCampaigns = async(req, res) =>{
+  try {
+      const result = await brandService.deletCampaigns( req.params.id);
+      if(result){
+        return res.json(result);
+      }
+      res.status(404).json({message:"group account"});
+    } catch (error) {
+      console.log(error);
+      return systemError.sendError(res, error);
+    }
+}
+
+
+
+export const updateCampaigns = async(req, res) =>{
+  try {
+      const result = await brandService.deletCampaigns( req.params.id);
+      if(result){
+        return res.json(result);
+      }
+      res.status(404).json({message:"group account"});
+    } catch (error) {
+      console.log(error);
+      return systemError.sendError(res, error);
+    }
 }

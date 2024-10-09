@@ -38,6 +38,7 @@ enum SchemaTypesReference {
   Telegram = "telegram",
   SocialMediaGroups = "socialmediagroups",
   SocialMediaPosts = "socialmediaposts",
+  Campaigns = "campaigns_db",
   TelegramMessage = "telegram_message",
   Brands = "brands_collection",
   BroadCastMessage = "broadcastmessage",
