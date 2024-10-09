@@ -4,6 +4,7 @@ import { getAccount } from "../../../Service/Operations/BrandCreation.service";
 import { PlatformEnum } from "../../SocialMedia/Platform";
 import moment from "../../DateAndTime/index";
 import { textPhotoToFacebook } from "../../../Service/SocialMedia/facebook.service";
+import { createSocialAccountAddPost } from "../../../Service/SocialMedia/socialMedia.service";
 export const addPostQueue = new Queue("FacebookPost", {
   redis: {
     host: process.env.REDIS_HOST,
