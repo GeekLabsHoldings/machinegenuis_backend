@@ -27,12 +27,12 @@ const SocialMediaPostsSchema = new mongoose.Schema({
     default: 0,
   },
   
-  group_id:  { type:  String}
+  group_id:  { type:  String, unique: false, required:false, default:0}
   ,
   timestamp: {
     type: Number,
-    required: true,
-    default: 0,
+    required: false,
+    default: Date.now(),
   },
 
   platform: EnumStringRequired(PlatformArr),
@@ -43,28 +43,11 @@ const SocialMediaPostsSchema = new mongoose.Schema({
   },
   brand: {
     type: String,
-    required: true,
+    required: false,
     trim:true
   },
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Create the model
 const SocialMediaPosts = mongoose.model(SchemaTypesReference.SocialMediaPosts, SocialMediaPostsSchema);
 export const socialMediaModel = SocialMediaPosts.discriminator('twitter_posts', socialMediaSchema);
-
-
-
-
 export default SocialMediaPosts;
