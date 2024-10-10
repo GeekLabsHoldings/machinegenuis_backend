@@ -1,22 +1,3 @@
-// import cron from "node-cron";
-
-// import {
-//   checkReplyTweet,
-//   convertToMilliseconds,
-//   createReply,
-//   getAllAccounts,
-//   getAllBrands,
-//   getPrompt,
-// } from "../../service/socialMedia/twitter.social.service.js";
-// import { addReply, getTweets } from "../../service/socialMedia/twitter.api.js";
-// import OpenAiService from "../../service/openai/openAiService.ts";
-// import jwt from "jsonwebtoken";
-// import moment from "moment/moment";
-// import { campaignListEnum } from "../../utils/campaign/index.ts";
-// import { redis } from "../../utils/Radios/radios.js";
-
-// import { getAccount } from "../../service/socialMedia/twitter";
-// import { PlatformEnum } from "../../utils/Platform/index";
 import "dotenv/config";
 import OpenAiService from "../../Service/OpenAi/OpenAiService";
 import { getAccount } from "../../Service/Operations/BrandCreation.service";
