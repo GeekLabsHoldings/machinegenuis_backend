@@ -45,7 +45,6 @@ export const getPreSignedURL = async (req, res) => {
     return res.status(500).json({ message: "Error cannot set presigned URL " });
   }
 };
-
 export const addPostSocialMediaFacebookText = async (req, res, next) => {
   const { brandId } = req.params;
   const { content, startTime } = req.body;
@@ -157,9 +156,6 @@ if(response?.error?.code === 190 ){
     return systemError.sendError(res, error);
   }
 };
-
-
-
 export const BrandSubs = async (req, res) => {
   try {
     const brands = await getBrands(0, 99999999999999)
