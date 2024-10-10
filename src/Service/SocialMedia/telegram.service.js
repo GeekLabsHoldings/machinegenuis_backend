@@ -172,6 +172,7 @@ export const sendMessageToAll = (
   captionText, 
   ms
 ) => {
+  console.log('sendMessageToAll telegram channels\n');
   chatIds.forEach(async(chatId) => {
     
     try {
