@@ -109,6 +109,7 @@ export const addPostSocialMediaFacebookText = async (req, res, next) => {
         .throw();
     }
     const facebookData = await getAccount(brandId, PlatformEnum.FACEBOOK);
+
     if (!facebookData) {
       return systemError
         .setStatus(400)
@@ -127,6 +128,12 @@ export const addPostSocialMediaFacebookText = async (req, res, next) => {
           client_id: facebookData.account.client_id,
           client_secret: facebookData.account.client_secret,
         })
+        .throw();
+    }
+    if (response?.error?.code === 100) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.PAGE_ID_NOT_FOUND)
         .throw();
     }
     const accountData = {
@@ -189,6 +196,12 @@ export const addPostSocialMediaFacebookPhoto = async (req, res, next) => {
           client_id: facebookData.account.client_id,
           client_secret: facebookData.account.client_secret,
         })
+        .throw();
+    }
+    if (response?.error?.code === 100) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.PAGE_ID_NOT_FOUND)
         .throw();
     }
     const accountData = {
