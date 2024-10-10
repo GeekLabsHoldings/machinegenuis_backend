@@ -8,7 +8,7 @@ import {
   getPageAccessToken,
   postPhotoToFacebook,
   textPhotoToFacebook,
-  GetSubCount
+  GetSubCount,
 } from "../../Service/SocialMedia/facebook.service";
 import { submitRedditPost } from "../../Service/SocialMedia/reddit.Service";
 import { createSocialAccountAddPost } from "../../Service/SocialMedia/socialMedia.service";
@@ -45,13 +45,13 @@ export const getPreSignedURL = async (req, res) => {
     return res.status(500).json({ message: "Error cannot set presigned URL " });
   }
 };
-export const updateTokenFacebook = async(req,res)=>{
-  const {brandId,longAccessToken} = req.body;
-  if(!brandId || !longAccessToken){
+export const updateTokenFacebook = async (req, res) => {
+  const { brandId, longAccessToken } = req.body;
+  if (!brandId || !longAccessToken) {
     return systemError
-    .setStatus(400)
-    .setMessage(ErrorMessages.DATA_IS_REQUIRED)
-    .throw();
+      .setStatus(400)
+      .setMessage(ErrorMessages.DATA_IS_REQUIRED)
+      .throw();
   }
   try {
     const brands = await checkBrand(brandId);
@@ -71,7 +71,9 @@ export const updateTokenFacebook = async(req,res)=>{
     const accountData = {
       platform: PlatformEnum.FACEBOOK,
       account: {
-        tokenPage:facebookData.account.tokenPage,
+        client_id: facebookData.account.client_id,
+        client_secret: facebookData.account.client_secret,
+        tokenPage: facebookData.account.tokenPage,
         longAccessToken,
         pageID: facebookData.account.pageID,
         email: facebookData.account.email,
@@ -81,12 +83,13 @@ export const updateTokenFacebook = async(req,res)=>{
     };
     await addOrDeleteAccount(brandId, accountData);
     return res.status(200).json({
-      message: "token updated successfully go to social media to check the post",
+      message:
+        "token updated successfully go to social media to check the post",
     });
   } catch (error) {
     return systemError.sendError(res, error);
   }
-}
+};
 export const addPostSocialMediaFacebookText = async (req, res, next) => {
   const { brandId } = req.params;
   const { content, startTime } = req.body;
@@ -116,15 +119,21 @@ export const addPostSocialMediaFacebookText = async (req, res, next) => {
       facebookData.account.pageID,
       facebookData.account.longAccessToken
     );
-if(response?.error?.code === 190 ){
-  return systemError
-  .setStatus(400)
-  .setMessage(ErrorMessages.FACEBOOK_TOKEN_EXPIRED)
-  .throw();
-}
+    if (response?.error?.code === 190) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.FACEBOOK_TOKEN_EXPIRED)
+        .setData({
+          client_id: facebookData.account.client_id,
+          client_secret: facebookData.account.client_secret,
+        })
+        .throw();
+    }
     const accountData = {
       platform: PlatformEnum.FACEBOOK,
       account: {
+        client_id: facebookData.account.client_id,
+        client_secret: facebookData.account.client_secret,
         tokenPage: response.access_token,
         longAccessToken: facebookData.account.longAccessToken,
         pageID: facebookData.account.pageID,
@@ -172,15 +181,21 @@ export const addPostSocialMediaFacebookPhoto = async (req, res, next) => {
       facebookData.account.pageID,
       facebookData.account.longAccessToken
     );
-if(response?.error?.code === 190 ){
-  return systemError
-  .setStatus(400)
-  .setMessage(ErrorMessages.FACEBOOK_TOKEN_EXPIRED)
-  .throw();
-}
+    if (response?.error?.code === 190) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.FACEBOOK_TOKEN_EXPIRED)
+        .setData({
+          client_id: facebookData.account.client_id,
+          client_secret: facebookData.account.client_secret,
+        })
+        .throw();
+    }
     const accountData = {
       platform: PlatformEnum.FACEBOOK,
       account: {
+        client_id: facebookData.account.client_id,
+        client_secret: facebookData.account.client_secret,
         tokenPage: response.access_token,
         longAccessToken: facebookData.account.longAccessToken,
         pageID: facebookData.account.pageID,
@@ -200,11 +215,19 @@ if(response?.error?.code === 190 ){
 };
 export const BrandSubs = async (req, res) => {
   try {
-    const brands = await getBrands(0, 99999999999999)
-    const output = []
-    for(const brand of brands){
+    const brands = await getBrands(0, 99999999999999);
+    const output = [];
+    for (const brand of brands) {
       const subs = await GetSubCount(brand._id);
-      output.push({id:brand._id, name:brand.name, description:brand.description, date:brand.aquisition_date, niche:brand.niche, subscribers:subs, engagement:96})
+      output.push({
+        id: brand._id,
+        name: brand.name,
+        description: brand.description,
+        date: brand.aquisition_date,
+        niche: brand.niche,
+        subscribers: subs,
+        engagement: 96,
+      });
     }
     res.json(output);
   } catch (error) {
