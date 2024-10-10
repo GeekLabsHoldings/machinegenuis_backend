@@ -125,7 +125,7 @@
               }
             ],
             "y": "19.0966%",
-            "width": "37.5432%",
+            "width": "33.3491%",
             "height": "61.8067%",
             "x_anchor": "0%",
             "y_anchor": "0%",
@@ -847,7 +847,7 @@
         "type": "composition",
         "track": 6,
         "time": 93.4428,
-        "duration": 7.6331,
+        "duration": 6.8566,
         "elements": [
           {
             "id": "0259ea4b-1add-48da-841e-945e9b05af2d",
@@ -956,6 +956,13 @@
             "source": "a2f90747-2d7e-4429-8cd2-e509a8108ab4"
           }
         ]
+      },
+      {
+        "id": "826d9100-628f-42ce-9021-0a6efaa12573",
+        "type": "audio",
+        "track": 7,
+        "time": 96.013,
+        "source": "6624b6e2-4b44-4273-84c2-d893a245c774"
       }
     ]
   }
