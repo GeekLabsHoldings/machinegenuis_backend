@@ -2,7 +2,7 @@ import { Schema, model, Types } from "mongoose";
 import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
 import { PlatformArr, PlatformEnum } from "../../Utils/SocialMedia/Platform";
 import { EnumStringRequired } from "../../Utils/Schemas";
-
+import { socialMediaSchema } from "./SocialMedia.model";
 
 // models/Group.js
 const mongoose = require("mongoose");
@@ -48,7 +48,23 @@ const SocialMediaPostsSchema = new mongoose.Schema({
   },
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
 // Create the model
 const SocialMediaPosts = mongoose.model(SchemaTypesReference.SocialMediaPosts, SocialMediaPostsSchema);
+export const socialMediaModel = SocialMediaPosts.discriminator('twitter_posts', socialMediaSchema);
+
+
+
 
 export default SocialMediaPosts;

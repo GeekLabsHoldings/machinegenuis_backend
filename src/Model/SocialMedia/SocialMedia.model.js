@@ -4,7 +4,7 @@ import { platform, type } from "os";
 import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
 import { EnumStringRequired } from "../../Utils/Schemas";
 import { PlatformArr } from "../../Utils/SocialMedia/Platform";
-const socialMediaSchema = new Schema({
+export const socialMediaSchema = new Schema({
   platform: EnumStringRequired(PlatformArr),
   brandId: {
     type: Types.ObjectId,
