@@ -13,14 +13,10 @@ export const socialMediaSchema = new Schema({
   content: {
     type: String,
   },
-  postId: { type: String, required: true },
+  postId: { type: String, required: false },
   employeeId: {
     type: Types.ObjectId,
-    required: true,
+    required: false,
     ref: SchemaTypesReference.Employee,
   },
 });
-export const socialMediaModel = model(
-  SchemaTypesReference.SocialMedia,
-  socialMediaSchema
-);

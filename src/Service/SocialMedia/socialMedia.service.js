@@ -1,6 +1,7 @@
 import { platform } from "os";
-import { socialMediaModel } from "../../Model/SocialMedia/SocialMedia.model";
+import { socialMediaModel } from "../../Model/SocialMedia/SocialMediaPosts.models";
 import socialAccountModel from "../../Model/SocialMedia/SocialMediaAccount.model";
+import { group } from "console";
 export const createSocialAccountAddPost = async (
   platform,
   brandId,
@@ -15,6 +16,7 @@ export const createSocialAccountAddPost = async (
       content,
       employeeId: userId,
       postId,
+      group_id:`${Date.now()}_${platform}_POST`,
     });
     return createPost;
   } catch (error) {
