@@ -108,7 +108,7 @@ export async function campaign(req, res) {
         starttime = 10000
 
     
-    telegramQueueAddJob({ message, chatIds, file_type, file_url, captionText, delay}, starttime)
+    await telegramQueueAddJob({ message, chatIds, file_type, file_url, captionText, delay}, starttime)
 
     res.json({
       message: message,
@@ -124,7 +124,8 @@ export async function campaign(req, res) {
 
 export async function campaignByBrand(req, res) {
   try {
-    const chatIds = await getChannelsByBrand(req.params.id);
+    const brand = req.params.id
+    const chatIds = await getChannelsByBrand(brand);
     const message = req.body.message;
     const file_url = req.body.file_url;
     const captionText = req.body.captionText;
@@ -136,7 +137,7 @@ export async function campaignByBrand(req, res) {
 
     if (starttime<=0)
         starttime = 10000
-    telegramQueueAddJob({TelegramB, message, chatIds, file_type, file_url, captionText, delay}, starttime)
+    await telegramQueueAddJob({TelegramB, message, chatIds, file_type, file_url, captionText, delay, brand}, starttime)
     
 
     res.json({

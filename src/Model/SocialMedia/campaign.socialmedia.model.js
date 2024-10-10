@@ -37,7 +37,7 @@ const CampaignSchema = new mongoose.Schema({
   
   brand: {
     type: Types.ObjectId,
-    required: true,
+    required: false,
     trim:true
   },
 

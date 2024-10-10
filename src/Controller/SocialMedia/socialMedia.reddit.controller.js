@@ -108,7 +108,7 @@ export const CampaignBroadcast = async (req, res) => {
     }
 
 
-    redditQueueAddJob({groups, delay, title, text, url}, starttime);
+    await redditQueueAddJob({groups, delay, title, text, url}, starttime);
 
 
     res.json({ message: "done" });
@@ -137,7 +137,7 @@ export const CampaignByBrand = async (req,res) => {
     }
 
 
-    redditQueueAddJob({groups, delay, title, text, url}, starttime);
+    await redditQueueAddJob({groups, delay, title, text, url}, starttime);
     
     res.json({ message: "done" });
   } catch (error) {
