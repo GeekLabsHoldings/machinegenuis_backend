@@ -88,6 +88,7 @@ const renderVideo = async (req, res) => {
     });
 
     template.elements[5].time = currentTime + 1
+    template.elements[6].time = currentTime + 3
     template.elements[5].duration = 6
 
     currentTime += template.elements[5].duration;
