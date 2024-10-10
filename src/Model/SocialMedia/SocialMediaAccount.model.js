@@ -5,7 +5,7 @@ import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
 import { campaignListArr } from "../../Utils/SocialMedia/campaign";
 import { statusListArr } from "../../Utils/SocialMedia/status";
 
-const socialAccountSchema = new Schema(
+export const socialAccountSchema = new Schema(
   {
     sharingList: EnumStringRequired(PlatformArr),
     brand: {
@@ -46,7 +46,6 @@ const socialAccountSchema = new Schema(
     campaignType: EnumStringRequired(campaignListArr),
     followers: String,
   },
-  { timestamps: true }
 );
 
 const socialAccountModel = model(
