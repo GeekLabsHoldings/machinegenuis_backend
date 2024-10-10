@@ -360,6 +360,9 @@ export const getAccount = async (id: string, platform: string) => {
 
   return null;
 };
+
+
+
 export const addOrDeleteAccount = async (
   id: string,
   accountData: accountDataType,

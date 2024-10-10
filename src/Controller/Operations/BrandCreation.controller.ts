@@ -289,7 +289,7 @@ export const addOrChangeAcount = async (req: Request, res: Response) => {
     else if (req.body.platform.toUpperCase()=="FACEBOOK"){
       accountData = {platform:req.body.platform,
         account:{tokenPage:req.body.tokenPage, longAccessToken:req.body.longAccessToken , pageID:req.body.pageID, 
-          email:req.body.email, password:req.body.password, cookies:req.body.cookies}}
+          email:req.body.email, password:req.body.password, client_id:req.body.client_id, client_secret:req.body.client_secret, cookies:req.body.cookies}}
 
      const result = await brandService.addOrDeleteAccount(req.params.id, accountData);
      return  res.json(result);
