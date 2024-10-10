@@ -16,7 +16,6 @@ const server = app.listen(port, async () => {
     startAgenda();
     console.log(`Server is Running And DB Connected http://localhost:${port}`);
     startCronJobs();
-
   } catch (error) {
     console.log(error);
   }
