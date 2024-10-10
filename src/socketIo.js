@@ -37,7 +37,6 @@ const onConnection = (socket) => {
       console.log(`User ${user.firstName} joined room: ${roomName}`);
     });
   }
-
   NewTweetsEvent(user, io);
   BroadCastMessageEvent(io);
 };
