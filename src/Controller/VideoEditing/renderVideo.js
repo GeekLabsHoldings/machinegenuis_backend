@@ -263,15 +263,6 @@ const renderVideo = async (req, res) => {
         width: "8.0154%",
         height: "14.4895%",
         clip: true,
-        animations: [
-          {
-            time: 0.077,
-            duration: 1.566,
-            transition: true,
-            type: "slide",
-            direction: "90°",
-          },
-        ],
         source: "207563f8-29f0-4440-94c0-7a063c1c24ff",
       },
       {
