@@ -45,6 +45,48 @@ export const getPreSignedURL = async (req, res) => {
     return res.status(500).json({ message: "Error cannot set presigned URL " });
   }
 };
+export const updateTokenFacebook = async(req,res)=>{
+  const {brandId,longAccessToken} = req.body;
+  if(!brandId || !longAccessToken){
+    return systemError
+    .setStatus(400)
+    .setMessage(ErrorMessages.DATA_IS_REQUIRED)
+    .throw();
+  }
+  try {
+    const brands = await checkBrand(brandId);
+    if (!brands) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.BRAND_NOT_FOUND)
+        .throw();
+    }
+    const facebookData = await getAccount(brandId, PlatformEnum.FACEBOOK);
+    if (!facebookData) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.ACCOUNT_NOT_FOUND)
+        .throw();
+    }
+    const accountData = {
+      platform: PlatformEnum.FACEBOOK,
+      account: {
+        tokenPage:facebookData.account.tokenPage,
+        longAccessToken,
+        pageID: facebookData.account.pageID,
+        email: facebookData.account.email,
+        password: facebookData.account.password,
+        cookies: facebookData.account.cookies,
+      },
+    };
+    await addOrDeleteAccount(brandId, accountData);
+    return res.status(200).json({
+      message: "token updated successfully go to social media to check the post",
+    });
+  } catch (error) {
+    return systemError.sendError(res, error);
+  }
+}
 export const addPostSocialMediaFacebookText = async (req, res, next) => {
   const { brandId } = req.params;
   const { content, startTime } = req.body;

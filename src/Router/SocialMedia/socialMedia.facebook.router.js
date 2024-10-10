@@ -3,6 +3,7 @@ import * as facebookController from "../../Controller/SocialMedia/socialMedia.fa
 const facebookRouter = Router();
 facebookRouter.get("/get-url/", facebookController.getPreSignedURL);
 facebookRouter.get("/get-subs/", facebookController.BrandSubs);
+facebookRouter.post("/update-token", facebookController.updateTokenFacebook);
 facebookRouter.post(
   "/add-post/text/:brandId",
   facebookController.addPostSocialMediaFacebookText
