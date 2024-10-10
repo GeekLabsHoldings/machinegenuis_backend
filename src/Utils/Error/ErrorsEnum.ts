@@ -62,6 +62,7 @@ enum ErrorMessages {
   DUPLICATE_TWEET = "You are not allowed to create a Tweet with duplicate content.",
   TWITTER_ACCOUNT_NOT_FOUND = "TWITTER ACCOUNT NOT FOUND",
   FACEBOOK_TOKEN_EXPIRED = "FACEBOOK TOKEN EXPIRED",
+  PAGE_ID_NOT_FOUND = "PAGE-ID NOT FOUND",
   NULL = "NULL",
 }
 export { ErrorMessages };
