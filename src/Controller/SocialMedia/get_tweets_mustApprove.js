@@ -110,7 +110,7 @@ export const tweets = async () => {
                   content: tweet.text,
                   brand: brand._id,
                   reply,
-                  userId: account.userName,
+                  accountName: account.userName,
                   campaignType: account.campaignType,
                 };
                 await eventEmitter.emit("TwitterNewTweets", data);
