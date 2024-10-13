@@ -64,7 +64,7 @@ export const getAllAccounts = async () => {
 };
 
 
-export const uploadImage = async(twitterData, image) => {
+export const uploadImageService = async (twitterData, image) => {
   try {
     const { ConsumerKey, ConsumerSecret, AccessToken, TokenSecret } = twitterData.account;
     //const fileBuffer =  Buffer.from(image, 'base64');;
