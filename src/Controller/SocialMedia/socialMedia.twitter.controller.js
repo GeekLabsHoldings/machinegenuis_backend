@@ -26,6 +26,7 @@ import {
   getTweetById,
   getTwitterAccount,
   getTwitterAccounts,
+  uploadImage
 } from "../../Service/SocialMedia/twitter.service";
 import moment from "moment-timezone";
 import OpenAiService from "../../Service/OpenAi/OpenAiService";
@@ -367,3 +368,56 @@ export const generatePost = async (req, res) => {
     return systemError.sendError(res, error);
   }
 };
+
+
+
+
+export async function uploadImage(req, res) {
+  console.log("this is a req.body for upload image \n\n", req.body);
+  
+  try {
+    console.log("Starting Twitter image upload process");
+    console.log("Request Content-Type:", req.headers['content-type']);
+    // Check if we have image data
+    const image = req.body.image
+    const rawTwitterData = req.body.twitterData;
+    if (!rawTwitterData || typeof rawTwitterData !== 'string') {
+      console.error("Missing or invalid twitterData");
+      return res.status(400).json({ error: "Missing or invalid twitterData" });
+    }
+
+    let twitterData;
+    try {
+      twitterData = JSON.parse(rawTwitterData);
+      console.log("Twitter data parsed successfully");
+    } catch (e) {
+      console.error("Failed to parse twitterData:", e);
+      return res.status(400).json({ error: "twitterData must be a valid JSON string" });
+    }
+    // Validate Twitter data structure
+    if (
+      !twitterData.platform ||
+      twitterData.platform !== "TWITTER" ||
+      !twitterData.account ||
+      typeof twitterData.account.ConsumerKey !== "string" ||
+      typeof twitterData.account.ConsumerSecret !== "string" ||
+      typeof twitterData.account.AccessToken !== "string" ||
+      typeof twitterData.account.TokenSecret !== "string" ||
+      typeof twitterData.account.BearerToken !== "string"
+    ) {
+      console.error("Invalid twitterData structure:", JSON.stringify(twitterData));
+      return res.status(400).json({ error: "Invalid twitterData structure" });
+    }
+
+
+
+
+    const twitterResponse = await uploadImage(twitterData, image)
+
+    return res.status(200).json(twitterResponse);
+  } catch (error) {
+    console.error("Unhandled error in upload-image API:", error);
+    return res.status(500).json({ error: "Internal server error", details: error.message });
+  }
+}
+  

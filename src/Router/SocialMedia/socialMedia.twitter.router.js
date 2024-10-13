@@ -1,7 +1,12 @@
-import { Router } from "express";
+import { Router, raw, json } from "express";
 import * as socialMediaController from "../../Controller/SocialMedia/socialMedia.twitter.controller";
 
 const twitterRouter = Router();
+
+twitterRouter.use(json());
+twitterRouter.use(raw({ type: 'image/*', limit: '5mb' }));
+
+
 twitterRouter.post(
   "/add-account/:brand",
   socialMediaController.addSocialAccountTwitter
@@ -37,6 +42,14 @@ twitterRouter.post(
 twitterRouter.get(
   "/get-all-accounts",
   socialMediaController.getAllAccountsTwitter
+);
+
+
+
+
+twitterRouter.post(
+  "/upload-image",
+  socialMediaController.uploadImage
 );
 
 export default twitterRouter;
