@@ -1,10 +1,7 @@
 import "dotenv/config";
 import OpenAiService from "../../Service/OpenAi/OpenAiService";
 import { getAccount } from "../../Service/Operations/BrandCreation.service";
-import {
-  addReply,
-  getTweets,
-} from "../../Service/SocialMedia/tweets_api_mustApprove";
+import { getTweets } from "../../Service/SocialMedia/tweets_api_mustApprove";
 import {
   checkReplyTweet,
   convertToMilliseconds,
@@ -19,6 +16,7 @@ import eventEmitter from "../../Utils/EventEmitter/eventEmitter";
 import { DepartmentEnum } from "../../Utils/DepartmentAndRoles";
 import { redis } from "../../Utils/Redis/redis";
 import moment from "moment";
+import { addReply } from "../../Service/SocialMedia/twitter.api";
 export const tweets = async () => {
   try {
     const brands = await getAllBrands();
@@ -90,18 +88,10 @@ export const tweets = async () => {
                   reply,
                   tweet.id
                 );
-                console.log(addReply);
-
-                if (addComment?.status === 401) {
-                  resError.push({
-                    error: true,
-                    message: errorMessage,
-                    details: addComment.data || addComment,
-                    statusCode: addComment.status,
-                  });
+                if (addComment.message === "Reply posted successfully") {
+                  account.comments = account.comments + 1;
+                  await account.save();
                 }
-                account.comments = account.comments + 1;
-                await account.save();
               } else if (
                 account.campaignType === campaignListEnum.MUST_APPROVE
               ) {
@@ -125,9 +115,7 @@ export const tweets = async () => {
                 account.campaignType,
                 content
               );
-
               postCount++;
-
               if (postCount >= longPauseAfterCount) {
                 console.log(
                   `Pausing for ${delayBetweenGroups / 60000} minutes`
@@ -149,13 +137,10 @@ export const tweets = async () => {
             }
           }
         }
-
         skip = (skip + 1) % accounts.length;
       }
-
       await redis.set(`${brand.brand}_skip`, skip);
     }
-
     return resError;
   } catch (error) {
     console.log("Error----->", error);
