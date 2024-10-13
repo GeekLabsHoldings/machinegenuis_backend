@@ -8,7 +8,8 @@ const BrandCreationRouter = Router();
 // Domains
 BrandCreationRouter.post("/check-domain-availability", brandController.checkDomains);
 BrandCreationRouter.post("/register-domain", brandController.registerDomain);
-
+BrandCreationRouter.post("/check-domain-email-verification", brandController.verificationDomain);
+BrandCreationRouter.post("/activate-domain", brandController.activateDomain);
 
 // get add Brand routes
 BrandCreationRouter.post("/add-brand-all-data", brandController.addBrandWithAllData);
