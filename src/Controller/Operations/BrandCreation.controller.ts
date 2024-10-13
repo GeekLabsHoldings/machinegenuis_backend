@@ -338,6 +338,7 @@ export const checkDomains = async (req: Request, res: Response) => {
 
 export const registerDomain = async (req: Request, res: Response) => {
   try {
+    const brand = req.body.brand
     const contactDetail:ContactDetail = {
       FirstName: req.body.FirstName,
       LastName: req.body.LastName,
@@ -350,10 +351,33 @@ export const registerDomain = async (req: Request, res: Response) => {
       PhoneNumber: req.body.PhoneNumber,
       Email: req.body.Email,
     };
-    const result = await brandService.registerDomain(req.body.domainName, req.body.DurationInYears, contactDetail);
+
+    const result = await brandService.registerDomain(req.body.domainName, req.body.DurationInYears, brand, contactDetail);
     res.json(result);
   } catch (error) {
     console.log(error);
     return systemError.sendError(res, error);
   }
 };
+
+export const verificationDomain = async(req: Request, res: Response)=>{
+  try {
+    const result = await brandService.verificationDomain(req.body.domainName);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    return systemError.sendError(res, error);
+  }
+}
+
+export const activateDomain = async(req: Request, res: Response)=>{
+try {
+  const domainName = req.body.domainName
+  const brand = req.body.brand
+  const result = await brandService.activateDomain(domainName, brand);
+  res.json(result);
+} catch (error) {
+  console.log(error);
+  return systemError.sendError(res, error);
+}
+}

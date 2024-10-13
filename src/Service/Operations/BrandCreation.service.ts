@@ -13,6 +13,7 @@ import SocialPostingAccount from "../../Model/Operations/SocialPostingAccount.mo
 import crypto, { Encoding } from "crypto";
 import Route53DomainChecker, { ContactDetail } from "../AWS/Rout53/domains";
 import { log } from "console";
+import AwsDomainActivation from "../AWS/Rout53/domain_activation";
 
 // import { Request, Response } from 'express';
 
@@ -278,6 +279,8 @@ export const deleteSubBrand = async (parentId: string, id: string) => {
     session.endSession();
   }
 };
+
+//=========================================================================
 export async function checkAndSuggest(domainName: string) {
   const checker = new Route53DomainChecker();
 
@@ -290,23 +293,81 @@ export async function checkAndSuggest(domainName: string) {
   }
   return { isAvailable };
 }
+
+
+
+
 export async function registerDomain(
   domainName: string,
   DurationInYears: number,
+  brand:string,
   contactDetails: ContactDetail
 ) {
   const checker = new Route53DomainChecker();
-
+  
   const result = await checker.registerDomain(
     domainName,
     DurationInYears,
     contactDetails
   );
+  await BrandsModel.updateOne(
+    { _id: brand },               // Filter: Find the brand by its ID
+    { $set: { domain: domainName }} // Update: Set the domain name
+  );
   console.log(`Is domain result is ${result}`);
 
   return result;
 }
-// Placeholder for account-related functions
+
+export async function verificationDomain(domainName:string) {
+  try {
+    const domainManager = new AwsDomainActivation();
+    const emailVerificationStatus = await domainManager.checkDomainVerificationStatus(domainName);
+    return emailVerificationStatus
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
+export async function activateDomain(domainName:string, brand:string){
+  try {
+    const domainManager = new AwsDomainActivation();
+
+
+  // Step 1: Create Hosted Zone
+  const HostedZoneId = await domainManager.createHostedZone(domainName);
+
+if (HostedZoneId) {
+  // Step 2: Update Name Servers for the domain
+  const nameServers = await domainManager.getNameServers(HostedZoneId);
+  if (nameServers) {
+    await domainManager.updateNS(domainName, nameServers, HostedZoneId);
+  }
+
+  // Step 3: Request SSL
+  const CertificateArn = await domainManager.requestCertificate(domainName);
+
+  if (CertificateArn) {
+    // Step 4: Get DNS CName Name CName value
+    const cnameRecord = await domainManager.getDnsValidationRecords(CertificateArn);
+
+    if (cnameRecord) {
+      // Step 5: Add CNAME for SSL validation
+      await domainManager.addHostedZoneRecord(domainName, cnameRecord, HostedZoneId, 'CNAME');
+    }
+  }
+}
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
+
+//============================================================
+
+
 export const getAccounts = async (id: string) => {
   // Implement account retrieval logic
   const brand = await BrandsModel.findById(id)
@@ -456,7 +517,6 @@ export function decrypt(encryptedData: string): string | null {
   }
   return null;
 }
-
 
 
 

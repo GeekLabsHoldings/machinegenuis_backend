@@ -29,6 +29,7 @@ const SocialMediaPostsSchema = new mongoose.Schema({
   
   group_id:  { type:  String, unique: false, required:false, default:0}
   ,
+
   timestamp: {
     type: Number,
     required: false,
@@ -36,11 +37,8 @@ const SocialMediaPostsSchema = new mongoose.Schema({
   },
 
   platform: EnumStringRequired(PlatformArr),
-  timestamp: {
-    type: Number,
-    required: true,
-    default: 0,
-  },
+
+  
   brand: {
     type: String,
     required: false,
