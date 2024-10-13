@@ -14,7 +14,7 @@ const SocialMediaCommentSchema = new Schema({
   content: String,
   post_id: { type: String, required: true },
   campaignType: EnumStringRequired(campaignListArr),
-});
+},{timestamps:true});
 const socialCommentModel = model(
   "socialMediaComment",
   SocialMediaCommentSchema

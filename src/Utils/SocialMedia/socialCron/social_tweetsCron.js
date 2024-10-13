@@ -9,6 +9,10 @@ export const twitterCron = cron.schedule("*/30 * * * *", async () => {
   isRunning = true;
 
   try {
+    if (process.env.NODE_ENV !== 'PROD') {
+      console.log("Cron job skipped in non-production environment.");
+      return;
+  }
     const response = await tweets();
     // if (Array.isArray(response) && response.length > 0) {
     //   const firstResponse = response[0];
