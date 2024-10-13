@@ -114,7 +114,8 @@ export const tweets = async () => {
                 reply,
                 tweet.id,
                 account.campaignType,
-                content
+                content,
+                account._id
               );
               postCount++;
               if (postCount >= longPauseAfterCount) {
