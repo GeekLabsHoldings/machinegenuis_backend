@@ -1,10 +1,10 @@
-import { Router, raw, json } from "express";
+import { Router, raw, json, urlencoded } from "express";
 import * as socialMediaController from "../../Controller/SocialMedia/socialMedia.twitter.controller";
 
 const twitterRouter = Router();
 
-twitterRouter.use(json());
-twitterRouter.use(raw({ type: 'image/*', limit: '5mb' }));
+twitterRouter.use(json({limit: '50mb', extended: true}));
+twitterRouter.use(urlencoded({ limit: '50mb', extended: true })); 
 
 
 twitterRouter.post(

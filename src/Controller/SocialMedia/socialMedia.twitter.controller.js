@@ -25,7 +25,7 @@ import {
   getTweetById,
   getTwitterAccount,
   getTwitterAccounts,
-  uploadImage
+  uploadImageService
 } from "../../Service/SocialMedia/twitter.service";
 import moment from "moment-timezone";
 import OpenAiService from "../../Service/OpenAi/OpenAiService";
@@ -40,6 +40,14 @@ import {
 import { twitterQueueAdd } from "../../Utils/CronJobs/TweetsQueue/twitterPostQueue";
 import { systemPromptEnum } from "../../Utils/Prompt";
 import socialAccountModel from "../../Model/SocialMedia/SocialMediaAccount.model";
+const Busboy = require('busboy');
+
+
+
+
+
+
+
 export const addPostSocialMediaTwitter = async (req, res) => {
   try {
     const { content, asset, mediaId, startTime } = req.body;
@@ -381,41 +389,79 @@ export async function uploadImage(req, res) {
     console.log("Request Content-Type:", req.headers['content-type']);
     // Check if we have image data
     const image = req.body.image
-    const rawTwitterData = req.body.twitterData;
-    if (!rawTwitterData || typeof rawTwitterData !== 'string') {
-      console.error("Missing or invalid twitterData");
-      return res.status(400).json({ error: "Missing or invalid twitterData" });
-    }
 
-    let twitterData;
-    try {
-      twitterData = JSON.parse(rawTwitterData);
-      console.log("Twitter data parsed successfully");
-    } catch (e) {
-      console.error("Failed to parse twitterData:", e);
-      return res.status(400).json({ error: "twitterData must be a valid JSON string" });
-    }
-    // Validate Twitter data structure
-    if (
-      !twitterData.platform ||
-      twitterData.platform !== "TWITTER" ||
-      !twitterData.account ||
-      typeof twitterData.account.ConsumerKey !== "string" ||
-      typeof twitterData.account.ConsumerSecret !== "string" ||
-      typeof twitterData.account.AccessToken !== "string" ||
-      typeof twitterData.account.TokenSecret !== "string" ||
-      typeof twitterData.account.BearerToken !== "string"
-    ) {
-      console.error("Invalid twitterData structure:", JSON.stringify(twitterData));
-      return res.status(400).json({ error: "Invalid twitterData structure" });
-    }
+    const busboy = Busboy({ headers: req.headers });
+  
+    let fileBuffer = Buffer.alloc(0);
+    let rawTwitterData;
+    const formData = {};
+
+    // Handle form field data
+    busboy.on('field', (fieldname, value) => {
+      formData[fieldname] = value;
+      rawTwitterData = value // Store the form field and its value
+      console.log(`Form field data received: ${fieldname}: ${value}`);
+    });
+  
+    // Handle file upload
+    busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
+      file.on('data', (data) => {
+        // Append incoming file data to the buffer
+        fileBuffer = Buffer.concat([fileBuffer, data]);
+      });
+  
+      file.on('end', () => {
+        console.log(`File upload complete: ${filename}, size: ${fileBuffer.length}`);
+      });
+    });
+  
+
+    busboy.on('finish', async () => {
+      // Process the uploaded file buffer and form data
+
+      console.log("twitter data \n\n", rawTwitterData)
+
+      if (!rawTwitterData || typeof rawTwitterData !== 'string') {
+        console.error("Missing or invalid twitterData");
+        return res.status(400).json({ error: "Missing or invalid twitterData" });
+      }
+  
+      let twitterData;
+      try {
+        twitterData = JSON.parse(rawTwitterData);
+        console.log("Twitter data parsed successfully");
+      } catch (e) {
+        console.error("Failed to parse twitterData:", e);
+        return res.status(400).json({ error: "twitterData must be a valid JSON string" });
+      }
+      // Validate Twitter data structure
+      if (
+        !twitterData.platform ||
+        twitterData.platform !== "TWITTER" ||
+        !twitterData.account ||
+        typeof twitterData.account.ConsumerKey !== "string" ||
+        typeof twitterData.account.ConsumerSecret !== "string" ||
+        typeof twitterData.account.AccessToken !== "string" ||
+        typeof twitterData.account.TokenSecret !== "string" ||
+        typeof twitterData.account.BearerToken !== "string"
+      ) {
+        console.error("Invalid twitterData structure:", JSON.stringify(twitterData));
+        return res.status(400).json({ error: "Invalid twitterData structure" });
+      }
+  
+  
+  
+  
+      const twitterResponse = await uploadImageService(twitterData,  fileBuffer.toString('base64'))
+  
+      return res.status(200).json(twitterResponse);
+    });
+
+    req.pipe(busboy);  
 
 
 
-
-    const twitterResponse = await uploadImage(twitterData, image)
-
-    return res.status(200).json(twitterResponse);
+   
   } catch (error) {
     console.error("Unhandled error in upload-image API:", error);
     return res.status(500).json({ error: "Internal server error", details: error.message });
