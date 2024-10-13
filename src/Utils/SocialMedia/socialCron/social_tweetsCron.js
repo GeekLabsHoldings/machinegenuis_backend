@@ -9,7 +9,7 @@ export const twitterCron = cron.schedule("*/30 * * * *", async () => {
   isRunning = true;
 
   try {
-    if (process.env.NODE_ENV !== 'PROD') {
+    if (process.env.REDIS_PORT !== "16388") {
       console.log("Cron job skipped in non-production environment.");
       return;
   }
