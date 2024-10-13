@@ -35,7 +35,8 @@ export const createSocialAccount = async (
   delayBetweenPosts,
   delayBetweenGroups,
   longPauseAfterCount,
-  niche
+  niche,
+  profile_image_url
 ) => {
   const socialAccount = await socialAccountModel.create({
     sharingList,
@@ -50,6 +51,7 @@ export const createSocialAccount = async (
     delayBetweenGroups,
     longPauseAfterCount,
     niche,
+    profile_image_url
   });
   return socialAccount;
 };
