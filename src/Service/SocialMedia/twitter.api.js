@@ -36,7 +36,7 @@ export const TwitterSocialMediaAddPost = async ({
   }
 };
 export const getUserByUsername = async (userName, BearerToken) => {
-  const url = `https://api.twitter.com/2/users/by/username/${userName}`;
+  const url = `https://api.twitter.com/2/users/by/username/${userName}?user.fields=profile_image_url`;
 
   try {
     const response = await axios.get(url, {

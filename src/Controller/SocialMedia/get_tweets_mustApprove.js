@@ -102,6 +102,7 @@ export const tweets = async () => {
                   reply,
                   accountName: account.userName,
                   campaignType: account.campaignType,
+                  profile_image_url:account.profile_image_url
                 };
                 await eventEmitter.emit("TwitterNewTweets", data);
               }
