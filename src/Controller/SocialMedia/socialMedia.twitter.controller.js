@@ -2,7 +2,6 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import {
   addReply,
-  getTweets,
   getUserByUsername,
   TwitterSocialMediaAddPost,
 } from "../../Service/SocialMedia/twitter.api";

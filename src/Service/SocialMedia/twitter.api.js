@@ -67,31 +67,6 @@ export const getUserByUsername = async (userName, BearerToken) => {
     throw error;
   }
 };
-export const getTweets = async (account_id, BEARER_TOKEN) => {
-  try {
-    const response = await axios.get(
-      `https://api.twitter.com/2/users/${account_id}/tweets`,
-      {
-        params: {
-          "tweet.fields": "created_at,public_metrics,attachments",
-          expansions: "attachments.media_keys",
-          "media.fields": "url",
-        },
-        headers: {
-          Authorization: `Bearer ${BEARER_TOKEN}`,
-        },
-      }
-    );
-
-    // Handle the response
-    return response;
-  } catch (error) {
-    console.error(
-      "Error fetching tweets:",
-      error.response?.data || error.message
-    );
-  }
-};
 export const addReply = async (
   CONSUMER_KEY,
   CONSUMER_SECRET,
