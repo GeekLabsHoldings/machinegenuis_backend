@@ -34,6 +34,7 @@ export const createReply = async (
   post_id,
   campaignType,
   content,
+  accountId
 ) => {
   if (campaignType === campaignListEnum.AUTO_COMMENT) {
     const socialComment = await socialCommentModel.create({
@@ -43,6 +44,7 @@ export const createReply = async (
       comment: reply,
       post_id,
       campaignType: campaignListEnum.AUTO_COMMENT,
+      accountId
     });
     return socialComment;
   } else {
@@ -54,6 +56,7 @@ export const createReply = async (
       post_id,
       content,
       campaignType: campaignListEnum.MUST_APPROVE,
+      accountId
     });
     return socialContent;
   }
