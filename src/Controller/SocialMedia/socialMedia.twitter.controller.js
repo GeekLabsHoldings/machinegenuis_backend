@@ -122,7 +122,7 @@ export const addSocialAccountTwitter = async (req, res) => {
       twitterData.account.BearerToken
     );
     const account_id = response.data.id;
-
+    const profile_image_url = response.data.profile_image_url;
     const socialAccount = await createSocialAccount(
       PlatformEnum.TWITTER,
       brand,
@@ -135,7 +135,8 @@ export const addSocialAccountTwitter = async (req, res) => {
       delayBetweenPosts,
       delayBetweenGroups,
       longPauseAfterCount,
-      brands.niche
+      brands.niche,
+      profile_image_url
     );
     return res.status(200).json({ result: socialAccount });
   } catch (error) {
@@ -186,6 +187,7 @@ export const editTwitterAccount = async (req, res) => {
       );
       twitterAccount.account_id = response.data.id;
       twitterAccount.userName = userName;
+      twitterAccount.profile_image_url=response.data.profile_image_url;
     }
     twitterAccount.brand = brand || twitterAccount.brand;
     twitterAccount.accountName = accountName || twitterAccount.accountName;
