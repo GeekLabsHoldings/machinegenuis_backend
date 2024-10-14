@@ -2,7 +2,7 @@ import hiringModel from "../../../Model/HR/Hiring/HiringModel";
 import IHiringModel from "../../../Model/HR/Hiring/IHiringModel";
 import IHiringService from "./IHiringService";
 import { HiringStatus, HiringStatusLevelEnum } from "../../../Utils/Hiring";
-import { ClientSession } from "mongoose";
+import { ClientSession, Types } from "mongoose";
 import { HiringStepsEnum } from "../../../Utils/GroupsAndTemplates";
 
 class HiringService implements IHiringService {
@@ -41,6 +41,11 @@ class HiringService implements IHiringService {
     async deleteHiringRequest(_id: string): Promise<boolean> {
         const result = await hiringModel.findOneAndDelete({ _id });
         return result ? true : false;
+    }
+
+    async getHiringByLinkedinAccount(account_id: string): Promise<(IHiringModel & { _id: Types.ObjectId | string }) | null> {
+        const result = await hiringModel.findOne({ linkedinAccount: account_id, currentStep: HiringStepsEnum.Get_Job_Candidates });
+        return result;
     }
 
 }
