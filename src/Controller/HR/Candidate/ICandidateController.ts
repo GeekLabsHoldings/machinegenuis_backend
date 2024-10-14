@@ -3,6 +3,7 @@ import ICandidateModel from "../../../Model/HR/Candidate/ICandidateModel";
 import ICandidateQuestionsModel from "../../../Model/HR/Candidate/ICandidateQuestionsModel";
 
 export default interface ICandidateController {
+    getCandidateFromLinkedin(): Promise<void>;
     getAllCandidateByHiring(hiring: string, hiringStep: string, limit: number, skip: number): Promise<ICandidateModel[]>
     changeMessageStatus(_id: string, candidate: ICandidateModel, session: ClientSession): Promise<void>;
     changeCurrentStepStatus(_id: string, status: boolean, session: ClientSession): Promise<ICandidateModel>;
