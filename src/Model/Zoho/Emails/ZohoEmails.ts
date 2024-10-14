@@ -16,7 +16,8 @@ const ZohoEmailsSchema = new Schema<IZohoEmailModel>({
     clientSecret: NotRequiredString,
     accessToken: NotRequiredString,
     expiredIn: NotRequiredNumber,
-    domain: RequiredString
+    domain: RequiredString,
+    isAdminAccount : {type:Boolean, required:false, default:false}
 })
 
 const ZohoEmailsModel = model(SchemaTypesReference.BrandEmail, ZohoEmailsSchema);

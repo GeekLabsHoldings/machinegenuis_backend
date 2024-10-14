@@ -21,9 +21,26 @@ export default class EmailsZohoModelService implements IEmailsZohoModelService {
         return result;
     }
 
-    async updateAccessToken(_id: string, accessToken: string, expiredIn: number): Promise<IZohoEmailModel | null> {
-        const result = await ZohoEmailsModel.findByIdAndUpdate(_id, { accessToken, expiredIn }, { new: true });
+    async getEmailAccounts() {
+        const result = await ZohoEmailsModel.find({});
         return result;
+    }
+
+    async getEmailAccountByIDorEmail(acc_id:string|null|undefined , email:string): Promise<IZohoEmailModel | null> {
+        const query = (acc_id) ? { _id:acc_id } : {accountEmail: email }
+        const result = await ZohoEmailsModel.findOne(query);
+        return result;
+    }
+
+
+    async updateAccessToken(_id: string, accessToken: string, refreshToken: string, expiredIn: number,  clientId?:string, clientSecret?:string, ): Promise<IZohoEmailModel | null> {
+        const result = await ZohoEmailsModel.findByIdAndUpdate(_id, { accessToken, refreshToken, clientId, clientSecret,  expiredIn }, { new: true });
+        return result;
+    }
+
+    async getMainAccount (): Promise<IZohoEmailModel | null> {
+        const mainAccount = await ZohoEmailsModel.findOne({isAdminAccount:true})
+        return mainAccount
     }
 
 }

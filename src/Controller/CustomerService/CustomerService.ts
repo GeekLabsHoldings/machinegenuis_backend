@@ -27,7 +27,7 @@ export default class CustomerServiceController implements ICustomerServiceContro
             console.log("Enter Here");
             const accessToken = await zohoEmailService.generateAccessToken(refreshToken);
             const expire = new Date().valueOf() + 3600000;
-            await emailsZohoModelService.updateAccessToken((_id.toString()), accessToken, expire);
+            await emailsZohoModelService.updateAccessToken((_id.toString()), accessToken,"", expire);
         }
         else {
             console.log("Set Access Token");

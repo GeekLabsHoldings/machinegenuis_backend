@@ -352,7 +352,7 @@ export const registerDomain = async (req: Request, res: Response) => {
       Email: req.body.Email,
     };
 
-    const result = await brandService.registerDomain(req.body.domainName, req.body.DurationInYears, brand, contactDetail);
+    const result = await brandService.registerDomain(req.body.domainName, req.body.DurationInYears, brand, contactDetail, req.body.AutoRenew);
     res.json(result);
   } catch (error) {
     console.log(error);

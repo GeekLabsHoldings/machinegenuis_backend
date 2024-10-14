@@ -14,6 +14,8 @@ import crypto, { Encoding } from "crypto";
 import Route53DomainChecker, { ContactDetail } from "../AWS/Rout53/domains";
 import { log } from "console";
 import AwsDomainActivation from "../AWS/Rout53/domain_activation";
+import domainModel from "../../Model/Operations/domains/domian.model";
+import ACMCLIENT from "../AWS/ACMClient/ACM";
 
 // import { Request, Response } from 'express';
 
@@ -301,21 +303,21 @@ export async function registerDomain(
   domainName: string,
   DurationInYears: number,
   brand:string,
-  contactDetails: ContactDetail
+  contactDetails: ContactDetail,
+  AutoRenew?:boolean
 ) {
   const checker = new Route53DomainChecker();
   
   const result = await checker.registerDomain(
     domainName,
     DurationInYears,
-    contactDetails
+    contactDetails,
+    AutoRenew
   );
-  await BrandsModel.updateOne(
-    { _id: brand },               // Filter: Find the brand by its ID
-    { $set: { domain: domainName }} // Update: Set the domain name
-  );
-  console.log(`Is domain result is ${result}`);
-
+  
+  const newdomain = new domainModel({domainName:domainName, brand:brand, contactEmail:contactDetails.Email, autoRenew:AutoRenew})
+  const domain = await newdomain.save()
+  console.log(`Is domain result is ${result}, for domain ${domain}`);
   return result;
 }
 
@@ -333,7 +335,7 @@ export async function verificationDomain(domainName:string) {
 export async function activateDomain(domainName:string, brand:string){
   try {
     const domainManager = new AwsDomainActivation();
-
+    const acm = new ACMCLIENT();
 
   // Step 1: Create Hosted Zone
   const HostedZoneId = await domainManager.createHostedZone(domainName);
@@ -346,16 +348,20 @@ if (HostedZoneId) {
   }
 
   // Step 3: Request SSL
-  const CertificateArn = await domainManager.requestCertificate(domainName);
+  const CertificateArn = await acm.requestCertificate(domainName);
 
   if (CertificateArn) {
     // Step 4: Get DNS CName Name CName value
-    const cnameRecord = await domainManager.getDnsValidationRecords(CertificateArn);
+    const cnameRecord = await acm.getDnsValidationRecords(CertificateArn);
 
     if (cnameRecord) {
       // Step 5: Add CNAME for SSL validation
       await domainManager.addHostedZoneRecord(domainName, cnameRecord, HostedZoneId, 'CNAME');
     }
+
+    const query = { $or: [{ brand: brand }, { domainName: domainName }] };
+    const update = { $set: { certificateID: CertificateArn, hostedZoneID:HostedZoneId } };
+    await domainModel.updateOne(query,update,{ new: true })
   }
 }
   } catch (error) {

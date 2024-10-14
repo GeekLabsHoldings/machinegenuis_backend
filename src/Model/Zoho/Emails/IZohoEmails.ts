@@ -14,4 +14,5 @@ export default interface IZohoEmailModel {
     accessToken: string;
     expiredIn: number;
     department: Array<string>;
+    isAdminAccount?: Boolean
 }
