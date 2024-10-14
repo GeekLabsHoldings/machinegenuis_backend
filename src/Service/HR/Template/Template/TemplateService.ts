@@ -9,14 +9,8 @@ class TemplateService implements ITemplateService {
         const result = await newTemplate.save();
         return result;
     }
-    async getTemplatesByRoleLevelStep(role: string, level: string, step: string): Promise<ITemplateModel[]> {
+    async getTemplatesByStepAndOptionalRoleLevel(step: string, role?: string, level?: string): Promise<ITemplateModel> {
         const pipeline: PipelineStage[] = [
-            {
-                $match: {
-                    role: { $eq: role },
-                    level: { $eq: level }
-                }
-            },
             {
                 $lookup: {
                     from: 'groups',
@@ -33,7 +27,9 @@ class TemplateService implements ITemplateService {
             },
             {
                 $match: {
-                    'group.step': { $eq: step }
+                    'group.step': step,
+                    ...(role ? { role: { $eq: role } } : {}),
+                    ...(level ? { level: { $eq: level } } : {})
                 }
             },
             {
@@ -44,10 +40,12 @@ class TemplateService implements ITemplateService {
                     role: 1
                 }
             }
-        ]
+        ];
+
         const result = await templateModel.aggregate(pipeline);
         return result[0];
     }
+
 
     async getTemplateById(_id: string): Promise<ITemplateModel | null> {
         const result = await templateModel.findById(_id).populate({
@@ -81,39 +79,6 @@ class TemplateService implements ITemplateService {
         return result;
     }
 
-    async getTemplateByStep(step: string): Promise<ITemplateModel[]> {
-        const pipeline: PipelineStage[] = [
-            {
-                $lookup: {
-                    from: 'groups',
-                    localField: 'group_id',
-                    foreignField: '_id',
-                    as: 'group'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$group',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $match: {
-                    'group.step': { $eq: step }
-                }
-            },
-            {
-                $project: {
-                    title: 1,
-                    level: 1,
-                    details: 1,
-                    role: 1
-                }
-            }
-        ]
-        const result = await templateModel.aggregate(pipeline);
-        return result;
-    }
 }
 
 const templateService = new TemplateService()

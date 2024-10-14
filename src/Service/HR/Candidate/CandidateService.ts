@@ -4,11 +4,15 @@ import ICandidateService from "./ICandidateService";
 import candidateModel from "../../../Model/HR/Candidate/CandidateModel";
 
 class CandidateService implements ICandidateService {
-    async getAllCandidateByHiring(hiring: string, hiringStep: string, limit: number, skip: number): Promise<ICandidateModel[]> {
-        const result = await candidateModel.find({ hiring, currentStep: hiringStep })
+    async createCandidate(candidate: ICandidateModel[]): Promise<void> {
+        await candidateModel.create(candidate);
+    }
+    async getAllCandidateByHiring(hiring: string, hiringStep: string, limit: number | null, skip: number | null): Promise<ICandidateModel[]> {
+        const query = candidateModel.find({ hiring, currentStep: hiringStep })
             .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit);
+        if (limit) query.limit(limit);
+        if (skip) query.skip(skip);
+        const result = await query.exec();
         return result;
     }
     async getCandidate(_id: string, session?: ClientSession): Promise<ICandidateModel | null> {

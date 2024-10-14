@@ -8,6 +8,10 @@ import { HiringSteps, HiringStepsEnum } from "../../../Utils/GroupsAndTemplates"
 import { StatusEnum } from "../../../Utils/Hiring";
 import ICandidateQuestionsModel from "../../../Model/HR/Candidate/ICandidateQuestionsModel";
 import candidateQuestionsService from "../../../Service/HR/CandidateQuestion/CandidateQuestionService";
+import LinkedinAccountService from "../../../Service/HR/LinkedinAccounts/LinkedinAccountService";
+import hiringService from "../../../Service/HR/Hiring/HiringService";
+import moment from "../../../Utils/DateAndTime/index";
+import axios from "axios";
 
 export default class CandidateController implements ICandidateController {
 
@@ -92,5 +96,55 @@ export default class CandidateController implements ICandidateController {
 
     async getAllCandidate(role: string | null, limit: number, skip: number): Promise<ICandidateModel[]> {
         return await candidateService.getAll(role, limit, skip);
+    }
+
+    async getCandidateFromLinkedin(): Promise<void> {
+        const linkedinAccountsService = new LinkedinAccountService();
+        const busyAccounts = await linkedinAccountsService.getBusyAccounts();
+        if (busyAccounts.length === 0)
+            return;
+        const setupAxios = axios.create({
+            baseURL: 'https://linkedin-scrape.machinegenius.io',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            timeout: (60 * 60 * 1000)
+        })
+        busyAccounts.forEach(async (account) => {
+            const getHiring = hiringService.getHiringByLinkedinAccount((account._id).toString());
+
+            const result = setupAxios.get(`/linkedin/candidate/${account._id}`);
+            const [hiring, candidate] = await Promise.all([getHiring, result]);
+            if (!candidate || !hiring)
+                return;
+            const candidateData: ICandidateModel[] = candidate.data.map((item: { url: string, name: string, profileLink: string, email: string, phone: string, cvPath: string }) => {
+                return {
+                    firstName: item.name.split(' ')[0],
+                    lastName: item.name.split(' ')[1],
+                    email: item.email,
+                    phoneNumber: item.phone,
+                    linkedIn: item.profileLink,
+                    cvLink: item.cvPath,
+                    role: hiring.role,
+                    currentStep: HiringStepsEnum.Get_Job_Candidates,
+                    hiring: hiring._id,
+                    stepsStatus: [{
+                        step: HiringStepsEnum.Get_Job_Candidates,
+                        status: StatusEnum.APPROVED
+                    }],
+                    messageStatus: [{
+                        step: HiringStepsEnum.Get_Job_Candidates,
+                        status: StatusEnum.APPROVED
+                    }],
+                    portfolio: "",
+                    department: hiring.department,
+                    appliedFrom: "Linkedin",
+                    createdAt: moment().valueOf(),
+                    recommendation: null
+                }
+            });
+            await candidateService.createCandidate(candidateData);
+        });
     }
 }

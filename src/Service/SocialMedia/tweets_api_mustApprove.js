@@ -4,7 +4,7 @@ import { OAuth } from "oauth";
 export const getTweets = async (account_id, BEARER_TOKEN) => {
   try {
     const response = await axios.get(
-      `https://api.twitter.com/2/users/${account_id}/tweets?max_results=100&exclude=replies,retweets`,
+      `https://api.twitter.com/2/users/${account_id}/tweets?max_results=50&exclude=replies,retweets`,
       {
         params: {
           "tweet.fields": "created_at,public_metrics,attachments",

@@ -48,7 +48,11 @@ export const getAllTweetsMustApprove = async () => {
     .find({
       campaignType: campaignListEnum.MUST_APPROVE,
     })
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .populate({
+      path: "accountId",
+      select: "profile_image_url",
+    });
   return twitters;
 };
 export const getTweetById = async (_id) => {
@@ -59,7 +63,7 @@ export const deleteTweet = async (_id) => {
   await socialCommentModel.deleteOne({ _id });
 };
 export const getAllAccounts = async () => {
-  const accounts = await socialAccountModel.find({});
+  const accounts = await socialAccountModel.find({}).sort({ createdAt: -1 });
   return accounts;
 };
 

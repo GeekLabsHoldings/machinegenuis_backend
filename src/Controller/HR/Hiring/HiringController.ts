@@ -2,14 +2,14 @@ import IHiringModel from "../../../Model/HR/Hiring/IHiringModel";
 import hiringService from "../../../Service/HR/Hiring/HiringService";
 import { ErrorMessages } from "../../../Utils/Error/ErrorsEnum";
 import systemError from "../../../Utils/Error/SystemError";
-import IHiringController, { IQuestionTemplate } from "./IHiringController";
+import IHiringController, { IQuestionTemplate, IStepsOfHiring } from "./IHiringController";
 import SuccessMessage from "../../../Utils/SuccessMessages";
 import templateService from "../../../Service/HR/Template/Template/TemplateService";
 import { HiringStatusLevelEnum } from "../../../Utils/Hiring";
-import { ITemplateModel } from "../../../Model/HR/Templates/ITemplateModel";
 import { HiringSteps, HiringStepsEnum } from "../../../Utils/GroupsAndTemplates";
 import { ClientSession } from "mongoose";
 import axios from "axios";
+import candidateService from "../../../Service/HR/Candidate/CandidateService";
 
 class HiringController implements IHiringController {
     async createHiring(hiring: IHiringModel): Promise<IHiringModel> {
@@ -53,22 +53,24 @@ class HiringController implements IHiringController {
     }
 
 
-    async getCurrentStepTemplate(_id: string): Promise<ITemplateModel[]> {
+    async getCurrentStepTemplate(_id: string): Promise<IStepsOfHiring> {
         const hiring = await hiringService.getOneHiring(_id)
         if (!hiring)
             return systemError.setStatus(404).setMessage(ErrorMessages.HIRING_NOT_FOUND).throw();
         const { currentStep, level, role } = hiring
-        if (currentStep === HiringStepsEnum.Interview_Call_Question || currentStep === HiringStepsEnum.Job_Listings) {
-            const template = await templateService.getTemplatesByRoleLevelStep(role, level, currentStep);
-            if (!template)
-                return systemError.setStatus(404).setMessage(ErrorMessages.TEMPLATE_NOT_FOUND).throw();
-            return template;
-        }
+        const query = [HiringStepsEnum.Interview_Call_Question, HiringStepsEnum.Tasks, HiringStepsEnum.Job_Listings].includes(currentStep as HiringStepsEnum);
 
-        const result = await templateService.getTemplateByStep(currentStep);
-        if (!result)
-            return systemError.setStatus(404).setMessage(ErrorMessages.TEMPLATE_NOT_FOUND).throw();
-        return result;
+        const template = await templateService.getTemplatesByStepAndOptionalRoleLevel(currentStep, (query ? role : undefined), (query ? level : undefined));
+        const candidate = await candidateService.getAllCandidateByHiring(_id, currentStep, null, null);
+        return {
+            _id,
+            step: currentStep,
+            level,
+            role,
+            template,
+            candidates: candidate
+        };
+
     }
 
     async publishJob(hiringId: string, role: string, contract: string, template: string, skills: Array<string>, questions: Array<IQuestionTemplate>, session: ClientSession): Promise<string> {
@@ -82,7 +84,16 @@ class HiringController implements IHiringController {
 
             }
         };
-        const result = await axios.post('http://44.201.202.233/linkedin/post-job', data, { headers: { 'Content-Type': 'application/json' } });
+        console.log("data", data);
+        const apis = axios.create({
+            baseURL: 'https://linkedin-scrape.machinegenius.io',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            timeout: (60 * 60 * 1000)
+        });
+        const result = await apis.post('/linkedin/post-job', data);
+        console.log("===================>", result.data);
         const _id = result.data;
         await hiringService.addHiringLinkedinAccount(hiringId, _id, session);
         return "Job Published Successfully";
