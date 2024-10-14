@@ -292,5 +292,6 @@ module.exports =
 {
     splitAndConvert,
     regenrateAudio,
-    testAudio
+    testAudio,
+    convertTextToAudio
 }
