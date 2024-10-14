@@ -6,7 +6,7 @@ import systemError from "../../Utils/Error/SystemError";
 import { PlatformEnum } from "../../Utils/SocialMedia/Platform";
 import redditQueueAddJob from "../../Utils/CronJobs/RedisQueue/reddit.social";
 import axios from "axios";
-import { getAccount } from "../../Service/Operations/BrandCreation.service";
+import { getAccount, getBrands } from "../../Service/Operations/BrandCreation.service";
 
 const cron = require("node-cron");
 
@@ -73,9 +73,13 @@ export async function get_subreddits_brand(req, res) {
 
 export const BrandRedditSubs = async (req, res) => {
   try {
-    const subs = await RedditServices.GetSubCount(req.params.id);
-    console.log(subs);
-    res.json({ subscribers: subs });
+    const brands = await getBrands(0, 99999999999999)
+    const output = []
+    for(const brand of brands){
+      const subs = await RedditServices.GetSubCount(brand._id);
+      output.push({id:brand._id, name:brand.name, description:brand.description, date:brand.aquisition_date, niche:brand.niche, subscribers:subs, engagement:96})
+    }
+    res.json(output);
   } catch (error) {
     return systemError.sendError(res, error);
   }
@@ -104,7 +108,7 @@ export const CampaignBroadcast = async (req, res) => {
     }
 
 
-    redditQueueAddJob({groups, delay, title, text, url}, starttime);
+    await redditQueueAddJob({groups, delay, title, text, url}, starttime);
 
 
     res.json({ message: "done" });
@@ -133,6 +137,36 @@ export const CampaignByBrand = async (req,res) => {
     }
 
 
+    await redditQueueAddJob({groups, delay, title, text, url}, starttime);
+    
+    res.json({ message: "done" });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+
+export const CampaignByBrandPersonal = async (req,res) => {
+  try {
+
+    let { title, text, url, delay, starttime } = req.body;
+    const groups = await RedditServices.getSubredditsByBrand(req.params.id, true);
+    delay = Math.max(delay, 10000);
+    starttime = starttime - Date.now();
+    if (starttime<=0)
+      starttime = 1000
+
+    const imgurUrlPattern =
+    /^https:\/\/imgur\.com(\/[a-zA-Z0-9-_\/]*)?(#\/[a-zA-Z0-9-_\/]*)?$/;
+
+    if (url && !imgurUrlPattern.test(url)) {
+      return res.status(400).json({
+        message: "Invalid Imgur URL  make sure no file extension at the end",
+      });
+    }
+
+
     redditQueueAddJob({groups, delay, title, text, url}, starttime);
     
     res.json({ message: "done" });
@@ -140,6 +174,10 @@ export const CampaignByBrand = async (req,res) => {
     console.log(error);
   }
 };
+
+
+
+
 
 export const DeletePost = async (req, ) => {
   try {

@@ -18,7 +18,7 @@ const snoowrap = require('snoowrap');
 const jwt = require('jsonwebtoken');
 
 
-const userAgent = 'app:v1.0.0 (by a nerdy person)'
+const userAgent = 'geek_app:node:v1.2.11 (by a geek)'
 
 
 // export const submitRedditPost = async ({token, title, text, subreddit}) => {
@@ -190,9 +190,9 @@ try {
 
 
 
-export const getSubredditsByBrand = async (brandName)=>{
+export const getSubredditsByBrand = async (brandName, personal=false)=>{
 try {
-  const groups = await SocialMediaGroups.find({ brand: brandName, platform:"REDDIT" });
+  const groups = await SocialMediaGroups.find({ brand: brandName, personal:personal, platform:"REDDIT" });
   return groups
 } catch (error) {
   console.error('Error fetching telegram channels:', error);
@@ -244,11 +244,8 @@ brand
   try {
     const channels = await SocialMediaGroups.find({brand:brand, platform:"REDDIT"})
 
-    let sum=0
-    console.log(channels, brand)
-    channels.forEach(channel=>{
-      sum+=channel.subscribers})
-  
+    const sum = channels.reduce((total, channel) => total + Number(channel.subscribers), 0);
+    
     return sum;
   } catch (error) {
     console.log(error)

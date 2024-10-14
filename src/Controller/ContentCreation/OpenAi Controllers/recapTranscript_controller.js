@@ -6,7 +6,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const recapContent = async (myContent) => {
     try {
-        const prompt = `rewrite this content in good way:-${myContent} `;
+        const prompt = `rewrite this as movie recape :-${myContent} `;
         const completion = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: [

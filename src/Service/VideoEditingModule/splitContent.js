@@ -3,6 +3,7 @@ const S3Uploader = require('./uploadToS3')
 const getImgs = require('./getImages');
 import wordsModel from '../../Model/VideoEditing/replacementWords_model';
 import { addWordAndReplace_srev } from '../../Service/VideoEditingModule/replaceWords';
+const axios = require('axios');
 
 require("dotenv").config();
 
@@ -96,7 +97,7 @@ const generateSlideJson = async (intro) => {
   try {
     const prompt = `Could you please split this content into 4 paragraphs, and give me JUST ONE KEYWORD for each paragraph. ONLY ONE KEYWORD !!!
     Focus on person names (President, Head of Government, etc.) and mention any countries or governments when relevant.
-    also give me main title in one or two words maximum for each splited paragraph
+    also give me three most important words as TITLE for each splited paragraph
     Here is the content:
     ${intro}
 
@@ -105,12 +106,12 @@ const generateSlideJson = async (intro) => {
       "paragraphs": [
         {
           "text": "Sample paragraph text...",
-          "title": "Policy"
+          "title": "Policy in canda"
           "keywords": ["Keyword"]
         },
         {
           "text": "Another paragraph text...",
-          "title": "Others"
+          "title": "people in ..."
           "keywords": ["AnotherKeyword"]
         }
       ]
@@ -166,31 +167,71 @@ const generateSlideJson = async (intro) => {
 };
 
 const convertTextToAudio = async (text, index) => {
+  const apiKey = process.env.ELEVENLABS_API_KEY;
+  const voiceId = 'Xbs7Hxi9YicGxdbtUTdv';
+  console.log("USING ELEVENLABS");
+  
   try {
-    const response = await openai.audio.speech.create({
-      model: "tts-1",
-      voice: "alloy",
-      input: text,
-    });
+    const response = await axios.post(
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+      {
+        text: text,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'xi-api-key': apiKey,
+        },
+        responseType: 'arraybuffer', 
+      }
+    );
 
-    const audioStream = response.body;
-    return await S3Uploader.uploadToS3(audioStream, index);
+    const audioBuffer = response.data;
+    return await S3Uploader.uploadToS3(audioBuffer, index);
   } catch (error) {
-    console.error("Error converting text to audio:", error);
+    console.error('Error converting text to audio:', error);
     throw error;
   }
 };
 
-const reConvertTextToAudio = async (text, index) => {
-  try {
-    const response = await openai.audio.speech.create({
-      model: "tts-1",
-      voice: "alloy",
-      input: text,
-    });
+// const convertTextToAudio = async (text, index) => {
+//   try {
+//     const response = await openai.audio.speech.create({
+//       model: "tts-1",
+//       voice: "alloy",
+//       input: text,
+//     });
 
-    const audioStream = response.body;
-    return await S3Uploader.overWriteToS3(audioStream, index);
+//     const audioStream = response.body;
+//     return await S3Uploader.uploadToS3(audioStream, index);
+//   } catch (error) {
+//     console.error("Error converting text to audio:", error);
+//     throw error;
+//   }
+// };
+
+const reConvertTextToAudio = async (text, index) => {
+  const apiKey = process.env.ELEVENLABS_API_KEY;
+  const voiceId = 'Xbs7Hxi9YicGxdbtUTdv';
+  console.log("USING ELEVENLABS");
+  
+  try {
+    const response = await axios.post(
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+      {
+        text: text,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'xi-api-key': apiKey,
+        },
+        responseType: 'arraybuffer', 
+      }
+    );
+
+    const audioBuffer = response.data;
+    return await S3Uploader.overWriteToS3(audioBuffer, index);
   } catch (error) {
     console.error("Error converting text to audio:", error);
     throw error;

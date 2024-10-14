@@ -1,11 +1,10 @@
 import { platform } from "os";
-import { socialMediaModel } from "../../Model/SocialMedia/SocialMedia.model";
-import twitterModel from "../../Model/SocialMedia/TwitterData.model";
+import { socialMediaModel } from "../../Model/SocialMedia/SocialMediaPosts.models";
 import socialAccountModel from "../../Model/SocialMedia/SocialMediaAccount.model";
-
+import { group } from "console";
 export const createSocialAccountAddPost = async (
   platform,
-  brand,
+  brandId,
   content,
   userId,
   postId
@@ -13,10 +12,11 @@ export const createSocialAccountAddPost = async (
   try {
     const createPost = await socialMediaModel.create({
       platform,
-      brand,
+      brandId,
       content,
       employeeId: userId,
       postId,
+      group_id:`${Date.now()}_${platform}_POST`,
     });
     return createPost;
   } catch (error) {
@@ -34,7 +34,9 @@ export const createSocialAccount = async (
   employeeId,
   delayBetweenPosts,
   delayBetweenGroups,
-  longPauseAfterCount
+  longPauseAfterCount,
+  niche,
+  profile_image_url
 ) => {
   const socialAccount = await socialAccountModel.create({
     sharingList,
@@ -47,7 +49,9 @@ export const createSocialAccount = async (
     employeeId,
     delayBetweenPosts,
     delayBetweenGroups,
-    longPauseAfterCount
+    longPauseAfterCount,
+    niche,
+    profile_image_url
   });
   return socialAccount;
 };

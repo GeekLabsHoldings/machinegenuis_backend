@@ -1,13 +1,9 @@
-import { Schema, model } from "mongoose";
-
-import { hash } from "bcrypt";
 import { Schema, model, Types } from "mongoose";
-import { platform, type } from "os";
 import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
+import { PlatformArr, PlatformEnum } from "../../Utils/SocialMedia/Platform";
 import { EnumStringRequired } from "../../Utils/Schemas";
-import { PlatformArr } from "../../Utils/SocialMedia/Platform";
-import { brandArr } from "../../Utils/SocialMedia/Brand";
-import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
+import { socialMediaSchema } from "./SocialMedia.model";
+
 // models/Group.js
 const mongoose = require("mongoose");
 
@@ -18,26 +14,38 @@ const SocialMediaPostsSchema = new mongoose.Schema({
     required: false,
     trim: true,
   },
+  content: {
+    type: String,
+    required: false,
+    trim: true,
+  },
 
-  group_name: {type: String, required: false},
-
-  group_id:  { type:  String, ref: SchemaTypesReference.SocialMediaGroups }
-  ,
-  timestamp: {
+  engagment: {
     type: Number,
-    required: true,
+    required: false,
+    trim: true,
     default: 0,
   },
+  
+  group_id:  { type:  String, unique: false, required:false, default:0}
+  ,
+
+  timestamp: {
+    type: Number,
+    required: false,
+    default: Date.now(),
+  },
+
   platform: EnumStringRequired(PlatformArr),
 
+  
   brand: {
     type: String,
-    required: true,
+    required: false,
     trim:true
   },
 });
-
 // Create the model
 const SocialMediaPosts = mongoose.model(SchemaTypesReference.SocialMediaPosts, SocialMediaPostsSchema);
-
+export const socialMediaModel = SocialMediaPosts.discriminator('twitter_posts', socialMediaSchema);
 export default SocialMediaPosts;

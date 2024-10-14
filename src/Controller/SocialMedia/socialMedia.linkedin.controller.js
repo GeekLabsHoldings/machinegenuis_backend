@@ -7,10 +7,33 @@ import { createSocialAccountAddPost } from "../../Service/SocialMedia/socialMedi
 import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
 import systemError from "../../Utils/Error/SystemError";
 import { PlatformEnum } from "../../Utils/SocialMedia/Platform";
+import {
+  checkBrand,
+  getAccount,
+} from "../../Service/Operations/BrandCreation.service";
+import { LinkedInQueueAdd } from "../../Utils/CronJobs/linkedInQueue/linkedIn.Queue";
 export const getDataLinkedin = async (req, res) => {
   try {
-    // Call registerUpload and get the asset + uploadUrl
-    const { asset, uploadUrl } = await registerUpload();
+    const { brand } = req.params;
+    if (!brand) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.DATA_IS_REQUIRED)
+        .throw();
+    }
+    const brands = await checkBrand(brand);
+    if (!brands) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.BRAND_NOT_FOUND)
+        .throw();
+    }
+    const LinkedInAccount = await getAccount(brand, PlatformEnum.LINKEDIN);
+    console.log("LinkedTest", LinkedInAccount);
+    const { asset, uploadUrl } = await registerUpload(
+      LinkedInAccount.account.owner,
+      LinkedInAccount.account.token
+    );
 
     if (!asset || !uploadUrl) {
       return systemError
@@ -25,52 +48,41 @@ export const getDataLinkedin = async (req, res) => {
       data: {
         asset,
         uploadUrl,
-        linkedIn_Access_Token: process.env.LINKEDIN_ACCESS_TOKEN,
+        LinkedIn_Token: LinkedInAccount.account.token,
       },
     });
   } catch (error) {
-    // Handle errors and respond with error message
-    return res.status(400).json({
-      success: false,
-      message: `Failed to register upload: ${error.message}`,
-    });
+    return systemError.sendError(res, error);
   }
 };
-
 export const addPostSocialMediaLinkedin = async (req, res) => {
-  const { brand, content, asset } = req.body;
+  const { content, asset ,startTime} = req.body;
+  const { brandId } = req.params;
   const userId = req.body.currentUser._id;
-  if (!brand) {
+  if (!brandId) {
     return systemError
       .setStatus(400)
       .setMessage(ErrorMessages.DATA_IS_REQUIRED)
       .throw();
   }
   try {
-    const response = await postToLinkedIn(content, asset);
-    if (!response || !response.id) {
+    const brands = await checkBrand(brandId);
+    if (!brands) {
       return systemError
         .setStatus(400)
-        .setMessage(ErrorMessages.INVALID_LINKEDIN_API)
+        .setMessage(ErrorMessages.BRAND_NOT_FOUND)
         .throw();
     }
-    const postId = response.id;
-    const createPost = await createSocialAccountAddPost(
-      PlatformEnum.LINKEDIN,
-      brand,
-      content,
-      userId,
-      postId
-    );
-    if (!createPost) {
+    const LinkedInAccount = await getAccount(brandId, PlatformEnum.LINKEDIN);
+    if(!LinkedInAccount){
       return systemError
-        .setStatus(400)
-        .setMessage(ErrorMessages.CAN_NOT_CREATE_LINKEDIN_ACCOUNT)
-        .throw();
+      .setStatus(400)
+      .setMessage(ErrorMessages.ACCOUNT_NOT_FOUND)
+      .throw();
     }
+    await LinkedInQueueAdd(content, asset, brandId, userId,startTime);
     return res.status(200).json({
-      result: createPost,
-      linkedinPost: response,
+      message:"Success"
     });
   } catch (error) {
     const errorMessage =

@@ -2,12 +2,14 @@ import { Router } from "express";
 import * as facebookController from "../../Controller/SocialMedia/socialMedia.facebook.controller";
 const facebookRouter = Router();
 facebookRouter.get("/get-url/", facebookController.getPreSignedURL);
+facebookRouter.get("/get-subs/", facebookController.BrandSubs);
+facebookRouter.post("/update-token", facebookController.updateTokenFacebook);
 facebookRouter.post(
-  "/add-post/text",
+  "/add-post/text/:brandId",
   facebookController.addPostSocialMediaFacebookText
 );
 facebookRouter.post(
-    "/add-post/photos",
+    "/add-post/photos/:brandId",
     facebookController.addPostSocialMediaFacebookPhoto
   );
 

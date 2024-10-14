@@ -2,8 +2,9 @@ import promptsModel from "../../Model/ContentCreation/Prompts/prompts_model";
 import { socialMediaModel } from "../../Model/SocialMedia/SocialMedia.model";
 import socialAccountModel from "../../Model/SocialMedia/SocialMediaAccount.model";
 import socialCommentModel from "../../Model/SocialMedia/Twitter.SocialMedia.tweets.model";
-import twitterModel from "../../Model/SocialMedia/TwitterData.model";
 import { campaignListEnum } from "../../Utils/SocialMedia/campaign";
+const OAuth = require('oauth-1.0a');
+const crypto = require('crypto');
 
 export const createAccountTwitter = async (
   platform,
@@ -27,12 +28,7 @@ export const createAccountTwitter = async (
     console.log("=============", { error });
   }
 };
-export const createTwitterAccountSecret = async (brand, token) => {
-  await twitterModel.create({
-    brand,
-    token,
-  });
-};
+
 export const existAccount = async (accountName) => {
   const Exist = await socialAccountModel.findOne({
     accountName,
@@ -52,7 +48,11 @@ export const getAllTweetsMustApprove = async () => {
     .find({
       campaignType: campaignListEnum.MUST_APPROVE,
     })
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .populate({
+      path: "accountId",
+      select: "profile_image_url",
+    });
   return twitters;
 };
 export const getTweetById = async (_id) => {
@@ -62,3 +62,60 @@ export const getTweetById = async (_id) => {
 export const deleteTweet = async (_id) => {
   await socialCommentModel.deleteOne({ _id });
 };
+export const getAllAccounts = async () => {
+  const accounts = await socialAccountModel.find({});
+  return accounts;
+};
+
+
+export const uploadImageService = async (twitterData, image) => {
+  try {
+    const { ConsumerKey, ConsumerSecret, AccessToken, TokenSecret } = twitterData.account;
+    //const fileBuffer =  Buffer.from(image, 'base64');;
+    // Create OAuth object and prepare request
+    const oauth = new OAuth({
+      consumer: { key: ConsumerKey, secret: ConsumerSecret },
+      signature_method: "HMAC-SHA1",
+      hash_function(baseString, key) {
+        return crypto
+          .createHmac("sha1", key)
+          .update(baseString)
+          .digest("base64");
+      },
+    });
+    const requestData = {
+      url: "https://upload.twitter.com/1.1/media/upload.json",
+      method: "POST",
+      data: {
+        media: image,
+      },
+    };
+    const headers = oauth.toHeader(
+      oauth.authorize(requestData, { key: AccessToken, secret: TokenSecret })
+    );
+    console.log("OAuth headers generated");
+    const body = new URLSearchParams();
+    body.append("media", requestData.data.media);
+    console.log("Sending request to Twitter API");
+    // Make request to Twitter API
+    const response = await fetch(requestData.url, {
+      method: requestData.method,
+      headers: {
+        ...headers,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: body.toString(),
+    });
+    console.log("Response received from Twitter API. Status:", response.status);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Twitter upload failed:", errorText);
+      return  errorText 
+    }
+    const twitterResponse = await response.json();
+    console.log("Twitter upload successful:", JSON.stringify(twitterResponse));
+    return twitterResponse
+  } catch (error) {
+    console.log(error)
+  }
+}

@@ -23,28 +23,20 @@ export const TwitterSocialMediaAddPost = async ({
 
   try {
     const tweet = await client.v2.tweet({
-      text: content,
+      text: content || "",
       media: mediaId
         ? {
             media_ids: [mediaId],
           }
         : undefined,
     });
-    if (tweet.status && tweet.status === 403) {
-      return systemError
-        .setStatus(403)
-        .getMessage(ErrorMessages.TWEET_IS_ALREADY_EXIST);
-    }
-    return {
-      message: "Tweet posted successfully",
-      tweet,
-    };
+    return { tweet, success: 200, message: "Tweet posted successfully" };
   } catch (error) {
-    console.error("Error posting tweet:", error);
+    return error;
   }
 };
 export const getUserByUsername = async (userName, BearerToken) => {
-  const url = `https://api.twitter.com/2/users/by/username/${userName}`;
+  const url = `https://api.twitter.com/2/users/by/username/${userName}?user.fields=profile_image_url`;
 
   try {
     const response = await axios.get(url, {
@@ -73,31 +65,6 @@ export const getUserByUsername = async (userName, BearerToken) => {
       error.response ? error.response.data : error.message
     );
     throw error;
-  }
-};
-export const getTweets = async (account_id, BEARER_TOKEN) => {
-  try {
-    const response = await axios.get(
-      `https://api.twitter.com/2/users/${account_id}/tweets`,
-      {
-        params: {
-          "tweet.fields": "created_at,public_metrics,attachments",
-          expansions: "attachments.media_keys",
-          "media.fields": "url",
-        },
-        headers: {
-          Authorization: `Bearer ${BEARER_TOKEN}`,
-        },
-      }
-    );
-
-    // Handle the response
-    return response;
-  } catch (error) {
-    console.error(
-      "Error fetching tweets:",
-      error.response?.data || error.message
-    );
   }
 };
 export const addReply = async (

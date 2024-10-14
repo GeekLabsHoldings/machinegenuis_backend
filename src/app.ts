@@ -17,6 +17,7 @@ import socialMediaRouter from "./Router/SocialMedia";
 import AdministrativeRouter from "./Router/Administrative";
 import AccountingRouter from "./Router/Accounting";
 import OperationRouter from "./Router/Operations";
+import CustomerServiceRouter from "./Router/CustomerService";
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Middleware for parsing request body
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -40,23 +41,18 @@ app.get("/test-delay", async (req, res) => {
   return res.json("Done it work");
 });
 
-app.use(`/${RouterEnum.socialMedia}`, socialMediaRouter);
-app.use(`/${RouterEnum.CEO}`, OperationRouter)
-
-
 app.use(`/${RouterEnum.authentication}`, AuthenticationRouter);
 app.use(`/${RouterEnum.unAuthorizer}`, unAuthorizerApis);
 app.use(`/${RouterEnum.calendly}`, CalendlyRouter);
 app.use(`/${RouterEnum.VideoEditing}`, video_editing_router);
 app.use(checkAuthority);
-
 app.use(`/${RouterEnum.ContentCreation}`, content_creation_router);
 app.use(`/${RouterEnum.hr}`, HR_Router);
 app.use(`/${RouterEnum.admin}`, AdminRouter);
 app.use(`/${RouterEnum.user}`, UserRouter);
 app.use(`/${RouterEnum.Administrative}`, AdministrativeRouter);
 app.use(`/${RouterEnum.Accounting}`, AccountingRouter);
-
-
-
+app.use(`/${RouterEnum.socialMedia}`, socialMediaRouter);
+app.use(`/${RouterEnum.CEO}`, OperationRouter);
+app.use(`/${RouterEnum.CustomerService}`, CustomerServiceRouter)
 export { app };

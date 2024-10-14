@@ -1,5 +1,6 @@
 require("dotenv").config();
 const axios = require('axios');
+const serviceEnhanceImg = require('../../Service/VideoEditingModule/enahnceImg');
 
 const handleSearchImg = async (searchImgKeyword) => {
   try {
@@ -12,47 +13,69 @@ const handleSearchImg = async (searchImgKeyword) => {
       }
     });
 
+
     const imageResults = response.data.images_results || [];
 
-    const filteredImageUrls = imageResults
-      .filter(image => image.original && image.original_width < 900 && image.original_width > 600 && image.original_height < 800 && image.original_height > 400) 
-      .map(image => image.original) 
-      .filter(url => !url.includes('fbsbx')
-      && !url.includes('www.consilium.europa.eu')
-      && !url.includes('www.politico.com')
-      && !url.includes('newsobserver')
-      && !url.includes("usnews")
-      && !url.includes("macleans")
-      && !url.includes("www.intel.com")); 
+    const regenerateImgs = async (imageResults) => {
+      const enhancedImages = [];
+      
+      for (let i = 0; i < imageResults.length; i++) {
+          const url = imageResults[i];
+          console.log("url.original----> " + url.original);
+          
+          try {
+              const enhanced = await serviceEnhanceImg.enhanceImg(url.original);
+              enhancedImages.push(enhanced);
+              console.log("enhancedImages--->" + enhancedImages);
+          } catch (error) {
+              console.error('Error enhancing image:', error.message);
+          }
+      }
+      return enhancedImages;
+      
+    };
 
+    const filteredImageUrls = imageResults.map(image => image.original) 
+
+      
+    // const enhancedImages = await regenerateImgs(imageResults.slice(0,10));
     return filteredImageUrls;
+    
   } catch (error) {
     console.error("Error getting image:", error);
     throw error;
   }
 };
 
-const getImg = async (req, res) => {
-  try {
-    const { searchImgKeyword } = req.body;
-    if (!searchImgKeyword) {
-      return res
-        .status(400)
-        .json({ success: false, error: "No image name provided" });
-    }
-    const images = await handleSearchImg(searchImgKeyword);
+const handleSearchImgNew = async (searchImgKeyword) => {
+  const clientId = '2EXTEjC2SflA_MDUCG1v9_XdTMzHTVvmx6FlEgOywNo';
+  const url = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(searchImgKeyword)}&per_page=20&client_id=${clientId}`;
 
-    return res.json({ success: true, images });
+  try {
+    const response = await axios.get(url);
+
+    if (response.status === 200 && response.data.results.length > 0) {
+      const imageUrls = response.data.results.map(image => image.urls.raw);
+      return imageUrls;
+    } else {
+      console.log("No images found for the search term.");
+      return [];
+    }
   } catch (error) {
-    console.error("Error in getImg:", error);
-    return res
-      .status(500)
-      .json({ success: false, error: "Something went wrong!" });
+    if (error.response) {
+      console.error(`Error fetching images from Unsplash: ${error.response.status} - ${error.response.data.errors}`);
+    } else if (error.request) {
+      console.error("No response received from Unsplash:", error.request);
+    } else {
+      console.error("Error in setting up the request:", error.message);
+    }
+    throw error;
   }
 };
 
+
 module.exports =
 {
-    getImg,
-    handleSearchImg
+    handleSearchImg,
+    handleSearchImgNew
 }

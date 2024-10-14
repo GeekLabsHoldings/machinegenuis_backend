@@ -1,11 +1,24 @@
 import S3_services from "../../Service/AWS/S3_Bucket/presinedURL";
-import { postPhotoToFacebook, textPhotoToFacebook } from "../../Service/SocialMedia/facebook.service";
+import {
+  addOrDeleteAccount,
+  checkBrand,
+  getAccount,
+} from "../../Service/Operations/BrandCreation.service";
+import {
+  getPageAccessToken,
+  postPhotoToFacebook,
+  textPhotoToFacebook,
+  GetSubCount,
+} from "../../Service/SocialMedia/facebook.service";
 import { submitRedditPost } from "../../Service/SocialMedia/reddit.Service";
 import { createSocialAccountAddPost } from "../../Service/SocialMedia/socialMedia.service";
+import { FacebookPhotoQueueAdd } from "../../Utils/CronJobs/FacebookQueue/facebookPhotoQueue";
+import { FacebookQueueAdd } from "../../Utils/CronJobs/FacebookQueue/facebookTextQueue";
 import { ErrorMessages } from "../../Utils/Error/ErrorsEnum";
 import systemError from "../../Utils/Error/SystemError";
 import { PlatformEnum } from "../../Utils/SocialMedia/Platform";
 import { error } from "console";
+import { getBrands } from "../../Service/Operations/BrandCreation.service";
 require("dotenv").config();
 
 export const getPreSignedURL = async (req, res) => {
@@ -32,96 +45,205 @@ export const getPreSignedURL = async (req, res) => {
     return res.status(500).json({ message: "Error cannot set presigned URL " });
   }
 };
-
-export const addPostSocialMediaFacebookText = async (req, res, next) => {
-  const { brand, content, token } = req.body;
-  const userId = req.body.currentUser._id;
-  if ((!content || !brand, !token)) {
+export const updateTokenFacebook = async (req, res) => {
+  const { brandId, longAccessToken } = req.body;
+  if (!brandId || !longAccessToken) {
     return systemError
       .setStatus(400)
       .setMessage(ErrorMessages.DATA_IS_REQUIRED)
       .throw();
   }
   try {
-    const response = await textPhotoToFacebook({
-      accessToken: token,
-      message: content,
-    });
-    if (response?.message?.startsWith('Error')) {
-        return res.json({message:response.message});
-      }
-    if (!response) {
+    const brands = await checkBrand(brandId);
+    if (!brands) {
       return systemError
         .setStatus(400)
-        .setMessage(ErrorMessages.INVALID_REDDIT_API)
+        .setMessage(ErrorMessages.BRAND_NOT_FOUND)
         .throw();
     }
-    const postId = response.id;
-    const createPost = await createSocialAccountAddPost(
-      PlatformEnum.REDDIT,
-      brand,
-      content,
-      userId,
-      postId
-    );
-    if (!createPost) {
+    const facebookData = await getAccount(brandId, PlatformEnum.FACEBOOK);
+    if (!facebookData) {
       return systemError
         .setStatus(400)
-        .setMessage(ErrorMessages.CAN_NOT_CREATE_REDDIT_POST)
+        .setMessage(ErrorMessages.ACCOUNT_NOT_FOUND)
         .throw();
     }
+    const accountData = {
+      platform: PlatformEnum.FACEBOOK,
+      account: {
+        client_id: facebookData.account.client_id,
+        client_secret: facebookData.account.client_secret,
+        tokenPage: facebookData.account.tokenPage,
+        longAccessToken,
+        pageID: facebookData.account.pageID,
+        email: facebookData.account.email,
+        password: facebookData.account.password,
+        cookies: facebookData.account.cookies,
+      },
+    };
+    await addOrDeleteAccount(brandId, accountData);
     return res.status(200).json({
-      result: createPost,
-      facebookPost: response,
+      message:
+        "token updated successfully go to social media to check the post",
     });
   } catch (error) {
-    console.log(error);
+    return systemError.sendError(res, error);
   }
 };
-
-export const addPostSocialMediaFacebookPhoto = async (req, res, next) => {
-  const { brand, content, token, url } = req.body;
+export const addPostSocialMediaFacebookText = async (req, res, next) => {
+  const { brandId } = req.params;
+  const { content, startTime } = req.body;
   const userId = req.body.currentUser._id;
-  if ((!content || !brand, !token, !url)) {
+  if (!content || !brandId) {
     return systemError
       .setStatus(400)
       .setMessage(ErrorMessages.DATA_IS_REQUIRED)
       .throw();
   }
   try {
-    const response = await postPhotoToFacebook({
-      accessToken: token,
-      message: content,
-      imageUrl:url
-    });
-    if (response?.message?.startsWith('Error')) {
-        return res.json({message:response.message});
-      }
-    if (!response) {
+    const brands = await checkBrand(brandId);
+    if (!brands) {
       return systemError
         .setStatus(400)
-        .setMessage(ErrorMessages.INVALID_REDDIT_API)
+        .setMessage(ErrorMessages.BRAND_NOT_FOUND)
         .throw();
     }
-    const postId = response.id;
-    const createPost = await createSocialAccountAddPost(
-      PlatformEnum.FACEBOOK,
-      brand,
-      content,
-      userId,
-      postId
+    const facebookData = await getAccount(brandId, PlatformEnum.FACEBOOK);
+
+    if (!facebookData) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.ACCOUNT_NOT_FOUND)
+        .throw();
+    }
+    const response = await getPageAccessToken(
+      facebookData.account.pageID,
+      facebookData.account.longAccessToken
     );
-    if (!createPost) {
+    if (response?.error?.code === 190) {
       return systemError
         .setStatus(400)
-        .setMessage(ErrorMessages.CAN_NOT_CREATE_REDDIT_POST)
+        .setMessage(ErrorMessages.FACEBOOK_TOKEN_EXPIRED)
+        .setData({
+          client_id: facebookData.account.client_id,
+          client_secret: facebookData.account.client_secret,
+        })
         .throw();
     }
+    if (response?.error?.code === 100) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.PAGE_ID_NOT_FOUND)
+        .throw();
+    }
+    const accountData = {
+      platform: PlatformEnum.FACEBOOK,
+      account: {
+        client_id: facebookData.account.client_id,
+        client_secret: facebookData.account.client_secret,
+        tokenPage: response.access_token,
+        longAccessToken: facebookData.account.longAccessToken,
+        pageID: facebookData.account.pageID,
+        email: facebookData.account.email,
+        password: facebookData.account.password,
+        cookies: facebookData.account.cookies,
+      },
+    };
+    await addOrDeleteAccount(brandId, accountData);
+    await FacebookQueueAdd(content, startTime, brandId, userId);
+
     return res.status(200).json({
-      result: createPost,
-      facebookPost: response,
+      message: "Success",
     });
   } catch (error) {
-    console.log(error);
+    return systemError.sendError(res, error);
+  }
+};
+export const addPostSocialMediaFacebookPhoto = async (req, res, next) => {
+  const { brandId } = req.params;
+  const { content, url, startTime } = req.body;
+  const userId = req.body.currentUser._id;
+  if (!content || !brandId || !url) {
+    return systemError
+      .setStatus(400)
+      .setMessage(ErrorMessages.DATA_IS_REQUIRED)
+      .throw();
+  }
+  try {
+    const brands = await checkBrand(brandId);
+    if (!brands) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.BRAND_NOT_FOUND)
+        .throw();
+    }
+    const facebookData = await getAccount(brandId, PlatformEnum.FACEBOOK);
+    if (!facebookData) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.ACCOUNT_NOT_FOUND)
+        .throw();
+    }
+    const response = await getPageAccessToken(
+      facebookData.account.pageID,
+      facebookData.account.longAccessToken
+    );
+    if (response?.error?.code === 190) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.FACEBOOK_TOKEN_EXPIRED)
+        .setData({
+          client_id: facebookData.account.client_id,
+          client_secret: facebookData.account.client_secret,
+        })
+        .throw();
+    }
+    if (response?.error?.code === 100) {
+      return systemError
+        .setStatus(400)
+        .setMessage(ErrorMessages.PAGE_ID_NOT_FOUND)
+        .throw();
+    }
+    const accountData = {
+      platform: PlatformEnum.FACEBOOK,
+      account: {
+        client_id: facebookData.account.client_id,
+        client_secret: facebookData.account.client_secret,
+        tokenPage: response.access_token,
+        longAccessToken: facebookData.account.longAccessToken,
+        pageID: facebookData.account.pageID,
+        email: facebookData.account.email,
+        password: facebookData.account.password,
+        cookies: facebookData.account.cookies,
+      },
+    };
+    await addOrDeleteAccount(brandId, accountData);
+    await FacebookPhotoQueueAdd(content, url, startTime, brandId, userId);
+    return res.status(200).json({
+      message: "Success",
+    });
+  } catch (error) {
+    return systemError.sendError(res, error);
+  }
+};
+export const BrandSubs = async (req, res) => {
+  try {
+    const brands = await getBrands(0, 99999999999999);
+    const output = [];
+    for (const brand of brands) {
+      const subs = await GetSubCount(brand._id);
+      output.push({
+        id: brand._id,
+        name: brand.name,
+        description: brand.description,
+        date: brand.aquisition_date,
+        niche: brand.niche,
+        subscribers: subs,
+        engagement: 96,
+      });
+    }
+    res.json(output);
+  } catch (error) {
+    return systemError.sendError(res, error);
   }
 };

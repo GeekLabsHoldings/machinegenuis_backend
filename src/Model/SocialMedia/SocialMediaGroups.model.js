@@ -8,6 +8,7 @@ import { EnumStringRequired } from "../../Utils/Schemas";
 import { PlatformArr } from "../../Utils/SocialMedia/Platform";
 import { brandArr } from "../../Utils/SocialMedia/Brand";
 import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
+import { socialAccountSchema } from "./SocialMediaAccount.model";
 // models/Group.js
 const mongoose = require("mongoose");
 
@@ -53,9 +54,18 @@ const SocialMediaGroupsSchema = new mongoose.Schema({
     required: false,
     default: 0,
   },
+
+  personal: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 });
 
 // Create the model
 const SocialMediaGroupsModel = mongoose.model(SchemaTypesReference.SocialMediaGroups, SocialMediaGroupsSchema);
+
+// socialAccountSchema   socialAccountModel
+export const socialAccountModel = SocialMediaGroupsModel.discriminator('twitter_accounts', socialAccountSchema);
 
 export default SocialMediaGroupsModel;

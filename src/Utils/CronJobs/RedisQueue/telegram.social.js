@@ -2,7 +2,8 @@ import Queue from "bull";
 import {sendMessageToAll, CleanUp} from "../../../Service/SocialMedia/telegram.service";
 import { TelegramB } from "../../../Controller/SocialMedia/socialMedia.telegram.controller";
 const TelegramBot = require("node-telegram-bot-api");
-
+import SocialMediaCampaigns from "../../../Model/SocialMedia/campaign.socialmedia.model";
+import { log } from "console";
 
 
 function delay_(ms) {
@@ -23,24 +24,40 @@ telegramQueue.on('error', (err) => {
 });
 
 
-telegramQueue.process((job) => {
+  telegramQueue.process( (job) => {
+    
+      let { message, chatIds, file_type, file_url, captionText, delay, campaign} = job.data
+
+      console.log("Processing job: \t");
+      try {
+        SocialMediaCampaigns.findOneAndUpdate(
+          { _id: campaign._id },
+          { $set: { status: 'Running' } }
+        ).then(() => {
+          return sendMessageToAll(TelegramB, message, chatIds, file_type, file_url, captionText, delay);
+        }).then(() => {
+          return SocialMediaCampaigns.updateOne(
+            { _id: campaign._id },
+            { $set: { status: 'Finished', posts_shared: chatIds.length } }
+          );
+        }).catch((error) => {
+          console.log(error);
+          return SocialMediaCampaigns.updateOne(
+            { _id: campaign._id },
+            { $set: { status: 'Failed' } }
+          );
+        });
+      } catch (error) {
+        console.log(error)
+      }
   
-    let { message, chatIds, file_type, file_url, captionText, delay} = job.data
+  });
 
-    console.log("Processing job: \t", job.data);
-   sendMessageToAll(
-    TelegramB,
-    message,
-    chatIds,
-    file_type,
-    file_url,
-    captionText,
-    delay
-  );
-});
-
-const telegramQueueAddJob =  (data, delay) => {
-
+const telegramQueueAddJob = async (data, delay) => {
+  const newcampaign = SocialMediaCampaigns({content:data.message, timestamp:Date.now(), 
+    platform:"TELEGRAM", engagment:0, posts_shared:0, brand:data.brand, status:"Pending"})
+  const campaign = await newcampaign.save()
+  data = {...data, campaign: campaign}
   telegramQueue.add(data,{delay:delay});
   console.log("Job added success");
 };

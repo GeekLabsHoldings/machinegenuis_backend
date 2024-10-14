@@ -23,6 +23,7 @@ export default function createIo(server) {
 
   // Set up the connection event handler here
   io.on("connection", onConnection);
+  NewTweetsEvent(io);
 }
 
 // Define the onConnection function
@@ -37,8 +38,6 @@ const onConnection = (socket) => {
       console.log(`User ${user.firstName} joined room: ${roomName}`);
     });
   }
-
-  NewTweetsEvent(user, io);
   BroadCastMessageEvent(io);
 };
 export { io };

@@ -1,20 +1,19 @@
-import BrandsModel from "../../Model/Operations/BrandCreation.model";
-import { Types, startSession } from "mongoose";
+import BrandsModel, {SubBrandModel} from "../../Model/Operations/BrandCreation.model";
+import { ClientSession, Types, startSession } from "mongoose";
 import BrandType from "../../Model/Operations/IBrand_interface";
 import {
   ISubBrand,
   IBrand,
-  IBrandWithSubs,
 } from "../../Model/Operations/IBrand_interface";
 import {
-  IAccount,
-  IRedditAccountData,
-  ITelegramAccountData,
+  
   accountDataType,
 } from "../../Model/Operations/IPostingAccounts_interface";
 import SocialPostingAccount from "../../Model/Operations/SocialPostingAccount.model";
 import crypto, { Encoding } from "crypto";
 import Route53DomainChecker, { ContactDetail } from "../AWS/Rout53/domains";
+import { log } from "console";
+import AwsDomainActivation from "../AWS/Rout53/domain_activation";
 
 // import { Request, Response } from 'express';
 
@@ -29,19 +28,20 @@ export const addBrandWithSubandAccounts = async (
     session.startTransaction();
 
     const newbrand = new BrandsModel({ ...brandData });
-    const Brand = await newbrand.save();
+    const Brand = await newbrand.save({ session });
+  
     for (const sub of subBrands) {
-      const subbrand = await createSubBrand(Brand._id, sub.subbrand);
+      const subbrand = await createSubBrand(Brand._id, {...sub.subbrand, niche:Brand.niche}, session, false);
       for (const acc of sub.accounts) {
-        const account = await addOrDeleteAccount(subbrand._id, acc);
+        if (subbrand && subbrand._id){const account = await addOrDeleteAccount(subbrand._id, acc, session);}    
       }
     }
-
     for (const acc of accounts) {
-      const account = await addOrDeleteAccount(Brand._id, acc);
+      const account = await addOrDeleteAccount(Brand._id, acc, session);
     }
-    return Brand;
     await session.commitTransaction();
+    return Brand;
+    
   } catch (error) {
     await session.abortTransaction();
     console.log(error);
@@ -49,9 +49,12 @@ export const addBrandWithSubandAccounts = async (
     session.endSession();
   }
 };
-export const getAllBrands = async () => {
+
+
+
+export const getAllBrands = async (skip?:number, limit?:number) => {
   try {
-    const brands = await BrandsModel.find({ type: { $ne: "subbrand" } });
+    const brands = await BrandsModel.find({ type: { $ne: "subbrand" } }).skip(skip||0).limit(limit||0);
 
     //console.log(brands)
     const brandswithData: {
@@ -75,6 +78,70 @@ export const getAllBrands = async () => {
     console.log(error);
   }
 };
+
+
+
+
+export const getSingularBrands = async (skip:number, limit:number) => {
+  try {
+    const brands = await BrandsModel.find({}).skip(skip || 0).limit(limit || 999999);
+
+    const singular = await Promise.all(
+      brands.map(async (brand) => {
+        const b = await SubBrandModel.findOne({ parentId: brand._id });
+        // If sub-brand exists (b), return false, otherwise true
+        return b ? false : brand;
+      })
+    );
+    
+    // Filter out the `false` values (those with children)
+    const result = singular.filter(brand => brand !== false);
+    
+    return result;
+    
+
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+
+
+export const getBrands = async (skip:number, limit:number) => {
+  try {
+    //const brands = await BrandsModel.find({ }).skip(skip).limit(limit);
+
+    const brands = await BrandsModel.find().skip(skip||0).limit(limit||999999);
+    return brands;
+
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+
+export const getBrandsByPlatform = async (platform:string, skip:number, limit:number) => {
+  try{
+  const accounts = await SocialPostingAccount.find({platform:platform}).skip(skip||0).limit(limit||999999);
+ // console.log(`getBrandsByPlatform ${accounts}`);
+  
+  const brands : (IBrand|ISubBrand)[] = []
+  for(const acc of accounts){
+    const b = await BrandsModel.findById(acc.brand)
+    if (b)
+      brands.push(b)
+  }
+  return brands;
+
+} catch (error) {
+  console.log(error);
+}
+};
+
+
+
 export const getBrandById = async (id: string) => {
   try {
     const brand: IBrand | null = await BrandsModel.findById(id);
@@ -105,27 +172,77 @@ export const updateBrand = async (id: string, brandData: Partial<IBrand>) => {
   }
 };
 export const deleteBrand = async (id: string) => {
-  return await BrandsModel.findByIdAndDelete(id);
+  const session = await startSession();
+  try {
+    session.startTransaction();
+    await SocialPostingAccount.deleteMany({brand:id}).session(session)
+    await SubBrandModel.deleteMany({parentId:id}).session(session)
+
+    const d =  await BrandsModel.findByIdAndDelete(id).session(session);
+
+    await session.commitTransaction();
+    return d
+  }  catch (error) {
+    await session.abortTransaction();
+    console.log(error);
+  } finally {
+    session.endSession();
+  }
 };
 export const getAllSubBrands = async (
-  parentId: string
-): Promise<ISubBrand[]> => {
-  return await BrandsModel.find({ type: "subbrand", parentId });
+  parentId: string,
+  skip?:number,
+  limit?:number
+):Promise<ISubBrand[]> => {
+  const brand = await BrandsModel.findById(parentId)
+  if(!brand){
+    return []
+  }
+  return await SubBrandModel.find({ type: "subbrand", parentId }).skip(skip||0).limit(limit||9999999);
 };
-export const getSubBrandById = async (parentId: string, id: string) => {
-  return await BrandsModel.findOne({ _id: id, type: "subbrand", parentId });
+export const getSubBrandById = async (parentId: string, id: string, skip:number, limit:number) => {
+  const brand = await BrandsModel.findById(parentId)
+  if(!brand){
+    return null
+  }
+  return await BrandsModel.findOne({ _id: id, type: "subbrand", parentId }).skip(skip).limit(limit);
 };
+
+
+
 export const createSubBrand = async (
   parentId: string,
-  subBrandData: ISubBrand
+  subBrandData: ISubBrand,
+  session?: ClientSession,
+  f: boolean = true
 ) => {
-  const newSubBrand = new BrandsModel({
-    ...subBrandData,
-    type: "subbrand",
-    parentId,
-  });
-  return await newSubBrand.save();
+
+  if (!f){
+    const newSubBrand = new BrandsModel({
+      ...subBrandData,
+      type: "subbrand",
+      parentId,
+    });
+    return await newSubBrand.save({ session });
+  }else{
+    const Brand = await BrandsModel.findOne({_id:parentId})
+    console.log(`creating subbrand for ${Brand?._id}`);
+    
+    if(Brand){
+      const newSubBrand = new BrandsModel({
+        ...subBrandData,
+        type: "subbrand",
+        parentId,
+      });
+    return await newSubBrand.save({ session });
+    }
+    return null
+  }
+
 };
+
+
+
 export const updateSubBrand = async (
   parentId: string,
   id: string,
@@ -138,12 +255,32 @@ export const updateSubBrand = async (
   );
 };
 export const deleteSubBrand = async (parentId: string, id: string) => {
-  return await BrandsModel.findOneAndDelete({
-    _id: id,
-    type: "subbrand",
-    parentId,
-  });
+
+
+  const session = await startSession();
+  try {
+    session.startTransaction();
+    await SocialPostingAccount.deleteMany({brand:id}).session(session)
+    await SubBrandModel.deleteMany({parentId:id}).session(session)
+
+    await session.commitTransaction();
+    await session.commitTransaction();
+    const d = await BrandsModel.findOneAndDelete({
+      _id: id,
+      type: "subbrand",
+      parentId,
+    });
+    return d
+
+  }  catch (error) {
+    await session.abortTransaction();
+    console.log(error);
+  } finally {
+    session.endSession();
+  }
 };
+
+//=========================================================================
 export async function checkAndSuggest(domainName: string) {
   const checker = new Route53DomainChecker();
 
@@ -156,25 +293,87 @@ export async function checkAndSuggest(domainName: string) {
   }
   return { isAvailable };
 }
+
+
+
+
 export async function registerDomain(
   domainName: string,
   DurationInYears: number,
+  brand:string,
   contactDetails: ContactDetail
 ) {
   const checker = new Route53DomainChecker();
-
+  
   const result = await checker.registerDomain(
     domainName,
     DurationInYears,
     contactDetails
   );
+  await BrandsModel.updateOne(
+    { _id: brand },               // Filter: Find the brand by its ID
+    { $set: { domain: domainName }} // Update: Set the domain name
+  );
   console.log(`Is domain result is ${result}`);
 
   return result;
 }
-// Placeholder for account-related functions
+
+export async function verificationDomain(domainName:string) {
+  try {
+    const domainManager = new AwsDomainActivation();
+    const emailVerificationStatus = await domainManager.checkDomainVerificationStatus(domainName);
+    return emailVerificationStatus
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
+export async function activateDomain(domainName:string, brand:string){
+  try {
+    const domainManager = new AwsDomainActivation();
+
+
+  // Step 1: Create Hosted Zone
+  const HostedZoneId = await domainManager.createHostedZone(domainName);
+
+if (HostedZoneId) {
+  // Step 2: Update Name Servers for the domain
+  const nameServers = await domainManager.getNameServers(HostedZoneId);
+  if (nameServers) {
+    await domainManager.updateNS(domainName, nameServers, HostedZoneId);
+  }
+
+  // Step 3: Request SSL
+  const CertificateArn = await domainManager.requestCertificate(domainName);
+
+  if (CertificateArn) {
+    // Step 4: Get DNS CName Name CName value
+    const cnameRecord = await domainManager.getDnsValidationRecords(CertificateArn);
+
+    if (cnameRecord) {
+      // Step 5: Add CNAME for SSL validation
+      await domainManager.addHostedZoneRecord(domainName, cnameRecord, HostedZoneId, 'CNAME');
+    }
+  }
+}
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
+
+//============================================================
+
+
 export const getAccounts = async (id: string) => {
   // Implement account retrieval logic
+  const brand = await BrandsModel.findById(id)
+  if(!brand){
+    return []
+  }
   const accounts = await SocialPostingAccount.find({ brand: id });
 
   const data: accountDataType[] = [];
@@ -192,16 +391,23 @@ export const getAccounts = async (id: string) => {
   }
   return data;
 };
-
+export const checkBrand = async (brand: string) => {
+  const brands = await BrandsModel.findById(brand);
+  return brands;
+};
 export const getAccount = async (id: string, platform: string) => {
   // Implement account retrieval logic
+  const brand = await BrandsModel.findById(id)
+  if(!brand){
+    return null
+  }
   const account = await SocialPostingAccount.findOne({
     brand: id,
     platform: platform,
   });
   if (account) {
     let decrypted = decrypt(account.token);
-
+    //console.log("encryption\t", decrypted, account.token)
     if (account.platform == "TELEGRAM")
       return {
         platform: account.platform,
@@ -215,17 +421,21 @@ export const getAccount = async (id: string, platform: string) => {
 
   return null;
 };
+
+
+
 export const addOrDeleteAccount = async (
   id: string,
-  accountData: accountDataType
+  accountData: accountDataType,
+  session?: ClientSession
 ) => {
   // Implement account addition or deletion logic
   try {
     const result = await SocialPostingAccount.deleteOne({
-      platform: accountData.platform,
+      platform: accountData.platform.toUpperCase(),
       brand: id,
-    });
-
+    }, { session });
+    //console.log(accountData)
     if (result.deletedCount === 1) {
       console.log("Account deleted successfully!");
     } else {
@@ -235,13 +445,13 @@ export const addOrDeleteAccount = async (
       let payload = { ...accountData.account };
       let payloadStr = JSON.stringify(payload);
       const token = encrypt(payloadStr);
-      //console.log("encryption\t",accountData, payload, payloadStr, token)
+      
       const Account = new SocialPostingAccount({
         token: token,
         platform: accountData.platform,
         brand: id,
       });
-      const acc = await Account.save();
+      const acc = await Account.save({ session });
       console.log("Account added successfully!");
       return acc;
     } else if (
@@ -249,7 +459,7 @@ export const addOrDeleteAccount = async (
       "token" in accountData.account
     ) {
       let payload = accountData.account.token;
-      const token = encrypt(payload);
+      const token = encrypt(payload||"");
       const Account = new SocialPostingAccount({
         token: token,
         platform: accountData.platform,
@@ -263,6 +473,26 @@ export const addOrDeleteAccount = async (
     console.log(error);
   }
 };
+
+
+export const deleteAccount = async (acc_id: string) => {
+  try {
+    const delAccount = await SocialPostingAccount.findByIdAndDelete(acc_id);
+    if (delAccount) {
+      console.log('Account deleted successfully:', delAccount);
+      return delAccount
+    } else {
+      console.log('No account found with the provided ID.');
+      return null
+    }
+    
+  } catch (error) {
+    console.log('Error deleting account:', error);
+  }
+};
+
+
+
 function encrypt(text: string): string | null {
   const sk: String | undefined = process.env.SECRET_KEY;
   if (sk) {
@@ -281,10 +511,21 @@ export function decrypt(encryptedData: string): string | null {
     const secretKey = Buffer.from(sk, "hex");
     const decipher = crypto.createDecipheriv("aes-256-ecb", secretKey, null); // No IV for ECB
     let decrypted = decipher.update(encryptedData, "hex", "utf8");
-
     decrypted += decipher.final("utf8");
 
     return decrypted;
   }
   return null;
 }
+
+
+
+
+
+
+
+
+
+
+
+

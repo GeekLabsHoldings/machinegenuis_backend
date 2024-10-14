@@ -13,7 +13,7 @@ import systemError from "../../Utils/Error/SystemError";
 const crypto = require('crypto');
 const cron = require('node-cron');
 import telegramQueueAddJob from "../../Utils/CronJobs/RedisQueue/telegram.social";
-import { getAccount } from "../../Service/Operations/BrandCreation.service";
+import { getAccount, getBrands } from "../../Service/Operations/BrandCreation.service";
 
 export class TelegramB { 
   constructor(token){
@@ -44,7 +44,7 @@ export async function add_channel(req, res) {
     const { group_name, link, group_id, niche, brand, platform, engagement } =
       req.body;
 
-    let acountToken = await getAccount(group.brand, "TELEGRAM");
+    let acountToken = await getAccount(brand, "TELEGRAM");
     acountToken = acountToken.token
     const tb =  new TelegramB(acountToken)
     const subscribers = await tb.bot.getChatMemberCount(group_id);
@@ -108,7 +108,7 @@ export async function campaign(req, res) {
         starttime = 10000
 
     
-    telegramQueueAddJob({ message, chatIds, file_type, file_url, captionText, delay}, starttime)
+    await telegramQueueAddJob({ message, chatIds, file_type, file_url, captionText, delay}, starttime)
 
     res.json({
       message: message,
@@ -124,7 +124,37 @@ export async function campaign(req, res) {
 
 export async function campaignByBrand(req, res) {
   try {
-    const chatIds = await getChannelsByBrand(req.params.id);
+    const brand = req.params.id
+    const chatIds = await getChannelsByBrand(brand);
+    const message = req.body.message;
+    const file_url = req.body.file_url;
+    const captionText = req.body.captionText;
+    const file_type = req.body.file_type;
+    let delay = req.body.delay;
+    let starttime = req.body.starttime;
+
+    starttime = starttime - Date.now();
+
+    if (starttime<=0)
+        starttime = 10000
+    await telegramQueueAddJob({TelegramB, message, chatIds, file_type, file_url, captionText, delay, brand}, starttime)
+    
+
+    res.json({
+      message: message,
+      file: file_url,
+      captionText: captionText,
+      chatIds: chatIds,
+    });
+  } catch (error) {
+    return systemError.sendError(res, error);
+  }
+}
+
+
+export async function campaignByBrandPersonal(req, res) {
+  try {
+    const chatIds = await getChannelsByBrand(req.params.id, true);
     const message = req.body.message;
     const file_url = req.body.file_url;
     const captionText = req.body.captionText;
@@ -149,9 +179,6 @@ export async function campaignByBrand(req, res) {
     return systemError.sendError(res, error);
   }
 }
-
-
-
 
 
 export async function deleteMessage(req, res) {
@@ -183,9 +210,14 @@ export async function deleteMessage(req, res) {
 export async function get_subscripers(req, res) {
   try {
     // console.log(req.body.brand);
-
-    const subs = await GetSubCount(req.params.id);
-    res.json({ subscribers: subs });
+    const brands = await getBrands(0, 99999999999999)
+    const output = []
+    for(const brand of brands){
+      const subs = await GetSubCount(brand._id);
+      output.push({id:brand._id, name:brand.name, description:brand.description, date:brand.aquisition_date, niche:brand.niche, subscribers:subs, engagement:96})
+    }
+    
+    res.json(output);
   } catch (error) {
     return systemError.sendError(res, error);
   }

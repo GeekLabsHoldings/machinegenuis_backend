@@ -1,13 +1,18 @@
-import { Router } from "express";
+import { Router, raw, json, urlencoded } from "express";
 import * as socialMediaController from "../../Controller/SocialMedia/socialMedia.twitter.controller";
 
 const twitterRouter = Router();
+
+twitterRouter.use(json({limit: '50mb', extended: true}));
+twitterRouter.use(urlencoded({ limit: '50mb', extended: true })); 
+
+
 twitterRouter.post(
-  "/add-account",
+  "/add-account/:brand",
   socialMediaController.addSocialAccountTwitter
 );
 twitterRouter.put(
-  "/edit-account/:_id",
+  "/edit-account/:_id/:brand",
   socialMediaController.editTwitterAccount
 );
 twitterRouter.patch(
@@ -31,12 +36,20 @@ twitterRouter.post(
   socialMediaController.generateNewReply
 );
 twitterRouter.post(
-  "/add-reply-to-tweet/:_id",
+  "/add-reply-to-tweet/:_id/:brand",
   socialMediaController.addReplyToTweet
 );
+twitterRouter.get(
+  "/get-all-accounts",
+  socialMediaController.getAllAccountsTwitter
+);
+
+
+
+
 twitterRouter.post(
-  "/generate-hashtags",
-  socialMediaController.generateHashtags
+  "/upload-image",
+  socialMediaController.uploadImage
 );
 
 export default twitterRouter;

@@ -15,7 +15,7 @@ const delay = async (time) => {
 const split = async function (data) {
   const segments = [];
   let currentSegment = "";
-  let segmentEndTime = 600;
+  let segmentEndTime = 150;
   let startTime = 0;
   let endTime = 0;
   let part = 0;
@@ -33,13 +33,13 @@ const split = async function (data) {
       segments.push({
         part: part,
         "time duration": `${startTime}:${endTime}`,
-        transcription: { content: recappedContent },
+        transcription: { content: recappedContent.content },
       });
 
       startTime = endTime;
       currentSegment = "";
       currentSegment += item.transcript + " ";
-      segmentEndTime += 600;
+      segmentEndTime += 150;
     }
   }
 
