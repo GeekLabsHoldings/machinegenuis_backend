@@ -82,7 +82,16 @@ class HiringController implements IHiringController {
 
             }
         };
-        const result = await axios.post('http://44.201.202.233/linkedin/post-job', data, { headers: { 'Content-Type': 'application/json' } });
+        console.log("data", data);
+        const apis = axios.create({
+            baseURL: 'http://100.24.21.202',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            timeout: (60 * 60 * 1000)
+        });
+        const result = await apis.post('/linkedin/post-job', data);
+        console.log("===================>", result.data);
         const _id = result.data;
         await hiringService.addHiringLinkedinAccount(hiringId, _id, session);
         return "Job Published Successfully";

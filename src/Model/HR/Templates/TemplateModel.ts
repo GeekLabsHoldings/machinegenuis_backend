@@ -9,7 +9,7 @@ import { HiringSteps } from "../../../Utils/GroupsAndTemplates";
 
 const templateContainerSchema = new Schema({
     title: { type: String, required: true },
-    description: { type: String, required: true }
+    description: { type: Schema.Types.Mixed, required: true }
 });
 
 

@@ -11,7 +11,7 @@ interface IGroupModel {
 
 interface TemplateContainerModel {
     title: string,
-    description: string
+    description: any
 }
 interface ITemplateModel {
     title: string,
