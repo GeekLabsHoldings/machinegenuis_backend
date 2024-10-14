@@ -63,7 +63,7 @@ export const deleteTweet = async (_id) => {
   await socialCommentModel.deleteOne({ _id });
 };
 export const getAllAccounts = async () => {
-  const accounts = await socialAccountModel.find({});
+  const accounts = await socialAccountModel.find({}).sort({ createdAt: -1 });
   return accounts;
 };
 

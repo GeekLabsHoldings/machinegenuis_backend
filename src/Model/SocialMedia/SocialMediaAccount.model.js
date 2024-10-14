@@ -50,7 +50,7 @@ export const socialAccountSchema = new Schema({
   comments: { type: Number, default: 0 },
   campaignType: EnumStringRequired(campaignListArr),
   followers: String,
-});
+},{timestamps:true});
 
 const socialAccountModel = model(
   SchemaTypesReference.SocialMediaAccount,
