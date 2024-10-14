@@ -1,5 +1,5 @@
 import axios, { Axios } from "axios";
-import IUserZohoService, { ICreateUserBody } from "./IUserZohoService";
+import IUserZohoService, { ICreateUserBody, IZohoAddUserRes } from "./IUserZohoService";
 import ZohoEmailsModel from "../../../Model/Zoho/Emails/ZohoEmails";
 
 export default class UserZohoService implements IUserZohoService {
@@ -19,6 +19,29 @@ export default class UserZohoService implements IUserZohoService {
             }
         });
     }
+
+    async generateAccessAndRefreshToken(code: string): Promise<{access_token:string, refresh_token:string}> {
+       try {
+        const result = await axios.post('https://accounts.zoho.com/oauth/v2/token', null, {
+            params: {
+                client_id: this.client_id,
+                grant_type: 'authorization_code',
+                client_secret: this.client_secret,
+                redirect_uri:"https://www.zylker.com/oauthredirect",
+                code: code
+            }
+        });
+
+        console.log(result.data);
+        const accessTokens = result.data;
+        return accessTokens;
+       } catch (error) {
+        console.log(error)
+        return {access_token:"", refresh_token:""}
+       }
+    }
+
+
     async generateAccessToken(refreshAccessToken: string): Promise<string> {
         const result = await axios.post('https://accounts.zoho.com/oauth/v2/token', null, {
             params: {
@@ -37,8 +60,8 @@ export default class UserZohoService implements IUserZohoService {
         this.axiosSetup.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
     }
 
-    async addNewUser(userData: ICreateUserBody): Promise<ICreateUserBody> {
+    async addNewUser(userData: ICreateUserBody): Promise<IZohoAddUserRes> {
         const result = await this.axiosSetup.post(`/organization/${this.organizationId}/accounts`, userData);
-        return result.data;
+        return result.data.data;
     }
 }

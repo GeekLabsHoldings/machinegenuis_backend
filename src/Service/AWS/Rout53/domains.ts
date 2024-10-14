@@ -1,6 +1,6 @@
 import { Route53Domains, RegisterDomainCommand , CountryCode  } from '@aws-sdk/client-route-53-domains';
 import { fromIni, fromEnv } from '@aws-sdk/credential-providers';
-
+import domainModel from '../../../Model/Operations/domains/domian.model';
 
 export interface ContactDetail {
   FirstName: string;
@@ -59,20 +59,7 @@ export default class Route53DomainChecker {
 
 
 
-   contactDetailsExample: ContactDetail = {
-    FirstName: "John",
-    LastName: "Doe",
-    ContactType: "PERSON",
-    AddressLine1: "123 Example St",
-    City: "New York",
-    State: "NY",
-    CountryCode: "US",
-    ZipCode: "10001",
-    PhoneNumber: "+1.1234567890",
-    Email: "johndoe@example.com",
-  };
-
-  async  registerDomain(domainName: string,DurationInYears:number, contactDetails: ContactDetail)  {
+  async  registerDomain(domainName: string,DurationInYears:number, contactDetails: ContactDetail, AutoRenew = true)  {
     // Define contact details (reusing for Admin, Registrant, and Tech contacts)
 
 
@@ -82,7 +69,7 @@ export default class Route53DomainChecker {
       AdminContact: contactDetails, // Admin contact details
       RegistrantContact: contactDetails, // Registrant contact details
       TechContact: contactDetails, // Tech contact details
-      AutoRenew: true, // Auto-renew the domain
+      AutoRenew: AutoRenew, // Auto-renew the domain
       PrivacyProtectAdminContact: true, // Enable privacy protection for Admin contact
       PrivacyProtectRegistrantContact: true, // Enable privacy protection for Registrant contact
       PrivacyProtectTechContact: true, // Enable privacy protection for Tech contact
@@ -100,3 +87,17 @@ export default class Route53DomainChecker {
   };
 
 }
+
+
+  //  contactDetailsExample: ContactDetail = {
+  //   FirstName: "John",
+  //   LastName: "Doe",
+  //   ContactType: "PERSON",
+  //   AddressLine1: "123 Example St",
+  //   City: "New York",
+  //   State: "NY",
+  //   CountryCode: "US",
+  //   ZipCode: "10001",
+  //   PhoneNumber: "+1.1234567890",
+  //   Email: "johndoe@example.com",
+  // };
