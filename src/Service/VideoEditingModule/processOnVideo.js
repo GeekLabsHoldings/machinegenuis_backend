@@ -1,7 +1,6 @@
 const cloudinary = require("cloudinary").v2;
 const { getAudioDurationInSeconds } = require('get-audio-duration');
-const recapAllContentController = require('../../Controller/ContentCreation/OpenAi Controllers/recapTranscript_controller');
-
+const recapAllContentController = require('../../Controller/ContentCreation/OpenAi Controllers/recapTranscript_controller')
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -20,19 +19,15 @@ const uploadVideoToCloudinary = async (videoUrl) => {
     }
 };
 
-const generateVidsAndSH = async (videoUrl, totalDuration) => {
+const generateVidsAndSH = async (videoUrl, timeInSeconds, start_offset) => {
     const publicId = await uploadVideoToCloudinary(videoUrl);
-    
-    let start_offset = 0;
+
+    const duration = timeInSeconds;
     const videoSegments = [];
 
-
-    const numberOfSegments = Math.ceil(totalDuration / 10);
-
-    for (let i = 0; i < numberOfSegments; i++) {
-        const end_offset = Math.min(start_offset + 10, totalDuration); 
-
-
+    for (let i = 0; i < Math.ceil(duration / 10); i++) {
+        const end_offset = Math.min(start_offset + 10, start_offset + duration); 
+        // Generate the full video segment (10 seconds or less for the last one)
         const trimmedVideoUrl = cloudinary.url(publicId, {
             resource_type: "video",
             transformation: [
@@ -43,17 +38,16 @@ const generateVidsAndSH = async (videoUrl, totalDuration) => {
         const threeSecVideoUrl = cloudinary.url(publicId, {
             resource_type: "video",
             transformation: [
-                { start_offset, end_offset: Math.min(start_offset + 3, totalDuration) }, 
+                { start_offset, end_offset: Math.min(start_offset + 3, end_offset) }, 
             ],
         });
-
 
         const screenshots = [
             cloudinary.url(publicId, {
                 resource_type: "video",
                 format: "jpg",
                 transformation: [
-                    { start_offset: Math.min(start_offset + 4, totalDuration), duration: 1 },
+                    { start_offset: start_offset + 4, duration: 1 },
                     { width: 600, crop: "scale" },
                 ],
             }),
@@ -61,12 +55,11 @@ const generateVidsAndSH = async (videoUrl, totalDuration) => {
                 resource_type: "video",
                 format: "jpg",
                 transformation: [
-                    { start_offset: Math.min(start_offset + 7, totalDuration), duration: 1 },
+                    { start_offset: start_offset + 7, duration: 1 },
                     { width: 600, crop: "scale" },
                 ],
             }),
         ];
-
 
         videoSegments.push({
             segment: i + 1,
@@ -75,36 +68,40 @@ const generateVidsAndSH = async (videoUrl, totalDuration) => {
             screenshots,
         });
 
-        start_offset += 10;  
+        start_offset += 10; 
     }
 
-    return videoSegments;
+    return { videoSegments, newStartOffset: start_offset }; 
 };
 
 const processRecapAndVideo = async (videoUrl, selectedContent) => {
     try {
-
         const recapData = await recapAllContentController.recapAllContent(selectedContent);
-        console.log("recapData ========>", recapData);
 
+        const result = [];
+        let globalStartOffset = 0;
 
-        const totalDuration = parseInt(recapData.time.split(":")[1]);
-        console.log("totalDuration ======>", totalDuration);
+        for (const recap of recapData) {
+            const timeString = recap.time; 
+            const timeInSeconds = parseInt(timeString.split(':')[1]); 
+            const audioUrl = recap.audioUrl.url;
 
+            const { videoSegments, newStartOffset } = await generateVidsAndSH(videoUrl, timeInSeconds, globalStartOffset);
 
-        const videoSegments = await generateVidsAndSH(videoUrl, totalDuration);
+            globalStartOffset = newStartOffset;
 
+            result.push({
+                time: recap.time,
+                audioUrl: recap.audioUrl,
+                videoSegments, 
+            });
+        }
 
-        return {
-            videoSegments,
-            time: recapData.time,
-            audioUrl: recapData.audioUrl,
-        };
+        return result;
     } catch (error) {
         throw new Error(`Error processing video: ${error.message}`);
     }
 };
-
 
 module.exports = {
     processRecapAndVideo
