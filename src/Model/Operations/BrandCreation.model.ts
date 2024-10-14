@@ -24,13 +24,6 @@ const BrandSchema = new Schema<IBrand>({
     trim: true,
   },
 
-  domain: {
-    type: String,
-    required: false,
-    trim: true,
-    default:""
-  },
-  
   aquisition_date: {
     type: Date,
     required: true,

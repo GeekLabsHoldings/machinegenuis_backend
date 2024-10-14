@@ -41,6 +41,7 @@ enum SchemaTypesReference {
   Campaigns = "campaigns_db",
   TelegramMessage = "telegram_message",
   Brands = "brands_collection",
+  domains = "domains_db",
   BroadCastMessage = "broadcastmessage",
   Word = "word",
   Scraped = "scraped",

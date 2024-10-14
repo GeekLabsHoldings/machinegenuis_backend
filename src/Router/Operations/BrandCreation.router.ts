@@ -4,7 +4,7 @@ import * as brandController from "../../Controller/Operations/BrandCreation.cont
 
 
 const BrandCreationRouter = Router();
-// BrandCreationRouter.use(json)
+
 // Domains
 BrandCreationRouter.post("/check-domain-availability", brandController.checkDomains);
 BrandCreationRouter.post("/register-domain", brandController.registerDomain);
@@ -20,14 +20,10 @@ BrandCreationRouter.get("/get-singular-brands", brandController.getSingularBrand
 BrandCreationRouter.get("/get-brands-platform", brandController.getBrandsByPlatform);   
 BrandCreationRouter.get("/get-all-brands-platform", brandController.getAllBrandsByPlatform); 
 
-
-
 // edit brands 
 BrandCreationRouter.get("/:id", brandController.getBrand);
 BrandCreationRouter.post("/:id/edit-brand", brandController.editBrand);
 BrandCreationRouter.post("/:id/delete-brand", brandController.deleteBrand);
-
-
 
 
 // Account routes 
