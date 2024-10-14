@@ -32,6 +32,7 @@
     "bcrypt": "^5.1.1",
     "bull": "^4.16.3",
     "busboy": "^1.6.0",
+    "cloudinary": "^2.5.1",
     "cors": "^2.8.5",
     "creatomate": "^1.2.1",
     "crypto": "^1.0.1",

@@ -10,11 +10,13 @@ const finalizeScriptContent = require('../../Controller/ContentCreation/OpenAi C
 const finalizeArticleContent = require('../../Controller/ContentCreation/OpenAi Controllers/articleContent_controllers')
 const generateTitles = require('../../Controller/ContentCreation/OpenAi Controllers/generateTitles_controller')
 const transcriptAudio = require('../../Controller/ContentCreation/AWS_Transcription/convertController')
+const finalRecap = require('../../Controller/ContentCreation/OpenAi Controllers/recapTranscript_controller')
 g_routes.post('/generate-content', generateContent.generateContent);
 
 //////////
 g_routes.post('/script/finalize-content', finalizeScriptContent.generateContent);
 g_routes.post('/article/finalize-content', finalizeArticleContent.generateContent);
+g_routes.post('/script/recap-content', finalRecap.generateRecapContent);
 //////////
 g_routes.post('/generate-titles', generateTitles.generateContentTitles);
 //////////
