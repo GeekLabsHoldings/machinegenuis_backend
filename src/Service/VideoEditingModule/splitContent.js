@@ -9,7 +9,7 @@ require("dotenv").config();
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const splitContent = async (content) => {
+ const splitContent = async (content) => {
   try {
       console.log("Received content:", content);
 
@@ -287,11 +287,122 @@ const splitAndConvert = async (req , res) => {
     return res.status(500).json({ success: false, error: "Error processing content"})
   }
 }
+const splitContentInvestocracy = async (content) => {
+  try {
+      console.log("Received content:", content);
+
+      const prompt = `Could you please split this content into paragraphs, then give me JUST ONE SHORT PHRASE for each paragraph, which I can use as a search query on YouTube. 
+      Make the phrase include the name of any famous person mentioned (President, Head of government, etc.) and, if relevant, the name of the government or country. 
+      If no such person or government is mentioned, provide a short, relevant phrase that captures the main idea of the paragraph.
+      Please don't change the original content!
+      Here is the content:
+      ${content}
+
+      Format the response like this:
+      {
+          "paragraphs": [
+              { "text": "Example paragraph", "keywords": ["short search phrase"] }
+          ]
+      }`;
+
+
+      const completion = await openai.chat.completions.create({
+          model: "gpt-4",
+          messages: [{ role: "user", content: prompt }]
+      });
+
+      console.log("Received completion from OpenAI:", completion);
+
+      const rawResult = completion.choices[0].message.content.trim();
+      console.log("Trimmed OpenAI response for body---->:", rawResult);
+
+      let parsedResult;
+      try {
+          parsedResult = JSON.parse(rawResult);
+          console.log("Parsed OpenAI response for body ----->:", parsedResult);
+      } catch (parseError) {
+          console.error("Failed to parse JSON response:", parseError);
+          throw new Error("Invalid JSON response from OpenAI");
+      }
+
+      const resultObject = await Promise.all(parsedResult.paragraphs.map(async (paragraph, index) => {
+          console.log(`Processing paragraph ${index + 1}:`, paragraph.text);
+
+          const wordsList = await wordsModel.find({});
+          const upDatedText = await addWordAndReplace_srev.findAndReplaceWords(paragraph.text, wordsList);
+
+          let audioPath;
+          try {
+              console.log(`Converting paragraph ${index + 1} to audio...`);
+              audioPath = await convertTextToAudio(upDatedText, index);
+              console.log(`Audio generated for paragraph ${index + 1}:`, audioPath);
+          } catch (err) {
+              console.error(`Error converting text to audio for paragraph ${index}:`, err);
+              audioPath = null;
+          }
+
+          return {
+              index,
+              text: upDatedText,
+              keywords: paragraph.keywords,
+              audioPath
+          };
+      }));
+
+      console.log("Final processed result:", resultObject);
+      return resultObject;
+
+  } catch (error) {
+      console.error("Error splitting content:", error);
+      throw error;
+  }
+};
+const generateIntroKeyword = async (intro) => {
+  try {
+    const prompt = `Please provide just ONE short phrase that summarizes the following content and can be used as a YouTube search query.
+    Focus on finding the most relevant name or phrase related to people, countries, or governments, if applicable.
+    Make it a brief, descriptive phrase instead of a single word.
+    Here is the content:
+    ${intro}
+
+    Respond in the format:
+    {
+      "keyword": "YourShortSearchPhraseHere"
+    }`;
+
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [{ role: "user", content: prompt }]
+    });
+
+    const rawResult = completion.choices[0].message.content.trim();
+    console.log("Trimmed Response:", rawResult);
+
+    let parsedResult;
+    try {
+      parsedResult = JSON.parse(rawResult);
+    } catch (parseError) {
+      console.error("Failed to parse JSON response:", parseError);
+      throw new Error("Invalid JSON response from OpenAI");
+    }
+    const introKeyword = parsedResult.keyword || "No Keyword Found";
+
+    return { keyword: introKeyword };
+
+  } catch (error) {
+    console.error("Error generating keyword for intro:", error);
+    throw error;
+  }
+};
 
 module.exports =
 {
     splitAndConvert,
     regenrateAudio,
     testAudio,
-    convertTextToAudio
+    convertTextToAudio,
+    splitContent,
+    splitContentInvestocracy,
+    generateIntroKeyword
 }
