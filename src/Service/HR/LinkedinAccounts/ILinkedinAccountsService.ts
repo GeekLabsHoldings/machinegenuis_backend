@@ -1,6 +1,11 @@
 import { Types } from "mongoose";
-import ILinkedinAccountCookiesModel from "../../../Model/HR/LinkedinAccounts/ILinkedinAccountCookiesModel";
-
+export interface ILinkedinAccountCookiesModel {
+    _id: Types.ObjectId | string;
+    cookies: Array<object>;
+    email: string;
+    password: string;
+    isBusy: boolean;
+}
 export default interface ILinkedinAccountsService {
-    getBusyAccounts(): Promise<(ILinkedinAccountCookiesModel & { _id: Types.ObjectId | string })[]>;
+    getBusyAccounts(): Promise<ILinkedinAccountCookiesModel[]>;
 }
