@@ -1,7 +1,8 @@
 import { model, Schema } from 'mongoose';
 import IEventModel from './IEventModel';
 import { SchemaTypesReference } from '../../Utils/Schemas/SchemaTypesReference';
-import { NotRequiredString, RefType, RequiredNumber, RequiredString } from '../../Utils/Schemas';
+import { NotRequiredString, RefType, RequiredNumber, RequiredString, NotRequiredBoolean } from '../../Utils/Schemas';
+
 
 const schema = new Schema<IEventModel>({
     title: RequiredString,
@@ -14,7 +15,10 @@ const schema = new Schema<IEventModel>({
     articleTitle: NotRequiredString, // candidate name
     backgroundColor: NotRequiredString,
     createdBy: RefType(SchemaTypesReference.Employee, true),
-    assignedTo: RefType(SchemaTypesReference.Employee, false)
+    assignedTo: RefType(SchemaTypesReference.Employee, false),
+    brand:RefType(SchemaTypesReference.Brands, false),
+    department:NotRequiredString,
+    status:{type: String, enum: ['Done', 'In Progress', 'Not Started'], required:false},
 })
 
 const eventModel = model<IEventModel>(SchemaTypesReference.EVENT, schema);
