@@ -1,6 +1,5 @@
 import { model, Schema } from "mongoose";
-import ILinkedinAccountCookiesModel from "./ILinkedinAccountCookiesModel";
-const LinkedinAccountCookiesSchema = new Schema<ILinkedinAccountCookiesModel>({
+const LinkedinAccountCookiesSchema = new Schema({
     cookies: Object,
     email: {
         type: String,
@@ -12,6 +11,6 @@ const LinkedinAccountCookiesSchema = new Schema<ILinkedinAccountCookiesModel>({
 
 });
 
-const LinkedinAccountCookiesModel = model<ILinkedinAccountCookiesModel>("LinkedinAccountCookies", LinkedinAccountCookiesSchema);
+const LinkedinAccountCookiesModel = model("LinkedinAccountCookies", LinkedinAccountCookiesSchema);
 
 export default LinkedinAccountCookiesModel;
