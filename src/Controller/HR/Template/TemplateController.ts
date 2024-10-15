@@ -7,6 +7,9 @@ import { ITemplateController } from "./ITemplateController";
 
 class TemplateController implements ITemplateController {
     async createTemplate(template: ITemplateModel, group_id: string, session: ClientSession): Promise<ITemplateModel & { _id: Types.ObjectId }> {
+        const checkTemplateExist = await templateService.checkTemplateExist(template.role, template.level);
+        if (checkTemplateExist)
+            return systemError.setStatus(400).setMessage(ErrorMessages.TEMPLATE_EXIST).throw();
         const result = await templateService.createTemplates(template);
         return result;
     }

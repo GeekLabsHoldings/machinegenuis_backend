@@ -142,8 +142,6 @@ const generateContent = async (req, res) => {
                 Talk about the current state of the stock that we talk about, and include forecasts predicting its growth.
                 Highlight the current position of the stock that we talk about.
                 End the article with an engaging statement to ask about the reader’s opinions about the topic - Maintain a professional, yet conversational manner..`;
-    } else if (brandName == "movieMyth") {
-      prompt = `Write me a movie recap for this transcript use storytelling format and write it in third person point of view, divide it into timestamps whereas each paragraph is 3 seconds only. Total maximum duration is 20 minutes. Write it in a suspenseful tone, apply emotions when applicable.`;
     } else {
       return res
         .status(404)

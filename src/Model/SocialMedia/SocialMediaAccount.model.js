@@ -9,6 +9,7 @@ import {
 import { SchemaTypesReference } from "../../Utils/Schemas/SchemaTypesReference";
 import { campaignListArr } from "../../Utils/SocialMedia/campaign";
 import { statusListArr } from "../../Utils/SocialMedia/status";
+import moment from "moment";
 
 export const socialAccountSchema = new Schema({
   sharingList: EnumStringRequired(PlatformArr),
@@ -49,6 +50,10 @@ export const socialAccountSchema = new Schema({
   status: EnumStringRequired(statusListArr),
   comments: { type: Number, default: 0 },
   campaignType: EnumStringRequired(campaignListArr),
+  createdAt: {
+    type: Number,
+    default: () => moment().valueOf(), 
+  },
   followers: String,
 });
 
