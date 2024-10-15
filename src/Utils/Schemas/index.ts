@@ -23,10 +23,23 @@ const RequiredBoolean = {
     default: false,
 }
 
+const NotRequiredBoolean = {
+    type: Boolean,
+    required: false,
+    default: false,
+}
+
 const RequiredNumber = {
     type: Number,
     required: true
 }
+
+
+const NotRequiredTimeStamp = {
+    type: Number,
+    required: false
+}
+
 
 const RequiredSpecificNumber = (specificNumber: number) => {
     return {
@@ -93,10 +106,12 @@ export {
     RequiredString,
     NotRequiredString,
     RequiredBoolean,
+    NotRequiredBoolean,
     RequiredNumber,
     NotRequiredNumber,
     RequiredUniqueString,
     RequiredUniqueNumber,
+    NotRequiredTimeStamp,
     RequiredSpecificNumber,
     RefType,
     StringValidation,
