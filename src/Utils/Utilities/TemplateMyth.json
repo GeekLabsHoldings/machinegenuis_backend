@@ -1,0 +1,362 @@
+{
+   "output_format": "mp4",
+    "width": 1280,
+    "height": 720,
+    "multipart": 120,
+    "prefetch": true,
+    "elements": [
+      {
+        "id": "d8884917-ee1a-47a4-bfcd-48669aed7355",
+        "type": "audio",
+        "track": 1,
+        "time": 140.374,
+        "source": "0329aef6-a25f-4a01-a24e-a3d0e9b97b0e",
+        "volume": "10%"
+      },
+      {
+        "id": "cd2c2a08-5d2a-49e6-a0c2-70cab9aba457",
+        "type": "audio",
+        "track": 2,
+        "time": 0,
+        "source": "3a4a4e27-1f59-48c2-af42-10abcb39871e",
+        "volume": "10%"
+      },
+      {
+        "id": "081c20a8-f7bb-478f-a306-f6368411352e",
+        "type": "audio",
+        "track": 3,
+        "duration": 59.7324,
+        "source": "f84464a4-ae2d-4c7d-b578-6b9c093e0e57"
+      },
+      {
+        "id": "c3cee9b0-0575-4bce-826a-431d60c818fa",
+        "type": "video",
+        "track": 4,
+        "duration": 3.004,
+        "source": "6d05695a-f77f-49fb-b861-01df4091cb6e",
+        "volume": "0%"
+      },
+      {
+        "id": "65899c4f-1b40-41cf-bd23-3a96bdd261c0",
+        "type": "image",
+        "track": 4,
+        "duration": 2.996,
+        "width": [
+          {
+            "time": 0,
+            "value": "100%"
+          },
+          {
+            "time": 2.996,
+            "value": "105%"
+          }
+        ],
+        "height": [
+          {
+            "time": 0.018,
+            "value": "100%"
+          },
+          {
+            "time": 2.996,
+            "value": "105%"
+          }
+        ],
+        "source": "6eb79a41-78aa-4fe3-ae19-f73479d8463c"
+      },
+      {
+        "id": "dc195bff-ec85-4338-97f8-0b9576202fdc",
+        "type": "composition",
+        "track": 5,
+        "time": "",
+        "elements": [
+          {
+            "id": "8e242ed4-e53e-4d38-84a6-110e73260c8e",
+            "type": "image",
+            "track": 1,
+            "time": 0.2263,
+            "duration": 13.9663,
+            "x": "8.7343%",
+            "y": [
+              {
+                "time": 1.049,
+                "value": "200%"
+              },
+              {
+                "time": 3.884,
+                "value": "-65%"
+              }
+            ],
+            "width": "75%",
+            "height": "66.6667%",
+            "z_rotation": "90°",
+            "source": "4be24547-739b-4fb7-bd7d-226dcd848fc8"
+          },
+          {
+            "id": "94be6578-9bd4-42d0-8668-98a2f4755104",
+            "type": "image",
+            "track": 2,
+            "time": 0.6582,
+            "duration": 13.9663,
+            "x": "8.7343%",
+            "y": [
+              {
+                "time": 1.049,
+                "easing": "linear",
+                "value": "200%"
+              },
+              {
+                "time": 4.324,
+                "value": "21%"
+              }
+            ],
+            "width": "75%",
+            "height": "66.6667%",
+            "z_rotation": "90°",
+            "source": "4be24547-739b-4fb7-bd7d-226dcd848fc8"
+          },
+          {
+            "id": "5193c1b5-51d3-43da-8ac1-097a06745178",
+            "type": "image",
+            "track": 3,
+            "time": 0.8583,
+            "duration": 13.9663,
+            "x": "25.73%",
+            "y": [
+              {
+                "time": 1.049,
+                "value": "200%"
+              },
+              {
+                "time": 3.884,
+                "value": "-65%"
+              }
+            ],
+            "width": "75%",
+            "height": "66.6667%",
+            "z_rotation": "90°",
+            "source": "4be24547-739b-4fb7-bd7d-226dcd848fc8"
+          },
+          {
+            "id": "34a11372-ec96-4bb5-b716-47a760210b2c",
+            "type": "image",
+            "track": 4,
+            "time": 1.5165,
+            "duration": 13.9663,
+            "x": "25.73%",
+            "y": [
+              {
+                "time": 1.049,
+                "easing": "linear",
+                "value": "200%"
+              },
+              {
+                "time": 3.446,
+                "value": "21%"
+              }
+            ],
+            "width": "75%",
+            "height": "66.6667%",
+            "z_rotation": "90°",
+            "source": "4be24547-739b-4fb7-bd7d-226dcd848fc8"
+          },
+          {
+            "id": "13d7ba3d-ac0e-4646-8339-2eeee59acc44",
+            "type": "image",
+            "track": 5,
+            "time": 0,
+            "duration": 13.9663,
+            "x": "42.73%",
+            "y": [
+              {
+                "time": 1.049,
+                "value": "200%"
+              },
+              {
+                "time": 4.962,
+                "value": "-65%"
+              }
+            ],
+            "width": "75%",
+            "height": "66.6667%",
+            "z_rotation": "90°",
+            "source": "4be24547-739b-4fb7-bd7d-226dcd848fc8"
+          },
+          {
+            "id": "21d15484-fc68-4b0c-8dac-baea6a933535",
+            "type": "image",
+            "track": 6,
+            "time": 0.6582,
+            "duration": 13.9663,
+            "x": "42.73%",
+            "y": [
+              {
+                "time": 1.049,
+                "easing": "linear",
+                "value": "200%"
+              },
+              {
+                "time": 4.304,
+                "value": "21%"
+              }
+            ],
+            "width": "75%",
+            "height": "66.6667%",
+            "z_rotation": "90°",
+            "source": "4be24547-739b-4fb7-bd7d-226dcd848fc8"
+          },
+          {
+            "id": "b63bf091-dfaf-4c11-9e61-738d5a95a393",
+            "type": "image",
+            "track": 7,
+            "time": 0.4985,
+            "duration": 13.9663,
+            "x": "59.73%",
+            "y": [
+              {
+                "time": 1.049,
+                "value": "200%"
+              },
+              {
+                "time": 4.962,
+                "value": "-65%"
+              }
+            ],
+            "width": "75%",
+            "height": "66.6667%",
+            "z_rotation": "90°",
+            "source": "4be24547-739b-4fb7-bd7d-226dcd848fc8"
+          },
+          {
+            "id": "e13aa91f-51f1-4d71-8eb4-ed550aacdd7c",
+            "type": "image",
+            "track": 8,
+            "time": 1.6356,
+            "duration": 13.9663,
+            "x": "59.73%",
+            "y": [
+              {
+                "time": 1.049,
+                "easing": "linear",
+                "value": "200%"
+              },
+              {
+                "time": 4.304,
+                "value": "21%"
+              }
+            ],
+            "width": "75%",
+            "height": "66.6667%",
+            "z_rotation": "90°",
+            "source": "4be24547-739b-4fb7-bd7d-226dcd848fc8"
+          },
+          {
+            "id": "56dfe4f1-e3f3-429b-b47a-c517f9e467f9",
+            "type": "image",
+            "track": 9,
+            "time": 0.4985,
+            "duration": 13.9663,
+            "x": "76.73%",
+            "y": [
+              {
+                "time": 1.049,
+                "value": "200%"
+              },
+              {
+                "time": 4.962,
+                "value": "-65%"
+              }
+            ],
+            "width": "75%",
+            "height": "66.6667%",
+            "z_rotation": "90°",
+            "source": "4be24547-739b-4fb7-bd7d-226dcd848fc8"
+          },
+          {
+            "id": "3205577b-5d1e-4c0b-b9d7-6d70d8c6ad2e",
+            "type": "image",
+            "track": 10,
+            "time": 1.6356,
+            "duration": 13.9663,
+            "x": "76.73%",
+            "y": [
+              {
+                "time": 1.049,
+                "easing": "linear",
+                "value": "200%"
+              },
+              {
+                "time": 4.304,
+                "value": "21%"
+              }
+            ],
+            "width": "75%",
+            "height": "66.6667%",
+            "z_rotation": "90°",
+            "source": "4be24547-739b-4fb7-bd7d-226dcd848fc8"
+          },
+          {
+            "id": "ec2b1ae7-8ae7-4539-89f5-f8a7cfb12a3b",
+            "type": "image",
+            "track": 11,
+            "time": 0.4985,
+            "duration": 13.9663,
+            "x": "93.73%",
+            "y": [
+              {
+                "time": 1.049,
+                "value": "200%"
+              },
+              {
+                "time": 4.962,
+                "value": "-65%"
+              }
+            ],
+            "width": "75%",
+            "height": "66.6667%",
+            "z_rotation": "90°",
+            "source": "4be24547-739b-4fb7-bd7d-226dcd848fc8"
+          },
+          {
+            "id": "f99acfb7-5052-4c6a-b42b-aeb7b04e512b",
+            "type": "image",
+            "track": 12,
+            "time": 1.6356,
+            "duration": 13.9663,
+            "x": "93.73%",
+            "y": [
+              {
+                "time": 1.049,
+                "easing": "linear",
+                "value": "200%"
+              },
+              {
+                "time": 4.304,
+                "value": "21%"
+              }
+            ],
+            "width": "75%",
+            "height": "66.6667%",
+            "z_rotation": "90°",
+            "source": "4be24547-739b-4fb7-bd7d-226dcd848fc8"
+          }
+        ]
+      },
+      {
+        "id": "a0b8101e-1713-4cec-ba5e-6e3e22e22d40",
+        "type": "video",
+        "track": 6,
+        "time": "",
+        "y": [
+          {
+            "time": 0.181,
+            "value": "150%"
+          },
+          {
+            "time": 1.406,
+            "value": "50%"
+          }
+        ],
+        "source": "6653e6e3-c816-476d-857c-ab89897a94d8"
+      }
+    ]
+  }
