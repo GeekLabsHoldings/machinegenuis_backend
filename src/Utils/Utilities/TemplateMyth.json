@@ -1,0 +1,25 @@
+{
+   "output_format": "mp4",
+    "width": 1280,
+    "height": 720,
+    "multipart": 120,
+    "prefetch": true,
+    "elements": [
+      {
+        "id": "d8884917-ee1a-47a4-bfcd-48669aed7355",
+        "type": "audio",
+        "track": 1,
+        "time": 140.374,
+        "source": "0329aef6-a25f-4a01-a24e-a3d0e9b97b0e",
+        "volume": "10%"
+      },
+      {
+        "id": "cd2c2a08-5d2a-49e6-a0c2-70cab9aba457",
+        "type": "audio",
+        "track": 2,
+        "time": 0,
+        "source": "3a4a4e27-1f59-48c2-af42-10abcb39871e",
+        "volume": "10%"
+      }
+    ]
+  }
