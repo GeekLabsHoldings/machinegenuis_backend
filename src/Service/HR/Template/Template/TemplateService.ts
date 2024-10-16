@@ -78,8 +78,8 @@ class TemplateService implements ITemplateService {
         const result = await templateModel.find({ group_id: { $type: 'objectId' } }).select({ title: 1, level: 1, role: 1, group_id: 1 })
         return result;
     }
-    async checkTemplateExist(role: string, level: string): Promise<boolean> {
-        const result = await templateModel.findOne({ role, level });
+    async checkTemplateExist(title: string, role: string, level: string): Promise<boolean> {
+        const result = await templateModel.findOne({ title, role, level });
         return result ? true : false;
     }
 
