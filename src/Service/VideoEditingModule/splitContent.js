@@ -291,9 +291,9 @@ const splitContentInvestocracy = async (content) => {
   try {
       console.log("Received content:", content);
 
-      const prompt = `Could you please split this content into paragraphs, then give me JUST ONE SHORT PHRASE for each paragraph, which I can use as a search query on YouTube. 
-      Make the phrase include the name of any famous person mentioned (President, Head of government, etc.) and, if relevant, the name of the government or country. 
-      If no such person or government is mentioned, provide a short, relevant phrase that captures the main idea of the paragraph.
+      const prompt = `Could you please split this content into paragraphs, then give me JUST ONE SINGLE WORD for each paragraph that I can use as a search query on YouTube. 
+      Make the word include the name of any famous person mentioned (President, Head of government, etc.) and, if relevant, the name of the government or country. 
+      If no such person or government is mentioned, provide a relevant word that captures the main idea of the paragraph.
       Please don't change the original content!
       Here is the content:
       ${content}
@@ -301,9 +301,10 @@ const splitContentInvestocracy = async (content) => {
       Format the response like this:
       {
           "paragraphs": [
-              { "text": "Example paragraph", "keywords": ["short search phrase"] }
+              { "text": "Example paragraph", "keywords": ["single search word"] }
           ]
       }`;
+
 
 
       const completion = await openai.chat.completions.create({
@@ -359,16 +360,16 @@ const splitContentInvestocracy = async (content) => {
 };
 const generateIntroKeyword = async (intro) => {
   try {
-    const prompt = `Please provide just ONE short phrase that summarizes the following content and can be used as a YouTube search query.
-    Focus on finding the most relevant name or phrase related to people, countries, or governments, if applicable.
-    Make it a brief, descriptive phrase instead of a single word.
+    const prompt = `Please provide just ONE single, descriptive word that best captures the following content and can be used as a YouTube search keyword.
+    Focus on finding the most relevant word related to people, countries, or governments, if applicable.
     Here is the content:
     ${intro}
 
     Respond in the format:
     {
-      "keyword": "YourShortSearchPhraseHere"
+      "keyword": "YourSingleKeywordHere"
     }`;
+
 
 
     const completion = await openai.chat.completions.create({

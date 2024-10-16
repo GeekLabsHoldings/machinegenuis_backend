@@ -1,5 +1,5 @@
 import get_all_content from '../../Controller/VideoEditing/getContent';
-import { gitDetailsContent } from '../../Controller/VideoEditing/getVideos';
+import { gitDetailsContent,  } from '../../Controller/VideoEditing/createVideo';
 
 const express = require('express')
 const Video_editing_router = express.Router();
@@ -27,7 +27,7 @@ Video_editing_router.post('/replace-words', controllerReplaceWords.addWordToRepl
 Video_editing_router.post('/find-replace', controllerReplaceWords.findToReplace);
 Video_editing_router.post('/enhance-img', controllerEnhanceImage.editImage);
 Video_editing_router.post('/process-video', controllerProcessOnVideo.processVideo);
-Video_editing_router.post('/get-content-youtube',gitDetailsContent );
+Video_editing_router.post('/get-content-youtube',gitDetailsContent);
 
 
 
