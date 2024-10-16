@@ -32,16 +32,6 @@ const schema = new Schema<ICandidateModel>({
 
 });
 
-schema.pre("save", function (next) {
-    const candidate = this as ICandidateModel;
-    candidate.stepsStatus = [];
-    candidate.messageStatus = [];
-    for (let i = 0; i < HiringSteps.length; i++) {
-        candidate.stepsStatus.push({ step: HiringSteps[i], status: statusArr[0] });
-        candidate.messageStatus.push({ step: HiringSteps[i], status: statusArr[0] });
-    }
-    next();
-});
 const candidateModel = model(SchemaTypesReference.Candidate, schema);
 export default candidateModel;
 
