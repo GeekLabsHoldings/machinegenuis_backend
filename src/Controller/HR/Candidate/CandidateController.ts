@@ -156,6 +156,9 @@ export default class CandidateController implements ICandidateController {
             if (!candidate || !hiring)
                 return;
             for (const item of candidate.data) {
+                if (item.phone.startsWith("+200")) {
+                    item.phone = item.phone.replace("+200", "+20");
+                }
                 const candidateData: ICandidateModel = {
                     firstName: item.name.split(' ')[0],
                     lastName: item.name.split(' ')[1],
