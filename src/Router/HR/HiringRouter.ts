@@ -31,7 +31,8 @@ HiringRouter.get('/hiring', async (req: Request, res: Response): Promise<Respons
 HiringRouter.get('/current-step-template/:_id', async (req: Request, res: Response): Promise<Response> => {
     try {
         const { _id } = req.params;
-        const result = await hiringController.getCurrentStepTemplate(_id);
+        const currentStep = (req.query.currentStep as string) || null
+        const result = await hiringController.getCurrentStepTemplate(_id, currentStep);
         return res.json(result);
     } catch (error) {
         return systemError.sendError(res, error);
