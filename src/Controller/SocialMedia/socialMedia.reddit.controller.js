@@ -204,6 +204,7 @@ try {
 
 
     const groups = await RedditServices.getSubreddits();
+    
     groups.forEach(async (group) => {
       try {
         const acount = await getAccount(req.body.brand,"REDDIT");
