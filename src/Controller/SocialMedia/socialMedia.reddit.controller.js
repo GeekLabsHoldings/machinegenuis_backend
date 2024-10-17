@@ -7,7 +7,7 @@ import { PlatformEnum } from "../../Utils/SocialMedia/Platform";
 import redditQueueAddJob from "../../Utils/CronJobs/RedisQueue/reddit.social";
 import axios from "axios";
 import { getAccount, getBrands } from "../../Service/Operations/BrandCreation.service";
-
+import GroupsAnalyticsModel from "../../Model/Operations/analytics/analytics.model";
 const cron = require("node-cron");
 
 
@@ -200,30 +200,33 @@ export const DeletePost = async (req, ) => {
 //====================================
 
 try {
+  //0 */6 * * *
   cron.schedule("0 */6 * * *", async () => {
-
-
+    console.log("this is REDDIT cron job \n\n\n", );
     const groups = await RedditServices.getSubreddits();
-    
+
     groups.forEach(async (group) => {
       try {
-        const acount = await getAccount(req.body.brand,"REDDIT");
+        const acount = await getAccount(group.brand,"REDDIT");
         const account = acount.account
-        
+        console.log("this is REDDIT ACCOUNT \n\n\n", account);
         const r = await RedditServices.getsnoowrap(
-
-          acount.appID,
-          acount.appSecret,
-          acount.username,
-          acount.password
+          account.appID,
+          account.appSecret,
+          account.username,
+          account.password
         );
-        group.subscribers = await RedditServices.getSubredditSubs(
-          r,
-          group.group_name
-        );
+        group.subscribers = await RedditServices.getSubredditSubs(r,group.group_name)||2;
         group.save();
+
+        const nrecord = new GroupsAnalyticsModel({brand: group.brand,
+          group_id: group.group_id,
+          subs:group.subscribers,
+          timestamp:Date.now(),
+          platform:group.platform})
+          await nrecord.save()
       } catch (error) {
-        
+        console.log(error)
       }
      
     });
