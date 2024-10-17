@@ -6,6 +6,7 @@ const {
 } = require("../../Service/VideoEditingModule/splitContent");
 
 
+
 export const gitDetailsContent = async (req, res) => {
   try {
     const { intro, content } = req.body;
@@ -14,31 +15,27 @@ export const gitDetailsContent = async (req, res) => {
     console.log(introKeyword);
 
     const bodyAndOutro = await splitContentInvestocracy(content);
-
-
     const bodyKeywords = bodyAndOutro.map((part) => part.keywords[0]);
-
-
     const keywords = [introKeyword, ...bodyKeywords];
 
-    const videoLinks = await findYouTubeLinksForKeywords(keywords, bodyAndOutro); 
+    const videoLinks = await findYouTubeLinksForKeywords(keywords, bodyAndOutro);
     console.log("Video links:----->", videoLinks);
 
     const result = {
       intro: {
         introKeyword: { keyword: introKeyword },
-        awsLinks: videoLinks[introKeyword]?.map(link => link.awsLink) || ["No videos found"],
+        awsLinks: videoLinks.intro?.map(link => link.awsLink) || ["No videos found"],
       },
       bodyAndOutro: await Promise.all(
         bodyAndOutro.map(async (part, index) => {
           console.log(`Keywords for part ${index}:`, part.keywords);
-          
+
           const awsLinks = part.keywords.map(keyword => {
             return videoLinks[keyword]?.map(link => link.awsLink) || ["No videos found"];
-          }).flat(); // Flatten the array if you have multiple links for each keyword
-    
+          }).flat();
+
           console.log(`AWS Links for keywords "${part.keywords.join(", ")}":`, awsLinks);
-    
+
           return {
             index,
             text: part.text,
@@ -48,7 +45,7 @@ export const gitDetailsContent = async (req, res) => {
               url: part.audioPath?.url || "Audio path not available",
               duration: part.audioPath?.duration || 0,
             },
-            awsLinks, // Include all AWS links
+            awsLinks,
           };
         })
       ),
@@ -61,8 +58,6 @@ export const gitDetailsContent = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
-
 // export const gitDetailsContent = async (req, res) => {
 //   try {
 //     const { intro, content } = req.body;
@@ -72,24 +67,28 @@ export const gitDetailsContent = async (req, res) => {
 
 //     const bodyAndOutro = await splitContentInvestocracy(content);
 
-//     const keywords = [
-//       introKeyword,
-//       ...bodyAndOutro.map((part) => part.keywords[0]),
-//     ];
+//     const bodyKeywords = bodyAndOutro.map((part) => part.keywords[0]);
 
-//     const videoLinks = await findYouTubeLinksForKeywords(keywords);
-// console.log("Video links:----->", videoLinks);
+//     const keywords = [introKeyword, ...bodyKeywords];
+
+//     const videoLinks = await findYouTubeLinksForKeywords(keywords, bodyAndOutro);
+//     console.log("Video links:----->", videoLinks);
 
 //     const result = {
 //       intro: {
 //         introKeyword: { keyword: introKeyword },
-//         awsLink: videoLinks[introKeyword]?.[0]?.awsLink || "No videos found",
+//         awsLinks: videoLinks[introKeyword]?.map(link => link.awsLink) || ["No videos found"],
 //       },
 //       bodyAndOutro: await Promise.all(
 //         bodyAndOutro.map(async (part, index) => {
-//           // Retry logic or alternative keyword if needed
-//           const awsLink = videoLinks[part.keywords[0]]?.[0]?.awsLink || "No videos found";
-
+//           console.log(`Keywords for part ${index}:`, part.keywords);
+          
+//           const awsLinks = part.keywords.map(keyword => {
+//             return videoLinks[keyword]?.map(link => link.awsLink) || ["No videos found"];
+//           }).flat(); // Flatten the array if you have multiple links for each keyword
+    
+//           console.log(`AWS Links for keywords "${part.keywords.join(", ")}":`, awsLinks);
+    
 //           return {
 //             index,
 //             text: part.text,
@@ -99,11 +98,13 @@ export const gitDetailsContent = async (req, res) => {
 //               url: part.audioPath?.url || "Audio path not available",
 //               duration: part.audioPath?.duration || 0,
 //             },
-//             awsLink,
+//             awsLinks, // Include all AWS links
 //           };
 //         })
 //       ),
 //     };
+//     console.log(result);
+
 //     res.status(200).json(result);
 //   } catch (error) {
 //     console.error("Error generating recap:", error);

@@ -52,7 +52,7 @@ function filterVideosByDuration(videoDetails) {
   });
 }
 
-export async function getAwsDownloadLink(youtubeVideoUrl) {
+ async function getAwsDownloadLink(youtubeVideoUrl) {
   try {
     const response = await axios.post(
       "http://18.118.105.172:3000/download-video",
@@ -68,24 +68,100 @@ export async function getAwsDownloadLink(youtubeVideoUrl) {
     return null;
   }
 }
+// export async function findYouTubeLinksForKeywords(keywords, bodyAndOutro) {
+//   const videoLinks = {};
+
+//   const introKeyword = keywords[0]; 
+//   const introVideos = await searchVideos(introKeyword);
+//   console.log(
+//     `Searching for intro keyword: ${introKeyword}, Found videos:`,
+//     introVideos
+//   );
+
+//   if (introVideos.length > 0) {
+//     const introVideoIds = introVideos.map((video) => video.id.videoId);
+//     const introVideoDetails = await getVideoDetails(introVideoIds);
+//     const filteredIntroVideos = filterVideosByDuration(introVideoDetails);
+
+//     const awsLinksForIntro = [];
+//     for (let i = 0; i < Math.min(5, filteredIntroVideos.length); i++) {
+//       const video = filteredIntroVideos[i];
+//       const youtubeLink = `https://www.youtube.com/watch?v=${video.id}`;
+//       const awsLink = await getAwsDownloadLink(youtubeLink);
+//       console.log("AWS link for intro---------->>>>:", awsLink);
+//       awsLinksForIntro.push({
+//         youtubeLink,
+//         awsLink: awsLink || "Error fetching AWS link",
+//       });
+//     }
+
+//     // Ensure at least 5 video entries
+//     while (awsLinksForIntro.length < 5) {
+//       awsLinksForIntro.push({ youtubeLink: null, awsLink: "No videos found" });
+//     }
+
+//     videoLinks.intro = awsLinksForIntro;
+//   } else {
+//     videoLinks.intro = Array(5).fill({ youtubeLink: null, awsLink: "No videos found" });
+//   }
+
+//   for (const item of bodyAndOutro) {
+//     const keyword = item.keywords[0];
+//     const videos = await searchVideos(keyword);
+//     console.log(`Searching for keyword: ${keyword}, Found videos:`, videos);
+
+//     if (videos.length > 0) {
+//       const videoIds = videos.map((video) => video.id.videoId);
+//       const videoDetails = await getVideoDetails(videoIds);
+//       const filteredVideos = filterVideosByDuration(videoDetails);
+
+//       if (filteredVideos.length > 0) {
+//         const awsLinksForKeyword = [];
+//         for (let i = 0; i < Math.min(1, filteredVideos.length); i++) {
+//           const video = filteredVideos[i];
+//           const youtubeLink = `https://www.youtube.com/watch?v=${video.id}`;
+//           const awsLink = await getAwsDownloadLink(youtubeLink);
+//           console.log("AWS link for bodyAndOutro---------->>>>:", awsLink);
+//           awsLinksForKeyword.push({
+//             youtubeLink,
+//             awsLink: awsLink || "Error fetching AWS link",
+//           });
+//         }
+//         videoLinks[keyword] = awsLinksForKeyword.length > 0
+//           ? awsLinksForKeyword
+//           : [{ youtubeLink: null, awsLink: "No videos found" }];
+//       } else {
+//         videoLinks[keyword] = [{ youtubeLink: null, awsLink: "No videos found" }];
+//       }
+//     } else {
+//       videoLinks[keyword] = [{ youtubeLink: null, awsLink: "No videos found" }];
+//     }
+//   }
+
+//   console.log("Final video links:", videoLinks);
+//   return videoLinks;
+// } 
+
+
 export async function findYouTubeLinksForKeywords(keywords, bodyAndOutro) {
-    const videoLinks = {};
-  
-    const introKeyword = keywords[0]; 
-    const introVideos = await searchVideos(introKeyword);
-    console.log(
-      `Searching for intro keyword: ${introKeyword}, Found videos:`,
-      introVideos
-    );
-  
-    if (introVideos.length > 0) {
-      const introVideoIds = introVideos.map((video) => video.id.videoId);
-      const introVideoDetails = await getVideoDetails(introVideoIds);
-      const filteredIntroVideos = filterVideosByDuration(introVideoDetails);
-  
-      const awsLinksForIntro = [];
-      for (let i = 0; i < Math.min(5, filteredIntroVideos.length); i++) {
-        const video = filteredIntroVideos[i];
+  const videoLinks = {};
+
+  const introKeyword = keywords[0]; 
+  const introVideos = await searchVideos(introKeyword);
+  console.log(
+    `Searching for intro keyword: ${introKeyword}, Found videos:`,
+    introVideos
+  );
+
+  if (introVideos.length > 0) {
+    const introVideoIds = introVideos.map((video) => video.id.videoId);
+    const introVideoDetails = await getVideoDetails(introVideoIds);
+    const filteredIntroVideos = filterVideosByDuration(introVideoDetails);
+
+    const awsLinksForIntro = [];
+    for (let i = 0; i < 5; i++) {
+      const video = filteredIntroVideos[i % filteredIntroVideos.length];
+      if (video) {
         const youtubeLink = `https://www.youtube.com/watch?v=${video.id}`;
         const awsLink = await getAwsDownloadLink(youtubeLink);
         console.log("AWS link for intro---------->>>>:", awsLink);
@@ -93,90 +169,55 @@ export async function findYouTubeLinksForKeywords(keywords, bodyAndOutro) {
           youtubeLink,
           awsLink: awsLink || "Error fetching AWS link",
         });
+      } else {
+        awsLinksForIntro.push({ youtubeLink: null, awsLink: "No videos found" });
       }
-      videoLinks.intro =
-        awsLinksForIntro.length > 0
-          ? awsLinksForIntro
-          : [{ youtubeLink: null, awsLink: "No videos found" }];
-    } else {
-      videoLinks.intro = [{ youtubeLink: null, awsLink: "No videos found" }];
     }
-  
-    for (const item of bodyAndOutro) {
-      const keyword = item.keywords[0];
-      const videos = await searchVideos(keyword);
-      console.log(`Searching for keyword: ${keyword}, Found videos:`, videos);
-  
-      if (videos.length > 0) {
-        const videoIds = videos.map((video) => video.id.videoId);
-        const videoDetails = await getVideoDetails(videoIds);
-        const filteredVideos = filterVideosByDuration(videoDetails);
-  
-        if (filteredVideos.length > 0) {
-          const awsLinksForKeyword = [];
-          for (let i = 0; i < Math.min(1, filteredVideos.length); i++) { // استخدم أول فيديو فقط لكل كلمة رئيسية
-            const video = filteredVideos[i];
-            const youtubeLink = `https://www.youtube.com/watch?v=${video.id}`;
-            const awsLink = await getAwsDownloadLink(youtubeLink);
-            console.log("AWS link for bodyAndOutro---------->>>>:", awsLink);
-            awsLinksForKeyword.push({
-              youtubeLink,
-              awsLink: awsLink || "Error fetching AWS link",
-            });
-          }
-          videoLinks[keyword] = awsLinksForKeyword.length > 0
-            ? awsLinksForKeyword
-            : [{ youtubeLink: null, awsLink: "No videos found" }];
-        } else {
-          videoLinks[keyword] = [{ youtubeLink: null, awsLink: "No videos found" }];
+
+    videoLinks.intro = awsLinksForIntro;
+  } else {
+    videoLinks.intro = Array(5).fill({ youtubeLink: null, awsLink: "No videos found" });
+  }
+
+  for (const item of bodyAndOutro) {
+    const keyword = item.keywords[0];
+    const videos = await searchVideos(keyword);
+    console.log(`Searching for keyword: ${keyword}, Found videos:`, videos);
+
+    if (videos.length > 0) {
+      const videoIds = videos.map((video) => video.id.videoId);
+      const videoDetails = await getVideoDetails(videoIds);
+      const filteredVideos = filterVideosByDuration(videoDetails);
+
+      if (filteredVideos.length > 0) {
+        const awsLinksForKeyword = [];
+        for (let i = 0; i < Math.min(1, filteredVideos.length); i++) {
+          const video = filteredVideos[i];
+          const youtubeLink = `https://www.youtube.com/watch?v=${video.id}`;
+          const awsLink = await getAwsDownloadLink(youtubeLink);
+          console.log("AWS link for bodyAndOutro---------->>>>:", awsLink);
+          awsLinksForKeyword.push({
+            youtubeLink,
+            awsLink: awsLink || "Error fetching AWS link",
+          });
         }
+        videoLinks[keyword] = awsLinksForKeyword.length > 0
+          ? awsLinksForKeyword
+          : [{ youtubeLink: null, awsLink: "No videos found" }];
       } else {
         videoLinks[keyword] = [{ youtubeLink: null, awsLink: "No videos found" }];
       }
+    } else {
+      videoLinks[keyword] = [{ youtubeLink: null, awsLink: "No videos found" }];
     }
-  
-    console.log("Final video links:", videoLinks);
-    return videoLinks;
   }
+
+  console.log("Final video links:", videoLinks);
+  return videoLinks;
+}
+
+
+
   
-// export async function findYouTubeLinksForKeywords(keywords) {
-//   const videoLinks = {};
-//   for (const keyword of keywords) {
-//     const videos = await searchVideos(keyword);
-//     console.log(`Searching for keyword: ${keyword}, Found videos:`, videos);
 
-//     if (videos.length > 0) {
-//       const videoIds = videos.map((video) => video.id.videoId);
-//       const videoDetails = await getVideoDetails(videoIds); // Pass as an array
-//       const filteredVideos = filterVideosByDuration(videoDetails);
-//       const awsLinksForKeyword = [];
-
-//       for (let i = 0; i < Math.min(9, filteredVideos.length); i++) {
-//         const video = filteredVideos[i];
-//         const youtubeLink = `https://www.youtube.com/watch?v=${video.id}`;
-//         const awsLink = await getAwsDownloadLink(youtubeLink);
-//         console.log("AWS link---------->>>>:", awsLink);
-//         if (!awsLink) {
-//           console.error(`No AWS link found for YouTube link: ${youtubeLink}`);
-//         }
-
-//         awsLinksForKeyword.push({
-//           youtubeLink,
-//           awsLink: awsLink || "Error fetching AWS link",
-//         });
-//       }
-
-//       if (awsLinksForKeyword.length > 0) {
-//         videoLinks[keyword] = awsLinksForKeyword;
-//       } else {
-//         videoLinks[keyword] = [
-//           { youtubeLink: null, awsLink: "No videos found" },
-//         ];
-//       }
-
-//       console.log("Video links:", videoLinks);
-//       return videoLinks;
-//     }
-//   }
-// }
 
