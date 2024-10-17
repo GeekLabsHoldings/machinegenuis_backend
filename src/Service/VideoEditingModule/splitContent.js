@@ -435,8 +435,8 @@ module.exports = {
   const x = {
     intro: {
       text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+      keywords: [],
       cnbc: {
-        keywordCNBC: "",
         videos: [
           { awsLink: "", duration: 0 },
           { awsLink: "", duration: 0 },
@@ -444,7 +444,6 @@ module.exports = {
         ]
       },
       Footage: {
-        keyword: "",
         videos: [
           { awsLink: "", duration: 0 },
           { awsLink: "", duration: 0 },
@@ -461,8 +460,8 @@ module.exports = {
       {
         index:0,
         text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+        keywords:[],
         cnbc: {
-          keywordCNBC: "",
           videos: [
             { awsLink: "", duration: 0 },
             { awsLink: "", duration: 0 },
@@ -470,7 +469,6 @@ module.exports = {
           ]
         },
         Footage: {
-          keyword: "",
           videos: [
             { awsLink: "", duration: 0 },
             { awsLink: "", duration: 0 },
@@ -486,8 +484,8 @@ module.exports = {
       {
         index:1,
         text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+        keywords:[],
         cnbc: {
-          keywordCNBC: "",
           videos: [
             { awsLink: "", duration: 0 },
             { awsLink: "", duration: 0 },
@@ -495,7 +493,6 @@ module.exports = {
           ]
         },
         Footage: {
-          keyword: "",
           videos: [
             { awsLink: "", duration: 0 },
             { awsLink: "", duration: 0 },
@@ -511,8 +508,8 @@ module.exports = {
       {
         index:2,
         text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+        keywords:[],
         cnbc: {
-          keywordCNBC: "",
           videos: [
             { awsLink: "", duration: 0 },
             { awsLink: "", duration: 0 },
@@ -520,7 +517,6 @@ module.exports = {
           ]
         },
         Footage: {
-          keyword: "",
           videos: [
             { awsLink: "", duration: 0 },
             { awsLink: "", duration: 0 },
@@ -536,8 +532,8 @@ module.exports = {
       {
         index:3,
         text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+        keywords:[],
         cnbc: {
-          keywordCNBC: "",
           videos: [
             { awsLink: "", duration: 0 },
             { awsLink: "", duration: 0 },
@@ -545,7 +541,6 @@ module.exports = {
           ]
         },
         Footage: {
-          keyword: "",
           videos: [
             { awsLink: "", duration: 0 },
             { awsLink: "", duration: 0 },
@@ -561,8 +556,8 @@ module.exports = {
       {
         index:4,
         text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+        keywords:[],
         cnbc: {
-          keywordCNBC: "",
           videos: [
             { awsLink: "", duration: 0 },
             { awsLink: "", duration: 0 },
@@ -570,7 +565,6 @@ module.exports = {
           ]
         },
         Footage: {
-          keyword: "",
           videos: [
             { awsLink: "", duration: 0 },
             { awsLink: "", duration: 0 },
@@ -585,8 +579,8 @@ module.exports = {
       },{
         index:5,
         text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+        keywords:[],
         cnbc: {
-          keywordCNBC: "",
           videos: [
             { awsLink: "", duration: 0 },
             { awsLink: "", duration: 0 },
@@ -594,7 +588,6 @@ module.exports = {
           ]
         },
         Footage: {
-          keyword: "",
           videos: [
             { awsLink: "", duration: 0 },
             { awsLink: "", duration: 0 },
@@ -610,8 +603,8 @@ module.exports = {
       {
         index:6,
         text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+        keywords:[],
         cnbc: {
-          keywordCNBC: "",
           videos: [
             { awsLink: "", duration: 0 },
             { awsLink: "", duration: 0 },
@@ -619,7 +612,6 @@ module.exports = {
           ]
         },
         Footage: {
-          keyword: "",
           videos: [
             { awsLink: "", duration: 0 },
             { awsLink: "", duration: 0 },
@@ -634,8 +626,8 @@ module.exports = {
       },{
         index:7,
         text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+        keywords:[],
         cnbc: {
-          keywordCNBC: "",
           videos: [
             { awsLink: "", duration: 0 },
             { awsLink: "", duration: 0 },
@@ -643,7 +635,6 @@ module.exports = {
           ]
         },
         Footage: {
-          keyword: "",
           videos: [
             { awsLink: "", duration: 0 },
             { awsLink: "", duration: 0 },
@@ -659,8 +650,8 @@ module.exports = {
       {
         index:8,
         text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+        keywords:[],
         cnbc: {
-          keywordCNBC: "",
           videos: [
             { awsLink: "", duration: 0 },
             { awsLink: "", duration: 0 },
@@ -668,7 +659,6 @@ module.exports = {
           ]
         },
         Footage: {
-          keyword: "",
           videos: [
             { awsLink: "", duration: 0 },
             { awsLink: "", duration: 0 },
