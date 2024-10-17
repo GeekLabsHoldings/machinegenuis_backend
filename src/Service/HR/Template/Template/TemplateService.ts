@@ -9,41 +9,10 @@ class TemplateService implements ITemplateService {
         const result = await newTemplate.save();
         return result;
     }
-    async getTemplatesByStepAndOptionalRoleLevel(step: string, role?: string, level?: string): Promise<ITemplateModel> {
-        const pipeline: PipelineStage[] = [
-            {
-                $lookup: {
-                    from: 'groups',
-                    localField: 'group_id',
-                    foreignField: '_id',
-                    as: 'group'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$group',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $match: {
-                    'group.step': step,
-                    ...(role ? { role: { $eq: role } } : {}),
-                    ...(level ? { level: { $eq: level } } : {})
-                }
-            },
-            {
-                $project: {
-                    title: 1,
-                    level: 1,
-                    details: 1,
-                    role: 1
-                }
-            }
-        ];
-
-        const result = await templateModel.aggregate(pipeline);
-        return result[0];
+    async getTemplatesByStepAndOptionalRoleLevel(step: string, role?: string, level?: string): Promise<ITemplateModel | null> {
+        const query = { step, ...(role ? { role } : {}), ...(level ? { level } : {}) };
+        const result = await templateModel.findOne(query);
+        return result;
     }
 
 
@@ -78,8 +47,8 @@ class TemplateService implements ITemplateService {
         const result = await templateModel.find({ group_id: { $type: 'objectId' } }).select({ title: 1, level: 1, role: 1, group_id: 1 })
         return result;
     }
-    async checkTemplateExist(title: string, role: string, level: string): Promise<boolean> {
-        const result = await templateModel.findOne({ title, role, level });
+    async checkTemplateExist(title: string, role: string, level: string, step: string): Promise<boolean> {
+        const result = await templateModel.findOne({ title, role, level, step });
         return result ? true : false;
     }
 

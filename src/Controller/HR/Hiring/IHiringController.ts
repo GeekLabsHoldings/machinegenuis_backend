@@ -8,7 +8,7 @@ export interface ICurrentStepTemplate extends ITemplateModel {
 
 export interface IStepsOfHiring {
     candidates: ICandidateModel[],
-    template: ITemplateModel,
+    template: ITemplateModel | "",
     step: string
     level: string
     role: string
