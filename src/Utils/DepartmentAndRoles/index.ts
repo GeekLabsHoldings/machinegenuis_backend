@@ -9,21 +9,21 @@ enum DepartmentEnum {
     CustomerService = 'customer-service',
     Development = 'development',
 }
-enum RoleEnum {
-    ContentWriter = "Content Writer",
-    Payroll = "Payroll",
-    CEO = "CEO",
-    SocialMedia = "Social Media",
-    Administrative = "Administrative",
-    VideoEditor = "Video Editor",
-    CustomerService = 'Customer Service',
-    BackEndPhp = 'Back End PHP',
-    BackEndDotNet = 'Back End .NET',
-    MeanStack = 'MEAN Stack',
-    DevOps = 'DevOps',
-    FrontEnd = 'Front End',
-    ReactNative = 'React Native'
-}
+// enum RoleEnum {
+//     ContentWriter = "Content Writer",
+//     Payroll = "Payroll",
+//     CEO = "CEO",
+//     SocialMedia = "Social Media",
+//     Administrative = "Administrative",
+//     VideoEditor = "Video Editor",
+//     CustomerService = 'Customer Service',
+//     BackEndPhp = 'Back End PHP',
+//     BackEndDotNet = 'Back End .NET',
+//     MeanStack = 'MEAN Stack',
+//     DevOps = 'DevOps',
+//     FrontEnd = 'Front End',
+//     ReactNative = 'React Native'
+// }
 
 const DepartmentRoles = {
     'hr': ["Recruiter", "Training", "Employee Relations"],
@@ -38,7 +38,7 @@ const DepartmentRoles = {
 } as const;
 
 const Departments = Object.keys(DepartmentRoles)
-const Roles = Object.values(RoleEnum);
+//const Roles = Object.values(RoleEnum);
 
 type DepartmentType = keyof typeof DepartmentRoles;
 type RoleType = typeof DepartmentRoles[DepartmentType][number];
@@ -46,8 +46,8 @@ type RoleType = typeof DepartmentRoles[DepartmentType][number];
 export {
     Departments,
     DepartmentRoles,
-    Roles,
-    RoleEnum,
+    // Roles,
+    // RoleEnum,
     DepartmentType,
     RoleType,
     DepartmentEnum

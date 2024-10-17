@@ -2,7 +2,6 @@ import { model, Schema } from "mongoose";
 import { EnumStringNotRequired, EnumStringRequired, NotRequiredString, RefType, RequiredNumber, RequiredString } from "../../../Utils/Schemas";
 import { SchemaTypesReference } from "../../../Utils/Schemas/SchemaTypesReference";
 import { IGroupModel, ITemplateModel } from "./ITemplateModel";
-import { Roles } from "../../../Utils/DepartmentAndRoles";
 import { JobLevel } from "../../../Utils/Level";
 import { HiringSteps } from "../../../Utils/GroupsAndTemplates";
 
@@ -24,7 +23,7 @@ const templateSchema = new Schema<ITemplateModel>({
     title: RequiredString,
     level: EnumStringNotRequired(JobLevel),
     details: [templateContainerSchema],
-    role: EnumStringNotRequired(Roles),
+    role: RequiredString,
     group_id: RefType(SchemaTypesReference.Group, false),
     step: EnumStringRequired(HiringSteps),
 
