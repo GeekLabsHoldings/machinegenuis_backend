@@ -31,7 +31,7 @@ export const tweets = async () => {
       const accounts = await getAllAccounts(brand._id);
       let skip = parseInt(await redis.get(`${brand.brand_name}_skip`)) || 0;
 
-      for (let i = 0; i < Math.min(accounts.length, 15); i++) {
+      for (let i = 0; i < Math.min(accounts.length, 14); i++) {
         const account = accounts[skip];
 
         const delayBetweenPosts = convertToMilliseconds(
