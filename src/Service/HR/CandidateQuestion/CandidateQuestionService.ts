@@ -17,7 +17,7 @@ class CandidateQuestionService implements ICandidateQuestionsService {
     }
 
     async candidateSendTask(candidate_id: string, task_url: string): Promise<ICandidateQuestionsModel | null> {
-        const result = await candidateQuestionModel.findOneAndUpdate({ candidate: candidate_id }, { taskLink: task_url }, { new: true });
+        const result = await candidateQuestionModel.findOneAndUpdate({ candidate: candidate_id }, { taskLink: task_url }, { upsert: true, new: true });
         return result;
     }
     async ReviewCandidateTask(_id: string, taskApprove: string, session: ClientSession): Promise<ICandidateQuestionsModel | null> {
