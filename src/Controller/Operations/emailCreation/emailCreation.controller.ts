@@ -67,6 +67,29 @@ export async function updateAccessToken(req: Request, res: Response) {
 }
 
 
+export async function addSignture(req: Request, res: Response) {
+    try {
+        const name = req.body.name
+        const content = req.body.content
+        const position = req.body.position
+        const assignUsers = req.body.assignUsers
+        const acc_id = req.body.acc_id
+        const email = req.body.email
+
+
+        const mainAccount = await new EmailsZohoModelService().getEmailAccountByIDorEmail(acc_id, email)
+        if (mainAccount) {
+            const zohoService = new UserZohoService(mainAccount.clientId, mainAccount.clientSecret, mainAccount.zohoId)
+            const sig = zohoService.addSignture({name, content, position, assignUsers}, mainAccount.accessToken)
+
+            return res.json({sig})
+        }
+        return res.status(404).json({ message: "no admin account found" })
+    } catch (error) {
+        console.log(error);
+        return systemError.sendError(res, error);
+    }
+}
 
 
 
