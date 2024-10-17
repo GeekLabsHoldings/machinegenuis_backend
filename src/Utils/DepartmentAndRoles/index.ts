@@ -26,13 +26,13 @@ enum RoleEnum {
 
 const DepartmentRoles = {
     'hr': ["Recruiter", "Training", "Employee Relations"],
-    "content-creation": ["ContentWriter"],
-    ceo: ['ceo'],
-    "social-media": ["SocialMedia"],
-    administrative: ['administrative'],
+    "content-creation": ["Content Writer"],
+    ceo: ['CEO'],
+    "social-media": ["Social Media"],
+    administrative: ['Administrative'],
     accounting: ['Payroll'],
-    "video-editing": ['VideoEditor'],
-    'customer-service': ['CustomerService'],
+    "video-editing": ['Video Editor'],
+    'customer-service': ['Customer Service'],
     development: ['Back End Php', 'Back End .Net', 'Mean Stack', 'DevOps', 'Front End'],
 } as const;
 
