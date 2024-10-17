@@ -22,6 +22,7 @@ enum RoleEnum {
     MeanStack = 'MEAN Stack',
     DevOps = 'DevOps',
     FrontEnd = 'Front End',
+    ReactNative = 'React Native'
 }
 
 const DepartmentRoles = {
@@ -33,7 +34,7 @@ const DepartmentRoles = {
     accounting: ['Payroll'],
     "video-editing": ['Video Editor'],
     'customer-service': ['Customer Service'],
-    development: ['Back End Php', 'Back End .Net', 'Mean Stack', 'DevOps', 'Front End'],
+    development: ['Back End Php', 'Back End .Net', 'Mean Stack', 'DevOps', 'Front End', 'React Native'],
 } as const;
 
 const Departments = Object.keys(DepartmentRoles)
