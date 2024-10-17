@@ -1,19 +1,20 @@
 const OpenAI = require("openai");
-const S3Uploader = require('./uploadToS3')
-const getImgs = require('./getImages');
-import wordsModel from '../../Model/VideoEditing/replacementWords_model';
-import { addWordAndReplace_srev } from '../../Service/VideoEditingModule/replaceWords';
-const axios = require('axios');
+const S3Uploader = require("./uploadToS3");
+const getImgs = require("./getImages");
+import { duration } from "moment";
+import wordsModel from "../../Model/VideoEditing/replacementWords_model";
+import { addWordAndReplace_srev } from "../../Service/VideoEditingModule/replaceWords";
+const axios = require("axios");
 
 require("dotenv").config();
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
- const splitContent = async (content) => {
+const splitContent = async (content) => {
   try {
-      console.log("Received content:", content);
+    console.log("Received content:", content);
 
-      const prompt = `Could you please split this content into paragraphs, then give me JUST ONE KEYWORD for each paragraph ONLY ONE KEYWORD !!!
+    const prompt = `Could you please split this content into paragraphs, then give me JUST ONE KEYWORD for each paragraph ONLY ONE KEYWORD !!!
       I need the keyword to be names of persons mentioned in the paragraph if they are famous (President, Head of government, etc.).
       IF any person is mentioned, give me the name of the government or country if applicable. If no relevant keyword is found, give me the most important word.
       Please don't change the original content!
@@ -27,69 +28,77 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
           ]
       }`;
 
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [{ role: "user", content: prompt }],
+    });
 
-      const completion = await openai.chat.completions.create({
-          model: "gpt-4",
-          messages: [{ role: "user", content: prompt }]
-      });
+    console.log("Received completion from OpenAI:", completion);
 
-      console.log("Received completion from OpenAI:", completion);
+    const rawResult = completion.choices[0].message.content.trim();
+    console.log("Trimmed OpenAI response for body---->:", rawResult);
 
+    let parsedResult;
+    try {
+      parsedResult = JSON.parse(rawResult);
+      console.log("Parsed OpenAI response for body ----->:", parsedResult);
+    } catch (parseError) {
+      console.error("Failed to parse JSON response:", parseError);
+      throw new Error("Invalid JSON response from OpenAI");
+    }
 
-      const rawResult = completion.choices[0].message.content.trim();
-      console.log("Trimmed OpenAI response for body---->:", rawResult);
+    var resultObject = await Promise.all(
+      parsedResult.paragraphs.map(async (paragraph, index) => {
+        console.log(`Processing paragraph ${index + 1}:`, paragraph.text);
 
+        const keywordsAndImages = await Promise.all(
+          paragraph.keywords.map(async (keyword) => {
+            try {
+              console.log(`Fetching image for keyword: ${keyword}`);
+              const imageUrl = await getImgs.handleSearchImg(keyword);
+              return { keyword, imageUrl };
+            } catch (err) {
+              console.error(
+                `Error fetching image for keyword ${keyword}:`,
+                err
+              );
+              return { keyword, imageUrl: null };
+            }
+          })
+        );
 
-      let parsedResult;
-      try {
-          parsedResult = JSON.parse(rawResult);
-          console.log("Parsed OpenAI response for body ----->:", parsedResult);
-      } catch (parseError) {
-          console.error("Failed to parse JSON response:", parseError);
-          throw new Error("Invalid JSON response from OpenAI");
-      }
+        const wordsList = await wordsModel.find({});
+        const upDatedText = await addWordAndReplace_srev.findAndReplaceWords(
+          paragraph.text,
+          wordsList
+        );
+        let audioPath;
+        try {
+          console.log(`Converting paragraph ${index + 1} to audio...`);
+          audioPath = await convertTextToAudio(upDatedText, index);
+          console.log(`Audio generated for paragraph ${index + 1}:`, audioPath);
+        } catch (err) {
+          console.error(
+            `Error converting text to audio for paragraph ${index}:`,
+            err
+          );
+          audioPath = null;
+        }
 
+        return {
+          index,
+          text: upDatedText,
+          keywordsAndImages,
+          audioPath,
+        };
+      })
+    );
 
-      var resultObject = await Promise.all(parsedResult.paragraphs.map(async (paragraph, index) => {
-          console.log(`Processing paragraph ${index + 1}:`, paragraph.text);
-
-          const keywordsAndImages = await Promise.all(paragraph.keywords.map(async (keyword) => {
-              try {
-                  console.log(`Fetching image for keyword: ${keyword}`);
-                  const imageUrl = await getImgs.handleSearchImg(keyword);
-                  return { keyword, imageUrl };
-              } catch (err) {
-                  console.error(`Error fetching image for keyword ${keyword}:`, err);
-                  return { keyword, imageUrl: null };
-              }
-          }));
-
-          const wordsList = await wordsModel.find({});
-          const upDatedText = await addWordAndReplace_srev.findAndReplaceWords(paragraph.text , wordsList)
-          let audioPath;
-          try {
-              console.log(`Converting paragraph ${index + 1} to audio...`);
-              audioPath = await convertTextToAudio(upDatedText, index);
-              console.log(`Audio generated for paragraph ${index + 1}:`, audioPath);
-          } catch (err) {
-              console.error(`Error converting text to audio for paragraph ${index}:`, err);
-              audioPath = null;
-          }
-                    
-          return {
-              index,
-              text: upDatedText,
-              keywordsAndImages,
-              audioPath
-          };
-      }));
-
-      console.log("Final processed result:", resultObject);           
-      return resultObject;
-
+    console.log("Final processed result:", resultObject);
+    return resultObject;
   } catch (error) {
-      console.error("Error splitting content:", error);
-      throw error;
+    console.error("Error splitting content:", error);
+    throw error;
   }
 };
 
@@ -119,7 +128,10 @@ const generateSlideJson = async (intro) => {
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
-      messages: [{ role: "user", content: prompt }, { role: "system", content: prompt }],
+      messages: [
+        { role: "user", content: prompt },
+        { role: "system", content: prompt },
+      ],
     });
 
     const rawResult = completion.choices[0].message.content.trim();
@@ -135,23 +147,29 @@ const generateSlideJson = async (intro) => {
 
     const paragraphs = parsedResult.paragraphs.slice(0, 4);
 
+    const slides = await Promise.all(
+      paragraphs.map(async (paragraph, index) => {
+        const keywordsAndImages = await Promise.all(
+          paragraph.keywords.map(async (keyword) => {
+            const imageUrl = await getImgs.handleSearchImg(keyword);
+            return { keyword, imageUrl };
+          })
+        );
 
-    const slides = await Promise.all(paragraphs.map(async (paragraph, index) => {
-      const keywordsAndImages = await Promise.all(paragraph.keywords.map(async (keyword) => {
-        const imageUrl = await getImgs.handleSearchImg(keyword);
-        return { keyword, imageUrl };
-      }));
+        const audioPath = await convertTextToAudio(
+          paragraph.text,
+          `S${index + 1}`
+        );
 
-      const audioPath = await convertTextToAudio(paragraph.text, `S${index + 1}`);
-
-      return {
-        index,
-        title: paragraph.title,
-        text: paragraph.text,
-        keywordsAndImages,
-        audioPath
-      };
-    }));
+        return {
+          index,
+          title: paragraph.title,
+          text: paragraph.text,
+          keywordsAndImages,
+          audioPath,
+        };
+      })
+    );
 
     const slideJson = slides.reverse().reduce((acc, slide, idx) => {
       acc[`slide${4 - idx}Json`] = [slide];
@@ -159,7 +177,6 @@ const generateSlideJson = async (intro) => {
     }, {});
 
     return slideJson;
-
   } catch (error) {
     console.error("Error generating slides:", error);
     throw error;
@@ -168,9 +185,9 @@ const generateSlideJson = async (intro) => {
 
 const convertTextToAudio = async (text, index) => {
   const apiKey = process.env.ELEVENLABS_API_KEY;
-  const voiceId = 'Xbs7Hxi9YicGxdbtUTdv';
+  const voiceId = "Xbs7Hxi9YicGxdbtUTdv";
   console.log("USING ELEVENLABS");
-  
+
   try {
     const response = await axios.post(
       `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
@@ -179,17 +196,17 @@ const convertTextToAudio = async (text, index) => {
       },
       {
         headers: {
-          'Content-Type': 'application/json',
-          'xi-api-key': apiKey,
+          "Content-Type": "application/json",
+          "xi-api-key": apiKey,
         },
-        responseType: 'arraybuffer', 
+        responseType: "arraybuffer",
       }
     );
 
     const audioBuffer = response.data;
     return await S3Uploader.uploadToS3(audioBuffer, index);
   } catch (error) {
-    console.error('Error converting text to audio:', error);
+    console.error("Error converting text to audio:", error);
     throw error;
   }
 };
@@ -212,9 +229,9 @@ const convertTextToAudio = async (text, index) => {
 
 const reConvertTextToAudio = async (text, index) => {
   const apiKey = process.env.ELEVENLABS_API_KEY;
-  const voiceId = 'Xbs7Hxi9YicGxdbtUTdv';
+  const voiceId = "Xbs7Hxi9YicGxdbtUTdv";
   console.log("USING ELEVENLABS");
-  
+
   try {
     const response = await axios.post(
       `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
@@ -223,10 +240,10 @@ const reConvertTextToAudio = async (text, index) => {
       },
       {
         headers: {
-          'Content-Type': 'application/json',
-          'xi-api-key': apiKey,
+          "Content-Type": "application/json",
+          "xi-api-key": apiKey,
         },
-        responseType: 'arraybuffer', 
+        responseType: "arraybuffer",
       }
     );
 
@@ -238,60 +255,64 @@ const reConvertTextToAudio = async (text, index) => {
   }
 };
 
-const testAudio = async (req , res) => {
+const testAudio = async (req, res) => {
   try {
     const { selectedContent } = req.body;
     if (!selectedContent) {
-      return res.status(400).json({ success: false, error: "No content provided" });
+      return res
+        .status(400)
+        .json({ success: false, error: "No content provided" });
     }
     const audioPath = await reConvertTextToAudio(selectedContent, "test");
     return res.json({ success: true, audioPath });
+  } catch {
+    return res
+      .status(500)
+      .json({ success: false, error: "Error regenerating audio" });
   }
-  catch
-  {
-    return res.status(500).json({ success: false, error: "Error regenerating audio"})
-  }
-}
+};
 
-const regenrateAudio = async (req , res) => {
+const regenrateAudio = async (req, res) => {
   try {
-    const { selectedContent , index} = req.body;
+    const { selectedContent, index } = req.body;
     if (!selectedContent || !index) {
-      return res.status(400).json({ success: false, error: "No content provided" });
+      return res
+        .status(400)
+        .json({ success: false, error: "No content provided" });
     }
     const audioPath = await reConvertTextToAudio(selectedContent, index);
     return res.json({ success: true, audioPath });
+  } catch {
+    return res
+      .status(500)
+      .json({ success: false, error: "Error regenerating audio" });
   }
-  catch
-  {
-    return res.status(500).json({ success: false, error: "Error regenerating audio"})
-  }
-}
+};
 
-const splitAndConvert = async (req , res) => {
+const splitAndConvert = async (req, res) => {
   try {
-    const {intro , selectedContent } = req.body;
+    const { intro, selectedContent } = req.body;
     if (!selectedContent) {
-      return res.status(400).json({ success: false, error: "No content provided" });
+      return res
+        .status(400)
+        .json({ success: false, error: "No content provided" });
     }
 
     const slideJson = await generateSlideJson(intro);
     const paragraphJson = await splitContent(selectedContent);
 
+    return res.status(200).json({ success: true, paragraphJson, slideJson });
+  } catch {
     return res
-    .status(200)
-    .json({ success: true, paragraphJson , slideJson});
+      .status(500)
+      .json({ success: false, error: "Error processing content" });
   }
-  catch
-  {
-    return res.status(500).json({ success: false, error: "Error processing content"})
-  }
-}
+};
 const splitContentInvestocracy = async (content) => {
   try {
-      console.log("Received content:", content);
+    console.log("Received content:", content);
 
-      const prompt = `Could you please split this content into paragraphs, then give me JUST ONE SINGLE WORD for each paragraph that I can use as a search query on YouTube. 
+    const prompt = `Could you please split this content into paragraphs, then give me JUST ONE SINGLE WORD for each paragraph that I can use as a search query on YouTube. 
       Make the word include the name of any famous person mentioned (President, Head of government, etc.) and, if relevant, the name of the government or country. 
       If no such person or government is mentioned, provide a relevant word that captures the main idea of the paragraph.
       Please don't change the original content!
@@ -305,57 +326,62 @@ const splitContentInvestocracy = async (content) => {
           ]
       }`;
 
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [{ role: "user", content: prompt }],
+    });
 
+    console.log("Received completion from OpenAI:", completion);
 
-      const completion = await openai.chat.completions.create({
-          model: "gpt-4",
-          messages: [{ role: "user", content: prompt }]
-      });
+    const rawResult = completion.choices[0].message.content.trim();
+    console.log("Trimmed OpenAI response for body---->:", rawResult);
 
-      console.log("Received completion from OpenAI:", completion);
+    let parsedResult;
+    try {
+      parsedResult = JSON.parse(rawResult);
+      console.log("Parsed OpenAI response for body ----->:", parsedResult);
+    } catch (parseError) {
+      console.error("Failed to parse JSON response:", parseError);
+      throw new Error("Invalid JSON response from OpenAI");
+    }
 
-      const rawResult = completion.choices[0].message.content.trim();
-      console.log("Trimmed OpenAI response for body---->:", rawResult);
+    const resultObject = await Promise.all(
+      parsedResult.paragraphs.map(async (paragraph, index) => {
+        console.log(`Processing paragraph ${index + 1}:`, paragraph.text);
 
-      let parsedResult;
-      try {
-          parsedResult = JSON.parse(rawResult);
-          console.log("Parsed OpenAI response for body ----->:", parsedResult);
-      } catch (parseError) {
-          console.error("Failed to parse JSON response:", parseError);
-          throw new Error("Invalid JSON response from OpenAI");
-      }
+        const wordsList = await wordsModel.find({});
+        const upDatedText = await addWordAndReplace_srev.findAndReplaceWords(
+          paragraph.text,
+          wordsList
+        );
 
-      const resultObject = await Promise.all(parsedResult.paragraphs.map(async (paragraph, index) => {
-          console.log(`Processing paragraph ${index + 1}:`, paragraph.text);
+        let audioPath;
+        try {
+          console.log(`Converting paragraph ${index + 1} to audio...`);
+          audioPath = await convertTextToAudio(upDatedText, index);
+          console.log(`Audio generated for paragraph ${index + 1}:`, audioPath);
+        } catch (err) {
+          console.error(
+            `Error converting text to audio for paragraph ${index}:`,
+            err
+          );
+          audioPath = null;
+        }
 
-          const wordsList = await wordsModel.find({});
-          const upDatedText = await addWordAndReplace_srev.findAndReplaceWords(paragraph.text, wordsList);
+        return {
+          index,
+          text: upDatedText,
+          keywords: paragraph.keywords,
+          audioPath,
+        };
+      })
+    );
 
-          let audioPath;
-          try {
-              console.log(`Converting paragraph ${index + 1} to audio...`);
-              audioPath = await convertTextToAudio(upDatedText, index);
-              console.log(`Audio generated for paragraph ${index + 1}:`, audioPath);
-          } catch (err) {
-              console.error(`Error converting text to audio for paragraph ${index}:`, err);
-              audioPath = null;
-          }
-
-          return {
-              index,
-              text: upDatedText,
-              keywords: paragraph.keywords,
-              audioPath
-          };
-      }));
-
-      console.log("Final processed result:", resultObject);
-      return resultObject;
-
+    console.log("Final processed result:", resultObject);
+    return resultObject;
   } catch (error) {
-      console.error("Error splitting content:", error);
-      throw error;
+    console.error("Error splitting content:", error);
+    throw error;
   }
 };
 const generateIntroKeyword = async (intro) => {
@@ -370,11 +396,9 @@ const generateIntroKeyword = async (intro) => {
       "keyword": "YourSingleKeywordHere"
     }`;
 
-
-
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
-      messages: [{ role: "user", content: prompt }]
+      messages: [{ role: "user", content: prompt }],
     });
 
     const rawResult = completion.choices[0].message.content.trim();
@@ -390,20 +414,273 @@ const generateIntroKeyword = async (intro) => {
     const introKeyword = parsedResult.keyword || "No Keyword Found";
 
     return { keyword: introKeyword };
-
   } catch (error) {
     console.error("Error generating keyword for intro:", error);
     throw error;
   }
 };
 
-module.exports =
-{
-    splitAndConvert,
-    regenrateAudio,
-    testAudio,
-    convertTextToAudio,
-    splitContent,
-    splitContentInvestocracy,
-    generateIntroKeyword
-}
+module.exports = {
+  splitAndConvert,
+  regenrateAudio,
+  testAudio,
+  convertTextToAudio,
+  splitContent,
+  splitContentInvestocracy,
+  generateIntroKeyword,
+};
+
+
+
+  const x = {
+    intro: {
+      text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+      cnbc: {
+        keywordCNBC: "",
+        videos: [
+          { awsLink: "", duration: 0 },
+          { awsLink: "", duration: 0 },
+          { awsLink: "", duration: 0 }
+        ]
+      },
+      Footage: {
+        keyword: "",
+        videos: [
+          { awsLink: "", duration: 0 },
+          { awsLink: "", duration: 0 },
+          { awsLink: "", duration: 0 }
+        ],
+        audioPath: {
+          index: "0-1729161302942",
+          url: "https://machine-genius.s3.amazonaws.com/My_Audios/audio-0-1729161076854.mp3",
+          duration: 0,
+        }
+      },
+    },
+    bodyAndOutro: [
+      {
+        index:0,
+        text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+        cnbc: {
+          keywordCNBC: "",
+          videos: [
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 }
+          ]
+        },
+        Footage: {
+          keyword: "",
+          videos: [
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 }
+          ],
+          audioPath: {
+            index: "0-1729161302942",
+            url: "https://machine-genius.s3.amazonaws.com/My_Audios/audio-0-1729161076854.mp3",
+            duration: 0,
+          }
+        },
+      },
+      {
+        index:1,
+        text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+        cnbc: {
+          keywordCNBC: "",
+          videos: [
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 }
+          ]
+        },
+        Footage: {
+          keyword: "",
+          videos: [
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 }
+          ],
+          audioPath: {
+            index: "0-1729161302942",
+            url: "https://machine-genius.s3.amazonaws.com/My_Audios/audio-0-1729161076854.mp3",
+            duration: 0,
+          }
+        },
+      },
+      {
+        index:2,
+        text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+        cnbc: {
+          keywordCNBC: "",
+          videos: [
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 }
+          ]
+        },
+        Footage: {
+          keyword: "",
+          videos: [
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 }
+          ],
+          audioPath: {
+            index: "0-1729161302942",
+            url: "https://machine-genius.s3.amazonaws.com/My_Audios/audio-0-1729161076854.mp3",
+            duration: 0,
+          }
+        },
+      },
+      {
+        index:3,
+        text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+        cnbc: {
+          keywordCNBC: "",
+          videos: [
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 }
+          ]
+        },
+        Footage: {
+          keyword: "",
+          videos: [
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 }
+          ],
+          audioPath: {
+            index: "0-1729161302942",
+            url: "https://machine-genius.s3.amazonaws.com/My_Audios/audio-0-1729161076854.mp3",
+            duration: 0,
+          }
+        },
+      },
+      {
+        index:4,
+        text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+        cnbc: {
+          keywordCNBC: "",
+          videos: [
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 }
+          ]
+        },
+        Footage: {
+          keyword: "",
+          videos: [
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 }
+          ],
+          audioPath: {
+            index: "0-1729161302942",
+            url: "https://machine-genius.s3.amazonaws.com/My_Audios/audio-0-1729161076854.mp3",
+            duration: 0,
+          }
+        },
+      },{
+        index:5,
+        text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+        cnbc: {
+          keywordCNBC: "",
+          videos: [
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 }
+          ]
+        },
+        Footage: {
+          keyword: "",
+          videos: [
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 }
+          ],
+          audioPath: {
+            index: "0-1729161302942",
+            url: "https://machine-genius.s3.amazonaws.com/My_Audios/audio-0-1729161076854.mp3",
+            duration: 0,
+          }
+        },
+      },
+      {
+        index:6,
+        text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+        cnbc: {
+          keywordCNBC: "",
+          videos: [
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 }
+          ]
+        },
+        Footage: {
+          keyword: "",
+          videos: [
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 }
+          ],
+          audioPath: {
+            index: "0-1729161302942",
+            url: "https://machine-genius.s3.amazonaws.com/My_Audios/audio-0-1729161076854.mp3",
+            duration: 0,
+          }
+        },
+      },{
+        index:7,
+        text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+        cnbc: {
+          keywordCNBC: "",
+          videos: [
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 }
+          ]
+        },
+        Footage: {
+          keyword: "",
+          videos: [
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 }
+          ],
+          audioPath: {
+            index: "0-1729161302942",
+            url: "https://machine-genius.s3.amazonaws.com/My_Audios/audio-0-1729161076854.mp3",
+            duration: 0,
+          }
+        },
+      },
+      {
+        index:8,
+        text: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+        cnbc: {
+          keywordCNBC: "",
+          videos: [
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 }
+          ]
+        },
+        Footage: {
+          keyword: "",
+          videos: [
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 },
+            { awsLink: "", duration: 0 }
+          ],
+          audioPath: {
+            index: "0-1729161302942",
+            url: "https://machine-genius.s3.amazonaws.com/My_Audios/audio-0-1729161076854.mp3",
+            duration: 0,
+          }
+        },
+      }
+    ]
+  };
+  

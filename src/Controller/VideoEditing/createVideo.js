@@ -58,6 +58,14 @@ export const gitDetailsContent = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+// export const getFinalContent = async (req, res) => {
+//   try {
+//     const { intro, content } = req.body;
+//     const introKeywordData = await generateIntroKeyword(intro);
+//     const introKeyword = introKeywordData.keyword;
+//     console.log(introKeyword);
+//   }}
+  
 // export const gitDetailsContent = async (req, res) => {
 //   try {
 //     const { intro, content } = req.body;
