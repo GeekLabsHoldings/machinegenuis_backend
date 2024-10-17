@@ -17,7 +17,6 @@ const groupSchema = new Schema<IGroupModel>({
     title: RequiredString,
     description: NotRequiredString,
     icon: NotRequiredString,
-    position: RequiredNumber,
     step: EnumStringRequired(HiringSteps),
 });
 
@@ -27,6 +26,7 @@ const templateSchema = new Schema<ITemplateModel>({
     details: [templateContainerSchema],
     role: EnumStringNotRequired(Roles),
     group_id: RefType(SchemaTypesReference.Group, false),
+    step: EnumStringRequired(HiringSteps),
 
 })
 

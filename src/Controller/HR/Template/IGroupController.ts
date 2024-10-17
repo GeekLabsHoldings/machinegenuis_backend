@@ -11,7 +11,6 @@ interface IGroupTemplates extends IGroupModel {
 }
 interface IGroupController {
     createGroup(group: IGroupModel, session: ClientSession): Promise<IGroupModel>;
-    updatePosition(group: IGroupPosition[], session: ClientSession): Promise<IGroupPosition[]>;
     deleteGroup(_id: string): Promise<void>;
     updateGroup(_id: string, group: IGroupModel): Promise<IGroupModel>;
     getAllGroupWithTemplates(): Promise<IGroupTemplates[]>
