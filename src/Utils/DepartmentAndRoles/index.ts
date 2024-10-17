@@ -6,16 +6,22 @@ enum DepartmentEnum {
     Accounting = "accounting",
     CEO = "ceo",
     VideoEditing = "video-editing",
-    CustomerService = 'customer-service'
+    CustomerService = 'customer-service',
+    Development = 'development',
 }
 enum RoleEnum {
-    ContentWriter = "ContentWriter",
+    ContentWriter = "Content Writer",
     Payroll = "Payroll",
-    CEO = "ceo",
-    SocialMedia = "SocialMedia",
-    Administrative = "administrative",
-    VideoEditor = "VideoEditor",
-    CustomerService = 'CustomerService'
+    CEO = "CEO",
+    SocialMedia = "Social Media",
+    Administrative = "Administrative",
+    VideoEditor = "Video Editor",
+    CustomerService = 'Customer Service',
+    BackEndPhp = 'Back End PHP',
+    BackEndDotNet = 'Back End .NET',
+    MeanStack = 'MEAN Stack',
+    DevOps = 'DevOps',
+    FrontEnd = 'Front End',
 }
 
 const DepartmentRoles = {
@@ -26,7 +32,8 @@ const DepartmentRoles = {
     administrative: ['administrative'],
     accounting: ['Payroll'],
     "video-editing": ['VideoEditor'],
-    'customer-service': ['CustomerService']
+    'customer-service': ['CustomerService'],
+    development: ['Back End Php', 'Back End .Net', 'Mean Stack', 'DevOps', 'Front End'],
 } as const;
 
 const Departments = Object.keys(DepartmentRoles)
