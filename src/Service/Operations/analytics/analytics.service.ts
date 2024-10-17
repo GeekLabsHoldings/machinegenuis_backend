@@ -6,13 +6,9 @@ import SocialMediaPosts, { socialMediaModel } from "../../../Model/SocialMedia/S
 import GroupsAnalyticsModel from "../../../Model/Operations/analytics/analytics.model";
 import IKPIs from "../../../Model/Operations/analytics/IKPIs.intreface";
 import KPIAnalyticsModel from "../../../Model/Operations/analytics/KPIs.model";
-import { platform } from "os";
-import { PlatformArr } from "../../../Utils/SocialMedia/Platform";
-const bizSdk = require('facebook-nodejs-business-sdk');
 const snoowrap = require('snoowrap');
 const axios = require('axios');
-const { Chart, registerables } = require('chart.js'); 
-const { createCanvas } = require('canvas');
+
 
 
 
@@ -117,8 +113,6 @@ export async function FacebookPostInsights(brand: string, postId: string) {
     try {
 
         const acc = await getAccount(brand, "FACEBOOK")
-        const Post = bizSdk.Post;
-        const post = new Post(postId);
         const url = `https://graph.facebook.com/${postId}/posts`;
 
         const response = await axios.get(url, null,{
@@ -499,44 +493,6 @@ export async function subsGains(endDate:string|number|Date = Date.now(), platfor
 
 
 
-
-Chart.register(...registerables);
-export async function noPostsChart(){
-    const width = 400; // Set desired width
-  const height = 400; // Set desired height
-  const canvas = createCanvas(width, height);
-  const ctx = canvas.getContext('2d');
-
-  // Create chart
-  const chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: ['January', 'February', 'March', 'April', 'May'],
-      datasets: [{
-        label: 'Sales',
-        data: [10, 20, 30, 40, 50],
-        borderColor: 'rgba(75, 192, 192, 1)',
-        fill: false,
-      }]
-    },
-    options: {
-      responsive: false,
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
-  });
-
-
-
-
-
-  // Render the chart and get the PNG buffer
-  const buffer = canvas.toBuffer('image/png');
-  return buffer
-}
 
 
 

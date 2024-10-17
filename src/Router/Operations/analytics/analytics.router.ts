@@ -13,7 +13,7 @@ analyticsRouter.get("/subs-gains",analyticsController.subsGains)
 
 //tmp
 analyticsRouter.get("/tmp",analyticsController.tmp)
-analyticsRouter.get("/chart",analyticsController.PostsCountChart)
+// analyticsRouter.get("/chart",analyticsController.PostsCountChart)
 
 
 // kpis

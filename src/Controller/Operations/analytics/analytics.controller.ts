@@ -123,13 +123,13 @@ export async function updateKPIs(req:Request, res:Response) {
 
 
 
-export async function PostsCountChart(req:Request, res:Response) {
-    try {
+// export async function PostsCountChart(req:Request, res:Response) {
+//     try {
 
-        const result = await analyticsService.noPostsChart()
-        res.json(result)
-    } catch (error) {
-        res.status(500).json(error)
-        console.log(error)
-    }
-}
+//         const result = await analyticsService.noPostsChart()
+//         res.json(result)
+//     } catch (error) {
+//         res.status(500).json(error)
+//         console.log(error)
+//     }
+// }
