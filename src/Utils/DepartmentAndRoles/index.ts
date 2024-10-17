@@ -37,7 +37,7 @@ const DepartmentRoles = {
     development: ['Back End Php', 'Back End .Net', 'Mean Stack', 'DevOps', 'Front End', 'React Native'],
 } as const;
 
-const Departments = Object.values(DepartmentRoles)
+const Departments = Object.keys(DepartmentRoles)
 const Roles = Object.values(RoleEnum);
 
 type DepartmentType = keyof typeof DepartmentRoles;
