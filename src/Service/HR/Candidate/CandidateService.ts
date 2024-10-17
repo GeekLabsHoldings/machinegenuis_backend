@@ -4,8 +4,12 @@ import ICandidateService from "./ICandidateService";
 import candidateModel from "../../../Model/HR/Candidate/CandidateModel";
 
 class CandidateService implements ICandidateService {
-    async createCandidate(candidate: ICandidateModel[]): Promise<void> {
-        await candidateModel.create(candidate);
+    async createCandidate(candidate: ICandidateModel): Promise<void> {
+        await candidateModel.findOneAndUpdate(
+            {
+                email: candidate.email,
+                hiring: candidate.hiring, cvLink: 'https://machine-genius.s3.amazonaws.com/cv/null',
+            }, candidate, { upsert: true });
     }
     async getAllCandidateByHiring(hiring: string, hiringStep: string, limit: number | null, skip: number | null): Promise<ICandidateModel[]> {
         const query = candidateModel.find({ hiring, currentStep: hiringStep })

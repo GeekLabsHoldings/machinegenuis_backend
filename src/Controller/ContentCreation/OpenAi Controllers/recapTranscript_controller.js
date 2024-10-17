@@ -1,6 +1,7 @@
 const OpenAI = require("openai");
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const convertText = require('../../../Service/VideoEditingModule/splitContent')
+const mythTTS = require('../../../Service/VideoEditingModule/TTSMyth');
 
 const recapContent = async (myContent) => {
   try {
@@ -113,7 +114,7 @@ const recapAllContent = async (selectedContent) => {
         });
   
         const recap = completion.choices[0].message.content.trim();
-        const audioUrl = await convertText.convertTextToAudio(recap , "Recap" )
+        const audioUrl = await mythTTS.convertTextToAudio(recap , "Recap" )
         recapedContent.push({
           recape: recap,
           time: time,

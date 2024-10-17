@@ -15,9 +15,10 @@ TemplateRouter.post('/create', async (req: Request, res: Response): Promise<Resp
             level: req.body.level || null,
             role: req.body.role || null,
             title: req.body.title,
-            group_id: req.body.group_id || null
+            group_id: req.body.group_id || null,
+            step: req.body.step
         }
-        const result = await templateController.createTemplate(template, (template.group_id) as string, session);
+        const result = await templateController.createTemplate(template);
         await session.commitTransaction();
         return res.status(201).json(result);
     } catch (error) {
@@ -38,7 +39,8 @@ TemplateRouter.put('/:_id', async (req: Request, res: Response): Promise<Respons
             level: req.body.level || null,
             role: req.body.role || null,
             title: req.body.title,
-            group_id: req.body.group_id
+            group_id: req.body.group_id,
+            step: req.body.step
         }
         const result = await templateController.updateTemplate(_id, template);
         return res.json(result);

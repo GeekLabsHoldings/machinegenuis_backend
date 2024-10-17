@@ -1,4 +1,4 @@
-import { ClientSession } from "mongoose";
+import { ClientSession, Types } from "mongoose";
 import ICandidateModel, { IStepStatus } from "../../../Model/HR/Candidate/ICandidateModel";
 import ICandidateController from "./ICandidateController";
 import candidateService from "../../../Service/HR/Candidate/CandidateService";
@@ -111,15 +111,55 @@ export default class CandidateController implements ICandidateController {
             },
             timeout: (60 * 60 * 1000)
         })
-        busyAccounts.forEach(async (account) => {
-            const getHiring = hiringService.getHiringByLinkedinAccount((account._id).toString());
-
-            const result = setupAxios.get(`/linkedin/candidate/${account._id}`);
-            const [hiring, candidate] = await Promise.all([getHiring, result]);
+        const status = [
+            {
+                step: HiringStepsEnum.REQUEST_HIRING,
+                status: StatusEnum.APPROVED
+            },
+            {
+                step: HiringStepsEnum.Job_Listings,
+                status: StatusEnum.APPROVED
+            },
+            {
+                step: HiringStepsEnum.Get_Job_Candidates,
+                status: StatusEnum.APPROVED
+            },
+            {
+                step: HiringStepsEnum.Schedule_Interview_Call,
+                status: StatusEnum.PENDING
+            },
+            {
+                step: HiringStepsEnum.Interview_Call_Question,
+                status: StatusEnum.PENDING
+            },
+            {
+                step: HiringStepsEnum.Tasks,
+                status: StatusEnum.PENDING
+            },
+            {
+                step: HiringStepsEnum.Schedule_Face_To_Face_Interview,
+                status: StatusEnum.PENDING
+            },
+            {
+                step: HiringStepsEnum.Job_Offer,
+                status: StatusEnum.PENDING
+            },
+            {
+                step: HiringStepsEnum.Required_Documents,
+                status: StatusEnum.PENDING
+            },
+        ]
+        for (const account of busyAccounts) {
+            const hiring = await hiringService.getHiringByLinkedinAccount((account._id).toString());
+            const candidate = await setupAxios.get(`/linkedin/candidate/${account._id}`);
+            
             if (!candidate || !hiring)
                 return;
-            const candidateData: ICandidateModel[] = candidate.data.map((item: { url: string, name: string, profileLink: string, email: string, phone: string, cvPath: string }) => {
-                return {
+            for (const item of candidate.data) {
+                if (item.phone.startsWith("+200")) {
+                    item.phone = item.phone.replace("+200", "+20");
+                }
+                const candidateData: ICandidateModel = {
                     firstName: item.name.split(' ')[0],
                     lastName: item.name.split(' ')[1],
                     email: item.email,
@@ -128,23 +168,17 @@ export default class CandidateController implements ICandidateController {
                     cvLink: item.cvPath,
                     role: hiring.role,
                     currentStep: HiringStepsEnum.Get_Job_Candidates,
-                    hiring: hiring._id,
-                    stepsStatus: [{
-                        step: HiringStepsEnum.Get_Job_Candidates,
-                        status: StatusEnum.APPROVED
-                    }],
-                    messageStatus: [{
-                        step: HiringStepsEnum.Get_Job_Candidates,
-                        status: StatusEnum.APPROVED
-                    }],
+                    hiring: new Types.ObjectId(hiring._id),
+                    stepsStatus: status,
+                    messageStatus: status,
                     portfolio: "",
                     department: hiring.department,
                     appliedFrom: "Linkedin",
                     createdAt: moment().valueOf(),
                     recommendation: null
                 }
-            });
-            await candidateService.createCandidate(candidateData);
-        });
+                await candidateService.createCandidate(candidateData);
+            };
+        };
     }
 }

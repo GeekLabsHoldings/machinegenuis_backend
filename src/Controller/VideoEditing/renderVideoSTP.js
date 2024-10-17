@@ -18,7 +18,7 @@ const renderVideo = async (req, res) => {
         .json({ success: false, error: "No content provided" });
     }
 
-    const template = require("../../Utils/Utilities/Template.json");
+    const template = require("../../Utils/Utilities/TemplateSTP.json");
     let bodyDuration = paragraphJson.reduce(
       (acc, paragraph) => acc + (paragraph.audioPath.duration || 15),
       0

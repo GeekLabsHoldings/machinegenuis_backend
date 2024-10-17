@@ -6,31 +6,39 @@ enum DepartmentEnum {
     Accounting = "accounting",
     CEO = "ceo",
     VideoEditing = "video-editing",
-    CustomerService = 'customer-service'
+    CustomerService = 'customer-service',
+    Development = 'development',
 }
 enum RoleEnum {
-    ContentWriter = "ContentWriter",
+    ContentWriter = "Content Writer",
     Payroll = "Payroll",
-    CEO = "ceo",
-    SocialMedia = "SocialMedia",
-    Administrative = "administrative",
-    VideoEditor = "VideoEditor",
-    CustomerService = 'CustomerService'
+    CEO = "CEO",
+    SocialMedia = "Social Media",
+    Administrative = "Administrative",
+    VideoEditor = "Video Editor",
+    CustomerService = 'Customer Service',
+    BackEndPhp = 'Back End PHP',
+    BackEndDotNet = 'Back End .NET',
+    MeanStack = 'MEAN Stack',
+    DevOps = 'DevOps',
+    FrontEnd = 'Front End',
+    ReactNative = 'React Native'
 }
 
 const DepartmentRoles = {
     'hr': ["Recruiter", "Training", "Employee Relations"],
-    "content-creation": ["ContentWriter"],
-    ceo: ['ceo'],
-    "social-media": ["SocialMedia"],
-    administrative: ['administrative'],
+    "content-creation": ["Content Writer"],
+    ceo: ['CEO'],
+    "social-media": ["Social Media"],
+    administrative: ['Administrative'],
     accounting: ['Payroll'],
-    "video-editing": ['VideoEditor'],
-    'customer-service': ['CustomerService']
+    "video-editing": ['Video Editor'],
+    'customer-service': ['Customer Service'],
+    development: ['Back End Php', 'Back End .Net', 'Mean Stack', 'DevOps', 'Front End', 'React Native'],
 } as const;
 
 const Departments = Object.keys(DepartmentRoles)
-const Roles = Object.keys(RoleEnum);
+const Roles = Object.values(RoleEnum);
 
 type DepartmentType = keyof typeof DepartmentRoles;
 type RoleType = typeof DepartmentRoles[DepartmentType][number];

@@ -3,12 +3,12 @@ import { ITemplateModel } from "../../../../Model/HR/Templates/ITemplateModel";
 
 export interface ITemplateService {
     createTemplates(template: ITemplateModel): Promise<ITemplateModel & { _id: Types.ObjectId }>;
-    getTemplatesByStepAndOptionalRoleLevel(step: string, role?: string, level?: string): Promise<ITemplateModel>
+    getTemplatesByStepAndOptionalRoleLevel(step: string, role?: string, level?: string): Promise<ITemplateModel | null>
     getTemplateById(_id: string): Promise<ITemplateModel | null>;
     updateTemplate(_id: string, template: ITemplateModel): Promise<ITemplateModel | null>;
     deleteTemplate(_id: string): Promise<boolean>;
     getUnAttachedTemplate(): Promise<ITemplateModel[]>;
     addGroupToTemplate(group_id: string, template_ids: string[], session: ClientSession): Promise<void>;
     getAttachedTemplate(): Promise<ITemplateModel[]>;
-    checkTemplateExist(role: string, level: string): Promise<boolean>
+    checkTemplateExist(title: string, role: string, level: string, step: string): Promise<boolean>
 }

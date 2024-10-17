@@ -4,7 +4,6 @@ interface IGroupModel {
     _id: ObjectId | string
     title: string,
     icon: string,
-    position: number,
     step: string,
     description: string,
 }
@@ -19,6 +18,7 @@ interface ITemplateModel {
     level: string,
     role: string,
     group_id: ObjectId | string,
+    step: string,
 }
 
 export {

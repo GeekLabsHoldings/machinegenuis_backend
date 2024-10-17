@@ -53,11 +53,12 @@ class HiringController implements IHiringController {
     }
 
 
-    async getCurrentStepTemplate(_id: string): Promise<IStepsOfHiring> {
+    async getCurrentStepTemplate(_id: string, requestCurrentStep: string | null): Promise<IStepsOfHiring> {
         const hiring = await hiringService.getOneHiring(_id)
         if (!hiring)
             return systemError.setStatus(404).setMessage(ErrorMessages.HIRING_NOT_FOUND).throw();
-        const { currentStep, level, role } = hiring
+        const { level, role } = hiring
+        const currentStep = requestCurrentStep || hiring.currentStep;
         const query = [HiringStepsEnum.Interview_Call_Question, HiringStepsEnum.Tasks, HiringStepsEnum.Job_Listings].includes(currentStep as HiringStepsEnum);
 
         const template = await templateService.getTemplatesByStepAndOptionalRoleLevel(currentStep, (query ? role : undefined), (query ? level : undefined));
@@ -67,7 +68,7 @@ class HiringController implements IHiringController {
             step: currentStep,
             level,
             role,
-            template,
+            template: template || "",
             candidates: candidate
         };
 

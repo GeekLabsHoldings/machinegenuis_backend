@@ -8,7 +8,7 @@ export interface ICurrentStepTemplate extends ITemplateModel {
 
 export interface IStepsOfHiring {
     candidates: ICandidateModel[],
-    template: ITemplateModel,
+    template: ITemplateModel | "",
     step: string
     level: string
     role: string
@@ -24,6 +24,6 @@ export default interface IHiringController {
     getHiring(type: string, limit: number, skip: number): Promise<IHiringModel[]>;
     deleteHiringRequest(_id: string): Promise<string>;
     toNextStep(_id: string): Promise<IHiringModel>;
-    getCurrentStepTemplate(_id: string): Promise<IStepsOfHiring>;
+    getCurrentStepTemplate(_id: string, requestCurrentStep: string | null): Promise<IStepsOfHiring>;
     publishJob(hiringId: string, role: string, contract: string, template: string, skills: Array<string>, questions: Array<IQuestionTemplate>, session: ClientSession): Promise<string>;
 }
