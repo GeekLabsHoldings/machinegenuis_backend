@@ -38,7 +38,7 @@ const DepartmentRoles = {
 } as const;
 
 const Departments = Object.keys(DepartmentRoles)
-const Roles = Object.keys(RoleEnum);
+const Roles = Object.values(RoleEnum);
 
 type DepartmentType = keyof typeof DepartmentRoles;
 type RoleType = typeof DepartmentRoles[DepartmentType][number];
