@@ -68,7 +68,7 @@ class HiringController implements IHiringController {
             step: currentStep,
             level,
             role,
-            template,
+            template: template || "",
             candidates: candidate
         };
 

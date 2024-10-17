@@ -7,11 +7,7 @@ import { ErrorMessages } from "../../../../Utils/Error/ErrorsEnum";
 import { IGroupPosition } from "../../../../Controller/HR/Template/IGroupController";
 
 class GroupService implements IGroupService {
-    async getCurrentGroupPosition(): Promise<number> {
-        const result = await groupModel.countDocuments();
-        return result;
-    }
-    async createGroup(group: IGroupModel, session: ClientSession): Promise<IGroupModel> {
+        async createGroup(group: IGroupModel, session: ClientSession): Promise<IGroupModel> {
         try {
             const newGroup = new groupModel(group);
             const result = await newGroup.save({ session });
