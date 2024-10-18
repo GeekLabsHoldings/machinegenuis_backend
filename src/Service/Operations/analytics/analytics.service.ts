@@ -6,9 +6,10 @@ import SocialMediaPosts, { socialMediaModel } from "../../../Model/SocialMedia/S
 import GroupsAnalyticsModel from "../../../Model/Operations/analytics/analytics.model";
 import IKPIs from "../../../Model/Operations/analytics/IKPIs.intreface";
 import KPIAnalyticsModel from "../../../Model/Operations/analytics/KPIs.model";
+import { log } from "node:console";
 const snoowrap = require('snoowrap');
 const axios = require('axios');
-
+import socialCommentModel from "../../../Model/SocialMedia/Twitter.SocialMedia.tweets.model";
 
 
 
@@ -220,8 +221,8 @@ async function fetchPosts(platform:string, s:number|Date, e:number|Date, brand:s
    
 }
 
-export async function noPosts(day: string|number|Date = Date.now(), duration: string, platform: string, limit: number, sign: number, brand:string): Promise<number[]> {
-    const resultList: number[] = []
+export async function noPosts(day: string|number|Date = Date.now(), duration: string, platform: string, limit: number, sign: number, brand:string): Promise<{date:number|Date, data:number}[]> {
+    const resultList: {date:number|Date, data:number}[] = []
 
     if (duration == "Daily") {
         let date = new Date(day);
@@ -229,7 +230,8 @@ export async function noPosts(day: string|number|Date = Date.now(), duration: st
             const startOfDay = new Date(date).setHours(0, 0, 0, 0); // Start of the day
             const endOfDay = new Date(date).setHours(23, 59, 59, 999);
             const result = await fetchPosts(platform, startOfDay, endOfDay, brand, true)
-            resultList.push((result as number))
+            //console.log(result)
+            resultList.push({date: startOfDay, data: (result as number)})
             date.setDate(date.getDate() + 1 * sign);
         }
 
@@ -246,7 +248,7 @@ export async function noPosts(day: string|number|Date = Date.now(), duration: st
             endOfWeek.setDate(startOfWeek.getDate() + 6);
             endOfWeek.setHours(23, 59, 59, 999);
             const result = await fetchPosts(platform, startOfWeek, endOfWeek, brand, true)
-            resultList.push((result as number))
+            resultList.push({date: startOfWeek, data: (result as number)})
             date.setDate(date.getDate() + 7 * sign);
         }
 
@@ -263,7 +265,7 @@ export async function noPosts(day: string|number|Date = Date.now(), duration: st
             const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
             endOfMonth.setHours(23, 59, 59, 999);
             const result = await fetchPosts(platform, startOfMonth, endOfMonth, brand, true)
-            resultList.push((result as number))
+            resultList.push({date: startOfMonth, data: (result as number)})
             date.setDate(date.getDate() + 30 * sign);
         }
 
@@ -287,7 +289,7 @@ export async function postsInsights(day: string|number|Date = Date.now(), durati
             const result =  await fetchPosts(platform, startOfDay, endOfDay, brand)
             const insights = await getInsights(platform, result as { brand: string, post_id: string, group_id: string }[])
             if(insights)
-                resultList.push(insights)
+                resultList.push({date:startOfDay,data:insights})
 
             date.setDate(date.getDate() + 1 * sign);
         }
@@ -307,7 +309,7 @@ export async function postsInsights(day: string|number|Date = Date.now(), durati
             const postCount = await fetchPosts(platform, startOfWeek, endOfWeek, brand)
             const insights = await getInsights(platform, postCount as { brand: string, post_id: string, group_id: string }[])
             if(insights)
-                resultList.push(insights)
+                resultList.push({date:startOfWeek,data:insights})
             date.setDate(date.getDate() + 7 * sign);
         }
 
@@ -326,7 +328,7 @@ export async function postsInsights(day: string|number|Date = Date.now(), durati
             const postCount = await fetchPosts(platform, startOfMonth, endOfMonth, brand)
             const insights = await getInsights(platform, postCount as { brand: string, post_id: string, group_id: string }[])
             if(insights)
-                resultList.push(insights)
+                resultList.push({date:startOfMonth,data:insights})
             date.setDate(date.getDate() + 30 * sign);
         }
 
@@ -349,8 +351,8 @@ async function fetchGroups(platform:string, group_id:string, s:Date|number|Numbe
     return (result?.subs as number)
 }
 
-export async function groupsInsights(day: string|number|Date = Date.now(), duration: string, platform: string, limit: number, sign: number,group_id:string): Promise<number[]> {
-    const resultList: number[] = []
+export async function groupsInsights(day: string|number|Date = Date.now(), duration: string, platform: string, limit: number, sign: number,group_id:string): Promise<object[]> {
+    const resultList: object[] = []
 
     if (duration == "Daily") {
         let date = new Date(day);
@@ -359,7 +361,7 @@ export async function groupsInsights(day: string|number|Date = Date.now(), durat
             const endOfDay = new Date(date).setHours(23, 59, 59, 999);
             const result = await fetchGroups(platform, group_id, startOfDay, endOfDay)
             if (result)
-                resultList.push(result)
+                resultList.push({date: startOfDay, result: result})
             else if (resultList.length)
                 resultList.push(resultList[resultList.length-1])
             date.setDate(date.getDate() + 1 * sign);
@@ -379,7 +381,7 @@ export async function groupsInsights(day: string|number|Date = Date.now(), durat
             endOfWeek.setHours(23, 59, 59, 999);
             const result = await fetchGroups(platform, group_id, startOfWeek, endOfWeek)
             if (result)
-                resultList.push(result)
+                resultList.push({date: startOfWeek, result: result})
             else 
                 resultList.push(resultList[resultList.length-1])
             date.setDate(date.getDate() + 7 * sign);
@@ -399,7 +401,7 @@ export async function groupsInsights(day: string|number|Date = Date.now(), durat
             endOfMonth.setHours(23, 59, 59, 999);
             const result = await fetchGroups(platform, group_id, startOfMonth, endOfMonth)
             if (result)
-                resultList.push(result)
+                resultList.push({date: startOfMonth, result: result})
             else 
                 resultList.push(resultList[resultList.length-1])
             date.setDate(date.getDate() + 30 * sign);
@@ -499,13 +501,47 @@ export async function subsGains(endDate:string|number|Date = Date.now(), platfor
 
 export async function getKPIs(brand:string) {
     try {
-        const kpis =await KPIAnalyticsModel.find({brand:brand})
-        const achievedKPIs:{platform:string, postsPerDay: number, postsPerWeek: number, postsPerMonth: number }[] = []
+        const kpis = await KPIAnalyticsModel.aggregate([
+            {
+                $match: { brand: brand }  // Filter documents by the specified brand
+            },
+            {
+                // Project the year and month from the timestamp
+                $project: {
+                    year: { $year: { $toDate: "$timeStamp" } },
+                    month: { $month: { $toDate: "$timeStamp" } },
+                    brand: 1,
+                    platform: 1,
+                    postsPerDay: 1,
+                    postsPerWeek: 1,
+                    postsPerMonth: 1,
+                }
+            },
+            {
+                // Group the data by year, month, and brand
+                $group: {
+                    _id: { year: "$year", month: "$month", brand: "$brand" },
+                    totalPostsPerDay: { $sum: "$postsPerDay" },
+                    totalPostsPerWeek: { $sum: "$postsPerWeek" },
+                    totalPostsPerMonth: { $sum: "$postsPerMonth" },
+                    platforms: { $addToSet: "$platform" },
+                }
+            },
+            {
+                // Sort by year and month in ascending order
+                $sort: {
+                    "_id.year": 1,
+                    "_id.month": 1
+                }
+            }
+        ])
+         // log("this is the kpis   \n", kpis)
+        const achievedKPIs:{platform:string, postsPerDay: number, postsPerWeek: number, postsPerMonth: number, timeStamp?:number }[] = []
         for(const k of kpis){
-            const achievedD = await noPosts(Date.now(), "Daily", k.platform, 1, 1 , brand)
-            const achievedW = await noPosts(Date.now(), "Weekly", k.platform, 1, 1 , brand) 
-            const achievedM = await noPosts(Date.now(), "Monthly", k.platform, 1, 1 , brand)
-            achievedKPIs.push({platform:k.platform,  postsPerDay: achievedD[0], postsPerWeek: achievedW[0], postsPerMonth: achievedM[0] })
+            const achievedD = await noPosts(k.timeStamp||Date.now(), "Daily", k.platform, 1, 1 , brand)
+            const achievedW = await noPosts(k.timeStamp||Date.now(), "Weekly", k.platform, 1, 1 , brand) 
+            const achievedM = await noPosts(k.timeStamp||Date.now(), "Monthly", k.platform, 1, 1 , brand)
+            achievedKPIs.push({platform:k.platform,  postsPerDay: achievedD[0].data, postsPerWeek: achievedW[0].data, postsPerMonth: achievedM[0].data })
         }
         
         return {kpis,achievedKPIs}
@@ -541,4 +577,66 @@ export async function updateKPIs(kpis:IKPIs) {
     } catch (error) {
         console.log(error)
     }
+}
+
+
+async function fetchComments(platform: string, brand: string, s: Date | number , e: Date | number ) {
+    const startDate = new Date(s).toISOString();
+    const endDate = new Date(e).toISOString();
+
+    const result = await socialCommentModel.countDocuments({
+        createdAt: {
+            $gte: startDate,
+            $lte: endDate
+        },
+        platform: platform,
+        brand: brand
+    });
+
+    return result as number;
+}
+
+export async function commentsCount(day: string | number | Date = Date.now(), duration: string, platform: string, limit: number, sign: number, brand: string): Promise<object[]> {
+    const resultList: object[] = [];
+    let date = new Date(day);
+
+    if (duration == "Daily") {
+       
+        for (let i = 0; i < limit; i++) {
+            const startOfDay = new Date(date).setHours(0, 0, 0, 0);
+            const endOfDay = new Date(date).setHours(23, 59, 59, 999);
+            const result = await fetchComments(platform, brand, startOfDay, endOfDay);
+
+            resultList.push({ day: startOfDay, data: result });
+   
+            date.setDate(date.getDate() + 1 * sign);
+        }
+    } else if (duration == "Weekly") {
+        for (let i = 0; i < limit; i++) {
+            const startOfWeek = new Date(date.setDate(date.getDate() - date.getDay() + 1));
+            startOfWeek.setHours(0, 0, 0, 0);
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            endOfWeek.setHours(23, 59, 59, 999);
+            const result = await fetchComments(platform, brand, startOfWeek, endOfWeek);
+
+            resultList.push({ day: startOfWeek, data: result });
+
+            date.setDate(date.getDate() + 7 * sign);
+        }
+    } else if (duration == "Monthly") {
+ 
+        for (let i = 0; i < limit; i++) {
+            const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+            startOfMonth.setHours(0, 0, 0, 0);
+            const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+            endOfMonth.setHours(23, 59, 59, 999);
+            const result = await fetchComments(platform, brand, startOfMonth, endOfMonth);
+
+            resultList.push({ day: startOfMonth, data: result });
+
+            date.setDate(date.getDate() + 30 * sign);
+        }
+    }
+    return sign == -1 ? resultList.reverse() : resultList;
 }
