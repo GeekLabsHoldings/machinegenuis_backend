@@ -34,6 +34,26 @@ export async function PostsCount(req:Request, res:Response) {
 
 
 
+export async function commentsCount(req:Request, res:Response) {
+    try {
+        const duration = String(req.query.duration) || "Daily"
+        const day = String(req.query.day) || "2024-10-15"
+        const platform = String(req.query.platform) || "TWITTER"
+        const limit = Number(req.query.limit) || 5
+        const sign = Number(req.query.sign) || 1
+        const brand = String(req.query.brand) || ""
+
+        const result = await analyticsService.commentsCount(day, duration, platform, limit, sign, brand)
+        res.json(result)
+    } catch (error) {
+        res.status(500).json(error)
+        console.log(error)
+    }
+}
+
+
+
+
 export async function postsInsights(req:Request, res:Response) {
     try {
         const duration = String(req.query.duration) || "Daily"

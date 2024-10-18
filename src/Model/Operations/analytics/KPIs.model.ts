@@ -18,6 +18,13 @@ const KPISchema = new Schema<IKPIs>({
     unique:false
   },
 
+  timeStamp: {
+    type: Number,
+    required: false,
+    default:Date.now(),
+    unique:false
+  },
+
   postsPerDay: {type:Number, default:0},
   postsPerWeek: {type:Number, default:0},
   postsPerMonth: {type:Number, default:0}
