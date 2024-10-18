@@ -7,6 +7,7 @@ const  analyticsRouter = Router();
 
 //analytics
 analyticsRouter.get("/post-count",analyticsController.PostsCount)
+analyticsRouter.get("/comments-count",analyticsController.commentsCount)
 analyticsRouter.get("/post-insights",analyticsController.postsInsights)
 analyticsRouter.get("/group-insights",analyticsController.groupsInsights)
 analyticsRouter.get("/subs-gains",analyticsController.subsGains)
