@@ -296,7 +296,7 @@ const splitContentInvestocracy = async (content) => {
   try {
     console.log("Received content:", content);
 
-    const prompt = `Could you please split this content into paragraphs, then give me MULTIPLE KEYWORDS for each paragraph that I can use as search queries on YouTube. 
+    const prompt = `Could you please split this content into paragraphs, then give me MULTIPLE KEYWORDS for each paragraph that I can use as search queries on YouTube.
       Each keyword should be a THREE-WORD PHRASE that captures the essence of the paragraph. Include the name of any famous person (President, Head of government, etc.) or relevant country/government, if mentioned.
       If no such person or government is mentioned, provide relevant phrases that capture the main idea of the paragraph.
       Please don't change the original content!
