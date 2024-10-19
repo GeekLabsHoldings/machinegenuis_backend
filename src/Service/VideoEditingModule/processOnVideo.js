@@ -12,7 +12,7 @@ cloudinary.config({
 
 const delay = promisify(setTimeout);
 
-const uploadVideoToCloudinary = async (videoUrl, maxRetries = 5, delayTime = 5000) => {
+const uploadVideoToCloudinary = async (videoUrl, maxRetries = 7, delayTime = 5000) => {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const result = await cloudinary.uploader.upload_large(videoUrl, {
