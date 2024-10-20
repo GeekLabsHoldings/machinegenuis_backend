@@ -116,7 +116,7 @@ class EventService implements IEventService {
 
     async getAllTasks(limit:number, skip:number){
         try {
-            const result = await eventModel.find({}).populate({
+            const result = await eventModel.find({assignedTo: { $ne: null }}).populate({
                 path: 'createdBy',
                 select: { firstName: 1, lastName: 1, department: 1, theme: 1 }
             }).populate({
@@ -131,7 +131,7 @@ class EventService implements IEventService {
 
     async getTasksByDepartment(department: string, limit:number, skip:number){
         try {
-            const result = await eventModel.find({department:department}).populate({
+            const result = await eventModel.find({department:department, assignedTo: { $ne: null }}).populate({
                 path: 'createdBy',
                 select: { firstName: 1, lastName: 1, department: 1, theme: 1 }
             }).populate({
@@ -146,7 +146,7 @@ class EventService implements IEventService {
 
     async getTasksByAssignedTo(user:string|Types.ObjectId|IEmployeeModel, limit:number, skip:number){
         try {
-            const result = await eventModel.find({assignedTo:user}).populate({
+            const result = await eventModel.find({assignedTo:user,}).populate({
                 path: 'createdBy',
                 select: { firstName: 1, lastName: 1, department: 1, theme: 1 }
             }).populate({
@@ -161,7 +161,7 @@ class EventService implements IEventService {
 
     async getTasksByCreatedBy(user:string|Types.ObjectId|IEmployeeModel, limit:number, skip:number){
         try {
-            const result = await eventModel.find({createdBy:user}).populate({
+            const result = await eventModel.find({createdBy:user, assignedTo: { $ne: null }}).populate({
                 path: 'createdBy',
                 select: { firstName: 1, lastName: 1, department: 1, theme: 1 }
             }).populate({
@@ -176,7 +176,7 @@ class EventService implements IEventService {
 
     async getTasksByBrand(brand:string|Types.ObjectId|IBrand, limit:number, skip:number){
         try {
-            const result = await eventModel.find({brand:brand}).populate({
+            const result = await eventModel.find({brand:brand, assignedTo: { $ne: null }}).populate({
                 path: 'createdBy',
                 select: { firstName: 1, lastName: 1, department: 1, theme: 1 }
             }).populate({

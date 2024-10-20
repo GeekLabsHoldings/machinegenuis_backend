@@ -8,6 +8,7 @@ const emailCreationRouter = Router();
 
 emailCreationRouter.post("/add-email", emailController.addEmail);
 emailCreationRouter.post("/update-accesstokens", emailController.updateAccessToken);
+emailCreationRouter.post("/add-signature", emailController.addSignture);
 emailCreationRouter.get("/get-all-accounts", emailController.getAllAccounts);
 emailCreationRouter.get("/get-account", emailController.getAccount);
 emailCreationRouter.get("/get-accounts-brand-department", emailController.getAccountByBorD);

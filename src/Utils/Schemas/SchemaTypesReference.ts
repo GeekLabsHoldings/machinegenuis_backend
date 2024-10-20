@@ -50,7 +50,8 @@ enum SchemaTypesReference {
   Content = "content",
   offlineMembers = "offlineMember",
   Role = "role",
-
+  GroupsAnalytics = "groups_subs",
+  KPI = "KPIs"
 }
 
 
