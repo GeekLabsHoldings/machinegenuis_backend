@@ -75,12 +75,11 @@ class HiringController implements IHiringController {
 
     }
 
-    async publishJob(hiringId: string, role: string, contract: string, template: string, skills: Array<string>, questions: Array<IQuestionTemplate>, session: ClientSession): Promise<string> {
+    async publishJob(hiringId: string, role: string, contract: string, template: string, questions: Array<IQuestionTemplate>, session: ClientSession): Promise<string> {
         const data = {
             details: {
                 jobTitle: role,
                 contract_type: contract,
-                skills,
                 description: template,
                 questions
 

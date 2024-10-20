@@ -5,7 +5,7 @@ import candidateService from "../../../Service/HR/Candidate/CandidateService";
 import systemError from "../../../Utils/Error/SystemError";
 import { ErrorMessages } from "../../../Utils/Error/ErrorsEnum";
 import { HiringSteps, HiringStepsEnum } from "../../../Utils/GroupsAndTemplates";
-import { StatusEnum } from "../../../Utils/Hiring";
+import { HiringStatusLevelEnum, StatusEnum } from "../../../Utils/Hiring";
 import ICandidateQuestionsModel from "../../../Model/HR/Candidate/ICandidateQuestionsModel";
 import candidateQuestionsService from "../../../Service/HR/CandidateQuestion/CandidateQuestionService";
 import LinkedinAccountService from "../../../Service/HR/LinkedinAccounts/LinkedinAccountService";
@@ -101,6 +101,7 @@ export default class CandidateController implements ICandidateController {
     async getCandidateFromLinkedin(): Promise<void> {
         const linkedinAccountsService = new LinkedinAccountService();
         const busyAccounts = await linkedinAccountsService.getBusyAccounts();
+        console.log("busyAccounts", busyAccounts);
         if (busyAccounts.length === 0)
             return;
         const setupAxios = axios.create({
@@ -151,10 +152,15 @@ export default class CandidateController implements ICandidateController {
         ]
         for (const account of busyAccounts) {
             const hiring = await hiringService.getHiringByLinkedinAccount((account._id).toString());
+            if (!hiring) {
+                console.log("Hiring not found");
+                continue;
+            }
+            console.log("hiring", hiring.currentStep);
             const candidate = await setupAxios.get(`/linkedin/candidate/${account._id}`);
-            
-            if (!candidate || !hiring)
-                return;
+
+            if (!candidate)
+                continue;
             for (const item of candidate.data) {
                 if (item.phone.startsWith("+200")) {
                     item.phone = item.phone.replace("+200", "+20");
@@ -179,6 +185,7 @@ export default class CandidateController implements ICandidateController {
                 }
                 await candidateService.createCandidate(candidateData);
             };
+            await hiringService.changeHiringStatus((hiring._id).toString(), HiringStatusLevelEnum.CONTINUE);
         };
     }
 }
