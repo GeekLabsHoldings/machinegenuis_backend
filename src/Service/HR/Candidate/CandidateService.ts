@@ -8,7 +8,7 @@ class CandidateService implements ICandidateService {
         await candidateModel.findOneAndUpdate(
             {
                 email: candidate.email,
-                hiring: candidate.hiring, cvLink: 'https://machine-genius.s3.amazonaws.com/cv/null',
+                hiring: candidate.hiring
             }, candidate, { upsert: true });
     }
     async getAllCandidateByHiring(hiring: string, hiringStep: string, limit: number | null, skip: number | null): Promise<ICandidateModel[]> {

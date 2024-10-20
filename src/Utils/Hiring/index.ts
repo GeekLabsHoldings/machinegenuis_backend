@@ -8,7 +8,8 @@ enum HiringStatus {
 enum HiringStatusLevelEnum {
     START_HIRING = 'Start Hiring',
     COMPLETE = "Complete",
-    CONTINUE = "Continue"
+    CONTINUE = "Continue",
+    PENDING = "Pending"
 }
 
 enum StatusEnum {
