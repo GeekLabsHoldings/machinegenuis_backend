@@ -10,6 +10,7 @@ import { HiringSteps, HiringStepsEnum } from "../../../Utils/GroupsAndTemplates"
 import { ClientSession } from "mongoose";
 import axios from "axios";
 import candidateService from "../../../Service/HR/Candidate/CandidateService";
+import IRoleModel from "../../../Model/HR/Role/IRoleModel";
 
 class HiringController implements IHiringController {
     async createHiring(hiring: IHiringModel): Promise<IHiringModel> {
@@ -60,14 +61,14 @@ class HiringController implements IHiringController {
         const { level, role } = hiring
         const currentStep = requestCurrentStep || hiring.currentStep;
         const query = [HiringStepsEnum.Interview_Call_Question, HiringStepsEnum.Tasks, HiringStepsEnum.Job_Listings].includes(currentStep as HiringStepsEnum);
-
-        const template = await templateService.getTemplatesByStepAndOptionalRoleLevel(currentStep, (query ? role : undefined), (query ? level : undefined));
+        const role_id = (role as IRoleModel & { _id: string })._id;
+        const template = await templateService.getTemplatesByStepAndOptionalRoleLevel(currentStep, (query ? role_id : undefined), (query ? level : undefined));
         const candidate = await candidateService.getAllCandidateByHiring(_id, currentStep, null, null);
         return {
             _id,
             step: currentStep,
             level,
-            role,
+            role: role as IRoleModel & { _id: string },
             template: template || "",
             candidates: candidate
         };
