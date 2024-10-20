@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import IRoleModel from "../HR/Role/IRoleModel";
 
 export default interface IEmployeeModel {
     _id: Types.ObjectId | string,
@@ -11,7 +12,7 @@ export default interface IEmployeeModel {
     phoneNumber: string,
     type: string,
     department: Array<string>,
-    role: string,
+    role: Types.ObjectId | IRoleModel & { _id: Types.ObjectId | string } | string,
     createdAt: number,
     createdBy: Types.ObjectId | IEmployeeModel,
     token: string,

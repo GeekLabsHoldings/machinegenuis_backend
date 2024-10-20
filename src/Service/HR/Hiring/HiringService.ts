@@ -24,6 +24,9 @@ class HiringService implements IHiringService {
             .populate({
                 path: 'createdBy', select: { _id: 1, firstName: 1, lastName: 1, theme: 1 }
             })
+            .populate({
+                path: 'role'
+            })
             .sort({ createdAt: -1 }).limit(limit).skip(skip);
         if (type === HiringStatus.OPENING)
             query.where({ hiringStatus: HiringStatusLevelEnum.CONTINUE })
@@ -35,7 +38,9 @@ class HiringService implements IHiringService {
     }
 
     async getOneHiring(_id: string): Promise<IHiringModel | null> {
-        return await hiringModel.findById(_id);
+        return await hiringModel.findById(_id).populate({
+            path: 'role'
+        });
     }
 
     async deleteHiringRequest(_id: string): Promise<boolean> {

@@ -10,5 +10,5 @@ export interface ITemplateService {
     getUnAttachedTemplate(): Promise<ITemplateModel[]>;
     addGroupToTemplate(group_id: string, template_ids: string[], session: ClientSession): Promise<void>;
     getAttachedTemplate(): Promise<ITemplateModel[]>;
-    checkTemplateExist(title: string, role: string, level: string, step: string): Promise<boolean>
+    checkTemplateExist(title: string, role: Types.ObjectId | string | null, level: string | null, step: string): Promise<boolean>
 }

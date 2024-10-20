@@ -1,7 +1,8 @@
-import { ClientSession } from "mongoose";
+import { ClientSession, Types } from "mongoose";
 import IHiringModel from "../../../Model/HR/Hiring/IHiringModel";
 import { ITemplateModel } from "../../../Model/HR/Templates/ITemplateModel";
 import ICandidateModel from "../../../Model/HR/Candidate/ICandidateModel";
+import IRoleModel from "../../../Model/HR/Role/IRoleModel";
 export interface ICurrentStepTemplate extends ITemplateModel {
     jobTitle: string
 }
@@ -11,7 +12,7 @@ export interface IStepsOfHiring {
     template: ITemplateModel | "",
     step: string
     level: string
-    role: string
+    role: IRoleModel & { _id: string | Types.ObjectId },
     _id: string
 }
 export interface IQuestionTemplate {

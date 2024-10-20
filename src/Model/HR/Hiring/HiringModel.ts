@@ -10,7 +10,7 @@ import { HiringSteps } from "../../../Utils/GroupsAndTemplates";
 const hiringSchema = new Schema<IHiringModel>({
     title: RequiredString,
     department: EnumStringRequired(Departments),
-    role: RequiredString,
+    role: RefType(SchemaTypesReference.Role, true),
     level: EnumStringRequired(JobLevel),
     createdBy: RefType(SchemaTypesReference.Employee, true),
     createdAt: RequiredNumber,
