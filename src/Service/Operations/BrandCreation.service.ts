@@ -370,7 +370,23 @@ if (HostedZoneId) {
 }
 
 
+export async function getAllDomains() {
+  try {
+    const domains = domainModel.find({})
+    return domains
+  } catch (error) {
+    console.log(error);
+  }
+}
 
+export async function getDomainsByBrand(brand:string|Types.ObjectId) {
+  try {
+    const domains = domainModel.find({brand:brand})
+    return domains
+  } catch (error) {
+    console.log(error);
+  }
+}
 //============================================================
 
 

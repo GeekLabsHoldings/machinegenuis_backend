@@ -10,6 +10,11 @@ BrandCreationRouter.post("/check-domain-availability", brandController.checkDoma
 BrandCreationRouter.post("/register-domain", brandController.registerDomain);
 BrandCreationRouter.post("/check-domain-email-verification", brandController.verificationDomain);
 BrandCreationRouter.post("/activate-domain", brandController.activateDomain);
+BrandCreationRouter.get("/get-all-domains", brandController.getAllDomains);
+BrandCreationRouter.get("/get-domains-brand", brandController.getDomainsByBrand);
+
+
+
 
 // get add Brand routes
 BrandCreationRouter.post("/add-brand-all-data", brandController.addBrandWithAllData);
@@ -20,10 +25,15 @@ BrandCreationRouter.get("/get-singular-brands", brandController.getSingularBrand
 BrandCreationRouter.get("/get-brands-platform", brandController.getBrandsByPlatform);   
 BrandCreationRouter.get("/get-all-brands-platform", brandController.getAllBrandsByPlatform); 
 
+
+
+
 // edit brands 
 BrandCreationRouter.get("/:id", brandController.getBrand);
 BrandCreationRouter.post("/:id/edit-brand", brandController.editBrand);
 BrandCreationRouter.post("/:id/delete-brand", brandController.deleteBrand);
+
+
 
 
 // Account routes 
@@ -31,6 +41,9 @@ BrandCreationRouter.get("/:id/get-accounts", brandController.getAccounts);
 BrandCreationRouter.get("/:id/get-account", brandController.getAccount);
 BrandCreationRouter.post("/:id/add-change-account", brandController.addOrChangeAcount);
 BrandCreationRouter.post("/:id/delete-account", brandController.deleteAccount);
+
+
+
 
 // Sub-brand routes
 BrandCreationRouter.post("/:parentId/add-sub-brand", brandController.addSubBrand);

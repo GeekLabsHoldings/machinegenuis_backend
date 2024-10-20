@@ -300,6 +300,12 @@ export const addOrChangeAcount = async (req: Request, res: Response) => {
       const result = await brandService.addOrDeleteAccount(req.params.id, accountData);
       return  res.json(result);
     }
+    else if (req.body.platform.toUpperCase()=="YOUTUBE"){
+      accountData = {platform:req.body.platform,
+         account:{client_id:req.body.client_id, client_secret:req.body.client_secret, redirect_uris:req.body.redirect_uris, token:req.body.token}}
+      const result = await brandService.addOrDeleteAccount(req.params.id, accountData);
+      return  res.json(result);
+    }
     return res.status(400).json({message:"error adding account check Platform and the correct Inputs for the platform"});
   } catch (error) {
     return systemError.sendError(res, error);
@@ -381,3 +387,28 @@ try {
   return systemError.sendError(res, error);
 }
 }
+
+
+
+
+  export const getAllDomains = async(req: Request, res: Response)=>{
+    try {
+
+      const result = await brandService.getAllDomains();
+      res.json(result);
+    } catch (error) {
+      console.log(error);
+      return systemError.sendError(res, error);
+    }
+    }
+
+    export const getDomainsByBrand = async(req: Request, res: Response)=>{
+      try {
+        const brand = String(req.query.brand)
+        const result = await brandService.getDomainsByBrand( brand);
+        res.json(result);
+      } catch (error) {
+        console.log(error);
+        return systemError.sendError(res, error);
+      }
+      }
