@@ -18,7 +18,7 @@ const schema = new Schema<ICandidateModel>({
     email: RequiredString,
     phoneNumber: StringValidation(phoneRegex, ErrorMessages.NULL),
     linkedIn: RequiredString,
-    role: RequiredString,
+    role: RefType(SchemaTypesReference.Role, true),
     department: RequiredString,
     cvLink: RequiredString,
     portfolio: NotRequiredString,
