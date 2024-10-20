@@ -1,4 +1,5 @@
-import { ObjectId } from "mongoose"
+import { ObjectId, Types } from "mongoose"
+import IRoleModel from "../Role/IRoleModel"
 
 interface IGroupModel {
     _id: ObjectId | string
@@ -16,7 +17,7 @@ interface ITemplateModel {
     title: string,
     details: Array<TemplateContainerModel>,
     level: string,
-    role: string,
+    role: Types.ObjectId | string | IRoleModel & { _id: string | Types.ObjectId } | null,
     group_id: ObjectId | string,
     step: string,
 }

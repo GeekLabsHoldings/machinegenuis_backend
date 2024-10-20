@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 import IHiringModel from "../Hiring/IHiringModel";
 import IEmployeeModel from "../../Employee/IEmployeeModel";
+import IRoleModel from "../Role/IRoleModel";
 
 export interface IStepStatus {
 
@@ -14,7 +15,7 @@ export default interface ICandidateModel {
     phoneNumber: string,
     email: string,
     linkedIn: string,
-    role: string,
+    role: Types.ObjectId | string | IRoleModel & { _id: Types.ObjectId | string },
     cvLink: string,
     portfolio: string,
     department: string,

@@ -17,12 +17,20 @@ class EmployeeService implements IEmployeeService {
         }
     }
     async getOneEmployee(_id: string): Promise<IEmployeeModel | null> {
-        const employee = await employeeModel.findById(_id).select({ firstName: 1, lastName: 1, email: 1, phoneNumber: 1, department: 1, role: 1, type: 1, token: 1 });
+        const employee = await employeeModel.findById(_id)
+            .populate({
+                path: 'role'
+            })
+            .select({ firstName: 1, lastName: 1, email: 1, phoneNumber: 1, department: 1, role: 1, type: 1, token: 1 });
         return employee;
     }
 
     async getAllEmployee(name: string | null, department: string | null, limit: number, skip: number): Promise<IEmployeeModel[]> {
-        const query = employeeModel.find().select({ firstName: 1, lastName: 1, email: 1, phoneNumber: 1, department: 1, role: 1, type: 1, cv: 1, linkedIn: 1 }).sort({ createdAt: 1 }).skip(skip).limit(limit)
+        const query = employeeModel.find()
+            .populate({
+                path: 'role'
+            })
+            .select({ firstName: 1, lastName: 1, email: 1, phoneNumber: 1, department: 1, role: 1, type: 1, cv: 1, linkedIn: 1 }).sort({ createdAt: 1 }).skip(skip).limit(limit)
         if (name) {
             query.where({
                 $or: [

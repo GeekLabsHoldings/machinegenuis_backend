@@ -18,8 +18,8 @@ const controllerEnhanceImage = require('../../Controller/VideoEditing/regenerate
 const controllerProcessOnVideo = require('../../Controller/VideoEditing/trimmingVids')
 
 Video_editing_router.get('/get-all-content', get_all_content);
-Video_editing_router.post('/render-STP-video', STPRenderVideo.renderVideo);
-Video_editing_router.post('/render-Myth-video', MythRenderVideo.renderVideo);
+Video_editing_router.post('/render-stp-video', STPRenderVideo.renderVideo);
+Video_editing_router.post('/render-myth-video', MythRenderVideo.renderVideo);
 Video_editing_router.post('/get-img', controllerGetImgs.getImg);
 Video_editing_router.post('/get-img-new', controllerGetImgs.getImgNew);
 Video_editing_router.post('/split-content', controllerSplitAndGenerate.splitAndConvert);

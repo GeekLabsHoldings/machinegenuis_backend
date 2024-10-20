@@ -23,7 +23,7 @@ const templateSchema = new Schema<ITemplateModel>({
     title: RequiredString,
     level: EnumStringNotRequired(JobLevel),
     details: [templateContainerSchema],
-    role: RequiredString,
+    role: RefType(SchemaTypesReference.Role, false),
     group_id: RefType(SchemaTypesReference.Group, false),
     step: EnumStringRequired(HiringSteps),
 
