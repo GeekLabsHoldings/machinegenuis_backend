@@ -10,9 +10,7 @@ function getPublishedAfterDate() {
 }
 
 async function searchVideos(query) {
-  const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(
-    query
-  )}&type=video&maxResults=50&publishedAfter=${getPublishedAfterDate()}&order=date&key=${
+  const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=50&publishedAfter=${getPublishedAfterDate()}&order=date&key=${
     process.env.API_KEY_SEARCH_IN_YOUTUBE
   }`;
 
@@ -86,13 +84,13 @@ function filterVideosByDuration(videoDetails) {
 async function getAwsDownloadLink(youtubeVideoUrl) {
   try {
     const response = await axios.post(
-      "http://18.118.105.172:3000/download-trim-video",
-      { youtubeVideoUrl }
+      "https://video.machinegenius.io/download-trim-video",
+      { url: youtubeVideoUrl }
     );
-    return response.data.video_url;
+    return response.data.trimmed_video;
   } catch (error) {
     console.error("Error getting AWS download link:", error);
-    return null;
+    return "video not found";
   }
 }
 
@@ -102,7 +100,9 @@ async function findVideosForKeyword(keyword, isCnbc) {
     const searchKeyword = isCnbc ? "cnbc" : keyword;
     videos = await searchVideos(searchKeyword);
     if (videos.length === 0 && !isCnbc) {
-      console.warn(`No videos found for "${keyword}". Trying again with "cnbc"...`);
+      console.warn(
+        `No videos found for "${keyword}". Trying again with "cnbc"...`
+      );
     }
   }
   return videos;
@@ -114,14 +114,18 @@ async function fetchAndFilterVideos(query) {
   const videoDetails = await getVideoDetails(videoIds);
   return filterVideosByDuration(videoDetails);
 }
-export async function findYouTubeLinksForKeywords(keywords, bodyAndOutro, introGenerate) {
+export async function findYouTubeLinksForKeywords(
+  keywords,
+  bodyAndOutro,
+  introGenerate
+) {
   const videoLinks = {
     intro: {
       text: introGenerate.text,
-      keywords: introGenerate.keywordsAndImages.map(item => item.keyword),
+      keywords: introGenerate.keywordsAndImages.map((item) => item.keyword),
       cnbc: { videos: [] },
       Footage: { videos: [] },
-      audioPath: introGenerate.audioPath
+      audioPath: introGenerate.audioPath,
     },
     bodyAndOutro: [],
   };
@@ -182,11 +186,15 @@ export async function findYouTubeLinksForKeywords(keywords, bodyAndOutro, introG
       if (video) {
         const youtubeLink = `https://www.youtube.com/watch?v=${video.id}`;
         const awsLink = await getAwsDownloadLink(youtubeLink);
-        videoLinks.bodyAndOutro[videoLinks.bodyAndOutro.length - 1].cnbc.videos.push({
+        videoLinks.bodyAndOutro[
+          videoLinks.bodyAndOutro.length - 1
+        ].cnbc.videos.push({
           awsLink: awsLink || "Error fetching AWS link",
           duration: "0",
         });
-        videoLinks.bodyAndOutro[videoLinks.bodyAndOutro.length - 1].Footage.videos.push({
+        videoLinks.bodyAndOutro[
+          videoLinks.bodyAndOutro.length - 1
+        ].Footage.videos.push({
           awsLink: awsLink || "Error fetching AWS link",
           duration: "0",
         });
