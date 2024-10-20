@@ -3,7 +3,8 @@ enum PlatformEnum {
   FACEBOOK = "FACEBOOK",
   LINKEDIN = "LINKEDIN",
   REDDIT = "REDDIT",
-  TELEGRAM = "TELEGRAM"
+  TELEGRAM = "TELEGRAM",
+  YOUTUBE = "YOUTUBE"
 }
 
 const PlatformArr = Object.values(PlatformEnum);
