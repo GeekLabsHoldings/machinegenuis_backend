@@ -9,6 +9,7 @@ import EmployeePaperRouter from './EmployeePaperRouter';
 import ComplaintRouter from './ComplaintRouter';
 import EventRouter from './EventRouter';
 import MessageRouter from './MessagesRouter';
+import RoleRouter from './RoleRouter';
 
 const HR_Router = Router();
 
@@ -23,5 +24,6 @@ HR_Router.use('/employee-paper', EmployeePaperRouter);
 HR_Router.use('/complaint', ComplaintRouter);
 HR_Router.use('/event', EventRouter);
 HR_Router.use('/message', MessageRouter);
+HR_Router.use('/role', RoleRouter);
 
 export default HR_Router;

@@ -25,30 +25,30 @@ enum DepartmentEnum {
 //     ReactNative = 'React Native'
 // }
 
-const DepartmentRoles = {
-    'hr': ["Recruiter", "Training", "Employee Relations"],
-    "content-creation": ["Content Writer"],
-    ceo: ['CEO'],
-    "social-media": ["Social Media"],
-    administrative: ['Administrative'],
-    accounting: ['Payroll'],
-    "video-editing": ['Video Editor'],
-    'customer-service': ['Customer Service'],
-    development: ['Back End Php', 'Back End .Net', 'Mean Stack', 'DevOps', 'Front End', 'React Native'],
-} as const;
+// const DepartmentRoles = {
+//     'hr': ["Recruiter", "Training", "Employee Relations"],
+//     "content-creation": ["Content Writer"],
+//     ceo: ['CEO'],
+//     "social-media": ["Social Media"],
+//     administrative: ['Administrative'],
+//     accounting: ['Payroll'],
+//     "video-editing": ['Video Editor'],
+//     'customer-service': ['Customer Service'],
+//     development: ['Back End Php', 'Back End .Net', 'Mean Stack', 'DevOps', 'Front End', 'React Native'],
+// } as const;
 
-const Departments = Object.keys(DepartmentRoles)
+const Departments = Object.values(DepartmentEnum)
 //const Roles = Object.values(RoleEnum);
 
-type DepartmentType = keyof typeof DepartmentRoles;
-type RoleType = typeof DepartmentRoles[DepartmentType][number];
+// type DepartmentType = keyof typeof DepartmentRoles;
+// type RoleType = typeof DepartmentRoles[DepartmentType][number];
 
 export {
     Departments,
-    DepartmentRoles,
+    //DepartmentRoles,
     // Roles,
     // RoleEnum,
-    DepartmentType,
-    RoleType,
+    // DepartmentType,
+    // RoleType,
     DepartmentEnum
 }
