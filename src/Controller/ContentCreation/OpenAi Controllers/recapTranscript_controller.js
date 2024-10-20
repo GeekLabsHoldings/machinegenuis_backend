@@ -1,6 +1,6 @@
 const OpenAI = require("openai");
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const convertText = require('../../../Service/VideoEditingModule/splitContent')
+const convertText = require('../../../Service/VideoEditingModule/splitContentSTP')
 const mythTTS = require('../../../Service/VideoEditingModule/TTSMyth');
 
 const recapContent = async (myContent) => {
