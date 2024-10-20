@@ -86,7 +86,7 @@ function filterVideosByDuration(videoDetails) {
 async function getAwsDownloadLink(youtubeVideoUrl) {
   try {
     const response = await axios.post(
-      "http://18.118.105.172:3000/download-video",
+      "http://18.118.105.172:3000/download-trim-video",
       { youtubeVideoUrl }
     );
     return response.data.video_url;
