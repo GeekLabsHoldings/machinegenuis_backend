@@ -10,7 +10,6 @@ enum DepartmentEnum {
     Development = 'development'
 }
 
-}
 // enum RoleEnum {
 //     ContentWriter = "Content Writer",
 //     Payroll = "Payroll",
