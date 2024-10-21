@@ -49,7 +49,7 @@ class HiringService implements IHiringService {
     }
 
     async getHiringByLinkedinAccount(account_id: string): Promise<(IHiringModel & { _id: Types.ObjectId | string }) | null> {
-        const result = await hiringModel.findOne({ linkedinAccount: account_id, currentStep: HiringStepsEnum.Get_Job_Candidates });
+        const result = await hiringModel.findOne({ linkedinAccount: account_id });
         return result;
     }
 
