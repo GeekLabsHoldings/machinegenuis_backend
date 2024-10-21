@@ -31,6 +31,8 @@ Video_editing_router.post('/find-replace', controllerReplaceWords.findToReplace)
 Video_editing_router.post('/enhance-img', controllerEnhanceImage.editImage);
 Video_editing_router.post('/process-video', controllerProcessOnVideo.processVideo);
 Video_editing_router.post('/split-content-inv',controllerSplitAndGenerate.splitAndConvertINV);
+Video_editing_router.post('/search-youtube',controllerSplitAndGenerate.searchVideosOnYouTube);
+
 
 
 
