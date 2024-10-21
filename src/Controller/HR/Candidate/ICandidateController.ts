@@ -10,7 +10,7 @@ export default interface ICandidateController {
     addCandidateQuestion(question: ICandidateQuestionsModel): Promise<ICandidateQuestionsModel>;
     getCandidateQuestion(_id: string): Promise<ICandidateQuestionsModel>;
     candidateAddTask(email: string, task_url: string): Promise<ICandidateQuestionsModel>;
-    getAllCandidateQuestionsAndTask(_id: string): Promise<ICandidateQuestionsModel[]>;
+    getAllCandidateQuestionsAndTask(department: string): Promise<ICandidateQuestionsModel[]>;
     changeCandidateTaskStatus(_id: string, status: string, session: ClientSession): Promise<ICandidateModel>;
     getAllCandidate(role: string | null, limit: number, skip: number): Promise<ICandidateModel[]>;
 }

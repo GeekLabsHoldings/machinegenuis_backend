@@ -25,8 +25,7 @@ class CandidateQuestionService implements ICandidateQuestionsService {
         return result;
     }
 
-    async getAllCandidatesQuestions(_id: string): Promise<ICandidateQuestionsModel[]> {
-        const _idObjectID = new Types.ObjectId(_id);
+    async getAllCandidatesQuestions(department: string): Promise<ICandidateQuestionsModel[]> {
         const pipeline: PipelineStage[] = [
             {
                 $lookup: {
@@ -43,8 +42,22 @@ class CandidateQuestionService implements ICandidateQuestionsService {
                 }
             },
             {
+                $lookup: {
+                    from: 'roles',
+                    localField: 'candidateData.role',
+                    foreignField: '_id',
+                    as: 'roleData'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$roleData',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
                 $match: {
-                    'candidateData.hiring': { $eq: _idObjectID }
+                    'candidateData.department': { $eq: department }
                 }
             },
             {
@@ -54,16 +67,19 @@ class CandidateQuestionService implements ICandidateQuestionsService {
                         firstName: '$candidateData.firstName',
                         lastName: '$candidateData.lastName',
                         phoneNumber: '$candidateData.phoneNumber',
-                        email: '$candidateData.email'
+                        email: '$candidateData.email',
+                        department: '$candidateData.department',
+                        roleName: '$roleData.roleName'  // Projecting roleName from roleData
                     },
                     questions: 1,
                     taskLink: 1,
                     taskApprove: 1
                 }
             }
-        ]
+        ];
+        
         const result = await candidateQuestionModel.aggregate(pipeline);
-        return result;
+        return result;        
     }
 }
 
