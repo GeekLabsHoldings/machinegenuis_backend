@@ -78,11 +78,11 @@ TaskRouter.delete('/delete/:_id', async (req: Request, res: Response): Promise<R
 })
 
 
-TaskRouter.get('/all-candidate-with-answers/:_id', async (req: Request, res: Response): Promise<Response> => {
+TaskRouter.get('/all-candidate-with-answers', async (req: Request, res: Response): Promise<Response> => {
     try {
-        const { _id } = req.params;
+        const department = req.query.department || req.body.currentUser.department[0];
         const candidateController = new CandidateController();
-        const result = await candidateController.getAllCandidateQuestionsAndTask(_id);
+        const result = await candidateController.getAllCandidateQuestionsAndTask(department);
         return res.json(result);
     } catch (error) {
         return systemError.sendError(res, error);
