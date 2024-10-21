@@ -49,7 +49,9 @@ enum SchemaTypesReference {
   generated_content = "generated-content",
   Content = "content",
   offlineMembers = "offlineMember",
-
+  Role = "role",
+  GroupsAnalytics = "groups_subs",
+  KPI = "KPIs"
 }
 
 

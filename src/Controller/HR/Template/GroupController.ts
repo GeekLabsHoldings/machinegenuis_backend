@@ -10,30 +10,10 @@ import templateService from "../../../Service/HR/Template/Template/TemplateServi
 class GroupController implements IGroupController {
 
     async createGroup(group: IGroupModel,  session: ClientSession): Promise<IGroupModel> {
-        const position = await groupService.getCurrentGroupPosition();
-        group.position = position + 1;
         const newGroup = await groupService.createGroup(group, session);
         return newGroup;
     }
 
-    async updatePosition(group: IGroupPosition[], session: ClientSession): Promise<IGroupPosition[]> {
-        const idSet = new Set<string>();
-        const count = await groupService.getCurrentGroupPosition();
-        if (group.length !== count)
-            return systemError.setStatus(406).setMessage(ErrorMessages.MUST_SEND_ALL_GROUPS).throw();
-        group.sort((a: IGroupPosition, b: IGroupPosition) => a.position - b.position);
-        for (let i = 0; i < group.length; i++) {
-            if (idSet.has(group[i]._id))
-                return systemError.setStatus(406).setMessage(ErrorMessages.DUPLICATED_ID_IN_REARRANGE).throw();
-            idSet.add(group[i]._id);
-            if (group[i].position !== i + 1) {
-                return systemError.setStatus(406).setMessage(ErrorMessages.GROUPS_POSITION_IS_INVALID).throw();
-            }
-        }
-        await groupService.updatePosition(group, session);
-        return group;
-
-    }
 
     async deleteGroup(_id: string): Promise<void> {
         const result = await groupService.deleteGroup(_id);
@@ -69,7 +49,6 @@ class GroupController implements IGroupController {
                 description: group.description,
                 icon: group.icon,
                 step: group.step,
-                position: group.position,
                 templates: groupTemplates[(group._id) as string] || []
             })
         });

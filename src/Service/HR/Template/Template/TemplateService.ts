@@ -9,47 +9,20 @@ class TemplateService implements ITemplateService {
         const result = await newTemplate.save();
         return result;
     }
-    async getTemplatesByStepAndOptionalRoleLevel(step: string, role?: string, level?: string): Promise<ITemplateModel> {
-        const pipeline: PipelineStage[] = [
-            {
-                $lookup: {
-                    from: 'groups',
-                    localField: 'group_id',
-                    foreignField: '_id',
-                    as: 'group'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$group',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $match: {
-                    'group.step': step,
-                    ...(role ? { role: { $eq: role } } : {}),
-                    ...(level ? { level: { $eq: level } } : {})
-                }
-            },
-            {
-                $project: {
-                    title: 1,
-                    level: 1,
-                    details: 1,
-                    role: 1
-                }
-            }
-        ];
-
-        const result = await templateModel.aggregate(pipeline);
-        return result[0];
+    async getTemplatesByStepAndOptionalRoleLevel(step: string, role?: string, level?: string): Promise<ITemplateModel | null> {
+        const query = { step, ...(role ? { role } : {}), ...(level ? { level } : {}) };
+        const result = await templateModel.findOne(query).populate({
+            path: 'role'
+        });
+        return result;
     }
 
 
     async getTemplateById(_id: string): Promise<ITemplateModel | null> {
         const result = await templateModel.findById(_id).populate({
             path: 'group_id'
+        }).populate({
+            path: 'role'
         });
         return result;
     }
@@ -66,7 +39,9 @@ class TemplateService implements ITemplateService {
     }
 
     async getUnAttachedTemplate(): Promise<ITemplateModel[]> {
-        const result = await templateModel.find({ group_id: null }).select({ title: 1, level: 1, role: 1 });
+        const result = await templateModel.find({ group_id: null }).select({ title: 1, level: 1, role: 1 }).populate({
+            path: 'role'
+        });
         return result;
     }
 
@@ -75,11 +50,14 @@ class TemplateService implements ITemplateService {
     }
 
     async getAttachedTemplate(): Promise<ITemplateModel[]> {
-        const result = await templateModel.find({ group_id: { $type: 'objectId' } }).select({ title: 1, level: 1, role: 1, group_id: 1 })
+        const result = await templateModel.find({ group_id: { $type: 'objectId' } })
+            .populate({ path: 'role' })
+            .select({ title: 1, level: 1, role: 1, group_id: 1 })
         return result;
     }
-    async checkTemplateExist(role: string, level: string): Promise<boolean> {
-        const result = await templateModel.findOne({ role, level });
+    async checkTemplateExist(title: string, role: Types.ObjectId | string | null, level: string | null, step: string): Promise<boolean> {
+        const query = { title, step, ...(role ? { role } : {}), ...(level ? { level } : {}) };
+        const result = await templateModel.findOne(query);
         return result ? true : false;
     }
 

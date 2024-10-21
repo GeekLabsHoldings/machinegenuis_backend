@@ -19,7 +19,7 @@ const schema = new Schema<IEmployeeModel>({
     createdAt: RequiredNumber,
     department: [EnumStringRequired(Departments)],
     personalEmail: RequiredString,
-    role: RequiredString,
+    role: RefType(SchemaTypesReference.Role, true),
     token: NotRequiredString,
     theme: RequiredString,
     cv: RequiredString,

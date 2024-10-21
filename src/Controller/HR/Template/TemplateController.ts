@@ -6,8 +6,8 @@ import systemError from "../../../Utils/Error/SystemError";
 import { ITemplateController } from "./ITemplateController";
 
 class TemplateController implements ITemplateController {
-    async createTemplate(template: ITemplateModel, group_id: string, session: ClientSession): Promise<ITemplateModel & { _id: Types.ObjectId }> {
-        const checkTemplateExist = await templateService.checkTemplateExist(template.role, template.level);
+    async createTemplate(template: ITemplateModel): Promise<ITemplateModel & { _id: Types.ObjectId }> {
+        const checkTemplateExist = await templateService.checkTemplateExist(template.title, (template.role as string), template.level, template.step);
         if (checkTemplateExist)
             return systemError.setStatus(400).setMessage(ErrorMessages.TEMPLATE_EXIST).throw();
         const result = await templateService.createTemplates(template);

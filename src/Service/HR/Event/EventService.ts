@@ -7,9 +7,11 @@ import { ErrorMessages } from "../../../Utils/Error/ErrorsEnum";
 import systemError from "../../../Utils/Error/SystemError";
 import IEventService from "./IEventService";
 import { SchemaTypesReference } from "../../../Utils/Schemas/SchemaTypesReference";
+import IEmployeeModel from "../../../Model/Employee/IEmployeeModel";
+import { IBrand } from "../../../Model/Operations/IBrand_interface";
 
 class EventService implements IEventService {
-    async createEvent(event: IEventModel | ICreateEventBody | ICreateTaskBody, session: ClientSession): Promise<IEventModel> {
+    async createEvent(event: IEventModel | ICreateEventBody | ICreateTaskBody, session: ClientSession|null): Promise<IEventModel> {
         try {
             const newEvent = new eventModel(event);
             const result = await newEvent.save({ session });
@@ -108,6 +110,84 @@ class EventService implements IEventService {
         }
         const result = await eventModel.find(query).exec();
         return result;
+    }
+
+
+
+    async getAllTasks(limit:number, skip:number){
+        try {
+            const result = await eventModel.find({assignedTo: { $ne: null }}).populate({
+                path: 'createdBy',
+                select: { firstName: 1, lastName: 1, department: 1, theme: 1 }
+            }).populate({
+                path: 'assignedTo',
+                select: { firstName: 1, lastName: 1, department: 1, theme: 1 }
+            }).limit(limit).skip(skip).sort({startNumber:-1});
+            return result;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async getTasksByDepartment(department: string, limit:number, skip:number){
+        try {
+            const result = await eventModel.find({department:department, assignedTo: { $ne: null }}).populate({
+                path: 'createdBy',
+                select: { firstName: 1, lastName: 1, department: 1, theme: 1 }
+            }).populate({
+                path: 'assignedTo',
+                select: { firstName: 1, lastName: 1, department: 1, theme: 1 }
+            }).limit(limit).skip(skip).sort({startNumber:-1});
+            return result;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async getTasksByAssignedTo(user:string|Types.ObjectId|IEmployeeModel, limit:number, skip:number){
+        try {
+            const result = await eventModel.find({assignedTo:user,}).populate({
+                path: 'createdBy',
+                select: { firstName: 1, lastName: 1, department: 1, theme: 1 }
+            }).populate({
+                path: 'assignedTo',
+                select: { firstName: 1, lastName: 1, department: 1, theme: 1 }
+            }).limit(limit).skip(skip).sort({startNumber:-1});
+            return result;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async getTasksByCreatedBy(user:string|Types.ObjectId|IEmployeeModel, limit:number, skip:number){
+        try {
+            const result = await eventModel.find({createdBy:user, assignedTo: { $ne: null }}).populate({
+                path: 'createdBy',
+                select: { firstName: 1, lastName: 1, department: 1, theme: 1 }
+            }).populate({
+                path: 'assignedTo',
+                select: { firstName: 1, lastName: 1, department: 1, theme: 1 }
+            }).limit(limit).skip(skip).sort({startNumber:-1});
+            return result;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async getTasksByBrand(brand:string|Types.ObjectId|IBrand, limit:number, skip:number){
+        try {
+            const result = await eventModel.find({brand:brand, assignedTo: { $ne: null }}).populate({
+                path: 'createdBy',
+                select: { firstName: 1, lastName: 1, department: 1, theme: 1 }
+            }).populate({
+                path: 'assignedTo',
+                select: { firstName: 1, lastName: 1, department: 1, theme: 1 }
+            }).limit(limit).skip(skip).sort({startNumber:-1});
+
+            return result;
+        } catch (error) {
+            console.log(error);
+        }
     }
 
 }

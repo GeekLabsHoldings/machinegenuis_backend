@@ -11,7 +11,8 @@ export interface ITelegramAccountData {token:string,}
 export interface ITwetterAccountData {ConsumerKey:string,ConsumerSecret:string,AccessToken:string,TokenSecret:string,BearerToken:string }  
 export interface ILinkedInAccountData {token:string,owner:string} 
 export interface IFacebookInAccountData {tokenPage?:string,longAccessToken?:string, pageID?:string, client_id?:string, client_secret?:string,  email?:string, password?:string, cookies?:string} 
+export interface IYoutubeAccountData {client_id:string, client_secret:string, redirect_uris:string,token?:string} 
 
 export type accountDataType = 
 {platform:string,
-  account:IRedditAccountData|ITelegramAccountData|ITwetterAccountData|ILinkedInAccountData|IFacebookInAccountData}
+  account:IRedditAccountData|ITelegramAccountData|ITwetterAccountData|ILinkedInAccountData|IFacebookInAccountData|IYoutubeAccountData}

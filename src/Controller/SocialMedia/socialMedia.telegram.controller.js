@@ -14,6 +14,8 @@ const crypto = require('crypto');
 const cron = require('node-cron');
 import telegramQueueAddJob from "../../Utils/CronJobs/RedisQueue/telegram.social";
 import { getAccount, getBrands } from "../../Service/Operations/BrandCreation.service";
+import GroupsAnalyticsModel from "../../Model/Operations/analytics/analytics.model";
+
 
 export class TelegramB { 
   constructor(token){
@@ -226,31 +228,3 @@ export async function get_subscripers(req, res) {
 
 
 
-  //====================================
-
-
-try {
-  cron.schedule('0 */6 * * *', async () => {
-
-    const groups = await getChannels();
-    groups.forEach(async(group)=>{
-
-      try {
-        let acountToken = await getAccount(group.brand, "TELEGRAM");
-        acountToken = acountToken.account.token
-        const tb =  new TelegramB(acountToken)
-        group.subscribers = await await tb.bot.getChatMemberCount(group.group_id);
-        group.save()
-        tb.cleanUp()
-      } catch (error) {
-          console.log(error)
-      }
-
-    })
-    
-  });
-} catch (error) {
-  console.log(error)
-}
-
-//===================================

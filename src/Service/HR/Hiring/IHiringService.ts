@@ -9,5 +9,6 @@ export default interface IHiringService {
     getOneHiring(_id: string): Promise<IHiringModel | null>
     deleteHiringRequest(_id: string): Promise<boolean>;
     addHiringLinkedinAccount(_id: string, account_id: string, session: ClientSession): Promise<IHiringModel | null>;
-    getHiringByLinkedinAccount(account_id: string): Promise<(IHiringModel & { _id: Types.ObjectId | string }) | null> 
+    getHiringByLinkedinAccount(account_id: string): Promise<(IHiringModel & { _id: Types.ObjectId | string }) | null>
+    changeHiringStatus(_id: string, hiringStatus: string): Promise<IHiringModel | null>;
 }

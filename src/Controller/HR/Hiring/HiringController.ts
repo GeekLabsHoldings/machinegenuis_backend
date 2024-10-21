@@ -10,6 +10,7 @@ import { HiringSteps, HiringStepsEnum } from "../../../Utils/GroupsAndTemplates"
 import { ClientSession } from "mongoose";
 import axios from "axios";
 import candidateService from "../../../Service/HR/Candidate/CandidateService";
+import IRoleModel from "../../../Model/HR/Role/IRoleModel";
 
 class HiringController implements IHiringController {
     async createHiring(hiring: IHiringModel): Promise<IHiringModel> {
@@ -53,32 +54,32 @@ class HiringController implements IHiringController {
     }
 
 
-    async getCurrentStepTemplate(_id: string): Promise<IStepsOfHiring> {
+    async getCurrentStepTemplate(_id: string, requestCurrentStep: string | null): Promise<IStepsOfHiring> {
         const hiring = await hiringService.getOneHiring(_id)
         if (!hiring)
             return systemError.setStatus(404).setMessage(ErrorMessages.HIRING_NOT_FOUND).throw();
-        const { currentStep, level, role } = hiring
+        const { level, role } = hiring
+        const currentStep = requestCurrentStep || hiring.currentStep;
         const query = [HiringStepsEnum.Interview_Call_Question, HiringStepsEnum.Tasks, HiringStepsEnum.Job_Listings].includes(currentStep as HiringStepsEnum);
-
-        const template = await templateService.getTemplatesByStepAndOptionalRoleLevel(currentStep, (query ? role : undefined), (query ? level : undefined));
+        const role_id = (role as IRoleModel & { _id: string })._id;
+        const template = await templateService.getTemplatesByStepAndOptionalRoleLevel(currentStep, (query ? role_id : undefined), (query ? level : undefined));
         const candidate = await candidateService.getAllCandidateByHiring(_id, currentStep, null, null);
         return {
             _id,
             step: currentStep,
             level,
-            role,
-            template,
+            role: role as IRoleModel & { _id: string },
+            template: template || "",
             candidates: candidate
         };
 
     }
 
-    async publishJob(hiringId: string, role: string, contract: string, template: string, skills: Array<string>, questions: Array<IQuestionTemplate>, session: ClientSession): Promise<string> {
+    async publishJob(hiringId: string, role: string, contract: string, template: string, questions: Array<IQuestionTemplate>, session: ClientSession): Promise<string> {
         const data = {
             details: {
                 jobTitle: role,
                 contract_type: contract,
-                skills,
                 description: template,
                 questions
 

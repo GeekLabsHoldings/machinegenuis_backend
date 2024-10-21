@@ -1,17 +1,18 @@
-import { ClientSession } from "mongoose";
+import { ClientSession, Types } from "mongoose";
 import IHiringModel from "../../../Model/HR/Hiring/IHiringModel";
 import { ITemplateModel } from "../../../Model/HR/Templates/ITemplateModel";
 import ICandidateModel from "../../../Model/HR/Candidate/ICandidateModel";
+import IRoleModel from "../../../Model/HR/Role/IRoleModel";
 export interface ICurrentStepTemplate extends ITemplateModel {
     jobTitle: string
 }
 
 export interface IStepsOfHiring {
     candidates: ICandidateModel[],
-    template: ITemplateModel,
+    template: ITemplateModel | "",
     step: string
     level: string
-    role: string
+    role: IRoleModel & { _id: string | Types.ObjectId },
     _id: string
 }
 export interface IQuestionTemplate {
@@ -24,6 +25,6 @@ export default interface IHiringController {
     getHiring(type: string, limit: number, skip: number): Promise<IHiringModel[]>;
     deleteHiringRequest(_id: string): Promise<string>;
     toNextStep(_id: string): Promise<IHiringModel>;
-    getCurrentStepTemplate(_id: string): Promise<IStepsOfHiring>;
-    publishJob(hiringId: string, role: string, contract: string, template: string, skills: Array<string>, questions: Array<IQuestionTemplate>, session: ClientSession): Promise<string>;
+    getCurrentStepTemplate(_id: string, requestCurrentStep: string | null): Promise<IStepsOfHiring>;
+    publishJob(hiringId: string, role: string, contract: string, template: string, questions: Array<IQuestionTemplate>, session: ClientSession): Promise<string>;
 }

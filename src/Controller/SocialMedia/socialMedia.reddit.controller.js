@@ -7,7 +7,7 @@ import { PlatformEnum } from "../../Utils/SocialMedia/Platform";
 import redditQueueAddJob from "../../Utils/CronJobs/RedisQueue/reddit.social";
 import axios from "axios";
 import { getAccount, getBrands } from "../../Service/Operations/BrandCreation.service";
-
+import GroupsAnalyticsModel from "../../Model/Operations/analytics/analytics.model";
 const cron = require("node-cron");
 
 
@@ -197,37 +197,3 @@ export const DeletePost = async (req, ) => {
   }
 };
 
-//====================================
-
-try {
-  cron.schedule("0 */6 * * *", async () => {
-
-
-    const groups = await RedditServices.getSubreddits();
-    groups.forEach(async (group) => {
-      try {
-        const acount = await getAccount(req.body.brand,"REDDIT");
-        const account = acount.account
-        
-        const r = await RedditServices.getsnoowrap(
-
-          acount.appID,
-          acount.appSecret,
-          acount.username,
-          acount.password
-        );
-        group.subscribers = await RedditServices.getSubredditSubs(
-          r,
-          group.group_name
-        );
-        group.save();
-      } catch (error) {
-        
-      }
-     
-    });
-  });
-} catch (error) { console.log(error);
-}
-
-//===================================

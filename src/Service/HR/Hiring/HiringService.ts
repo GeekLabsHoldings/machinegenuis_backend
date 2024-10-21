@@ -7,7 +7,7 @@ import { HiringStepsEnum } from "../../../Utils/GroupsAndTemplates";
 
 class HiringService implements IHiringService {
     async addHiringLinkedinAccount(_id: string, account_id: string, session: ClientSession): Promise<IHiringModel | null> {
-        return await hiringModel.findByIdAndUpdate(_id, { $set: { linkedinAccount: account_id, currentStep: HiringStepsEnum.Get_Job_Candidates } }, { session });
+        return await hiringModel.findByIdAndUpdate(_id, { $set: { linkedinAccount: account_id, currentStep: HiringStepsEnum.Get_Job_Candidates, hiringStatus: HiringStatusLevelEnum.PENDING } }, { session });
     }
 
     async createHiring(hiring: IHiringModel): Promise<IHiringModel> {
@@ -24,6 +24,9 @@ class HiringService implements IHiringService {
             .populate({
                 path: 'createdBy', select: { _id: 1, firstName: 1, lastName: 1, theme: 1 }
             })
+            .populate({
+                path: 'role'
+            })
             .sort({ createdAt: -1 }).limit(limit).skip(skip);
         if (type === HiringStatus.OPENING)
             query.where({ hiringStatus: HiringStatusLevelEnum.CONTINUE })
@@ -35,7 +38,9 @@ class HiringService implements IHiringService {
     }
 
     async getOneHiring(_id: string): Promise<IHiringModel | null> {
-        return await hiringModel.findById(_id);
+        return await hiringModel.findById(_id).populate({
+            path: 'role'
+        });
     }
 
     async deleteHiringRequest(_id: string): Promise<boolean> {
@@ -46,6 +51,14 @@ class HiringService implements IHiringService {
     async getHiringByLinkedinAccount(account_id: string): Promise<(IHiringModel & { _id: Types.ObjectId | string }) | null> {
         const result = await hiringModel.findOne({ linkedinAccount: account_id, currentStep: HiringStepsEnum.Get_Job_Candidates });
         return result;
+    }
+
+    async getHiringByRole(role_id: string): Promise<IHiringModel[]> {
+        return await hiringModel.find({ role: role_id });
+    }
+
+    async changeHiringStatus(_id: string, hiringStatus: string): Promise<IHiringModel | null> {
+        return await hiringModel.findByIdAndUpdate(_id, { $set: { hiringStatus } }, { new: true });
     }
 
 }

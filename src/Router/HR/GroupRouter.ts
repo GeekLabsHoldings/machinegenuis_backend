@@ -21,21 +21,6 @@ GroupRouter.post('/create', async (req: Request, res: Response): Promise<Respons
     }
 });
 
-GroupRouter.put('/rearrange-position', async (req: Request, res: Response): Promise<Response> => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-    try {
-        const { groupPosition } = req.body;
-        const result = await groupController.updatePosition(groupPosition, session);
-        await session.commitTransaction();
-        return res.json(result);
-    } catch (error) {
-        await session.abortTransaction();
-        return systemError.sendError(res, error);
-    } finally {
-        session.endSession();
-    }
-})
 
 GroupRouter.put('/edit/:_id', async (req: Request, res: Response): Promise<Response> => {
     try {
