@@ -64,7 +64,7 @@ export default class UserZohoService implements IUserZohoService {
         const result = await this.axiosSetup.post(`/organization/${this.organizationId}/accounts`, userData);
         return result.data.data;
     }
-    async addSignature(signatureData:{name: string, content: string, position: number, assignUsers: string}, access_token:string) {
+    async addSignature(signatureData:{name: string, content: string, position: number, assignUsers: string}) {
 
         try{
             //   /api/accounts/signature
@@ -72,7 +72,6 @@ export default class UserZohoService implements IUserZohoService {
         return result.data.data;
         }catch (error) {
             console.log(error);
-            
         } 
     }
 }

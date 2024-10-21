@@ -2,9 +2,10 @@ import { Types } from "mongoose";
 import IZohoEmailModel from "../../Model/Zoho/Emails/IZohoEmails";
 import ZohoEmailsModel from "../../Model/Zoho/Emails/ZohoEmails";
 import IEmailsZohoModelService from "./IEmailsZohoModelService";
+import IZohoEmailCreation from "../../Controller/Operations/emailCreation/IZohoEmailCreation.interface";
 
 export default class EmailsZohoModelService implements IEmailsZohoModelService {
-    async addEmailAccount(emailAccount: IZohoEmailModel): Promise<IZohoEmailModel> {
+    async addEmailAccount(emailAccount: IZohoEmailModel|IZohoEmailCreation): Promise<IZohoEmailModel> {
         const newEmailAccount = new ZohoEmailsModel(emailAccount);
         const result = await newEmailAccount.save();
         return result;

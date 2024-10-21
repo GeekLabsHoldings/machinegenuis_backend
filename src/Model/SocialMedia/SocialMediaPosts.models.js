@@ -20,12 +20,6 @@ const SocialMediaPostsSchema = new mongoose.Schema({
     trim: true,
   },
 
-  engagment: {
-    type: Number,
-    required: false,
-    trim: true,
-    default: 0,
-  },
   
   group_id:  { type:  String, unique: false, required:false, default:0}
   ,
@@ -43,6 +37,33 @@ const SocialMediaPostsSchema = new mongoose.Schema({
     type: String,
     required: false,
     trim:true
+  },
+
+  
+  likes: {
+    type: Number,
+    required: false,
+    trim: true,
+    default: 0,
+  },
+  
+  comments: {
+    type: Number,
+    required: false,
+    trim: true,
+    default: 0,
+  },
+  
+  shares: {
+    type: Number,
+    required: false,
+    trim: true,
+    default: 0,
+  },
+
+  postId: {
+    type: String,
+    required: false,
   },
 });
 // Create the model

@@ -153,7 +153,7 @@ export async function LinkedinPostInsights(brand: string, postId: string) {
 }
 
 
-export async function getInsights(platform: string, posts: { brand: string, post_id: string, group_id: string }[]) {
+export async function getInsights(platform: string, posts: { brand: string; post_id: string; group_id: string; }[]) {
     const sum = { like_count: 0, num_comments: 0, retweet_count: 0}
     if (platform == "TWITTER") {
         
@@ -192,7 +192,7 @@ export async function getInsights(platform: string, posts: { brand: string, post
 }
 
 
-async function fetchPosts(platform:string, s:number|Date, e:number|Date, brand:string|Types.ObjectId, count:boolean=false) {
+export async function fetchPosts(platform:string, s:number|Date, e:number|Date, brand:string|Types.ObjectId, count:boolean=false) {
     if (count){
         return await SocialMediaPosts.countDocuments({
             timestamp: {

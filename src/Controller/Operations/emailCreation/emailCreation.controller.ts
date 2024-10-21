@@ -5,6 +5,7 @@ import UserZohoService from "../../../Service/Zoho/UserAndOrganization/UserAndOr
 import ZohoEmailsModel from "../../../Model/Zoho/Emails/ZohoEmails";
 import EmailsZohoModelService from "../../../Service/Emails/EmailsZohoModelService";
 import IZohoEmailModel from "../../../Model/Zoho/Emails/IZohoEmails";
+import IZohoEmailCreation from "./IZohoEmailCreation.interface";
 
 
 
@@ -17,11 +18,10 @@ export async function addEmail(req: Request, res: Response) {
         const userData: ICreateUserBody = {...req.body.userData, employeeId:Date.now(), oneTimePassword:false}
         
         const brand = req.body.brand
-
+        const department = req.body.department
 
         if (mainAccount) {
             const zohoService = new UserZohoService(mainAccount.clientId, mainAccount.clientSecret, mainAccount.zohoId);
-
             if (!mainAccount.expiredIn || mainAccount.expiredIn <= new Date().valueOf()) {
                 console.log("Enter Here");
                 const accessToken = await zohoService.generateAccessToken(mainAccount.refreshToken);
@@ -31,11 +31,10 @@ export async function addEmail(req: Request, res: Response) {
            
             const newUser = await zohoService.addNewUser(userData)
 
-            const userEmail: IZohoEmailModel = {
+            const userEmail: IZohoEmailCreation = {
                 accountId: newUser.accountId,
                 accountName: newUser.displayName, zohoId: String(newUser.policyId.zoid), domain: newUser.accountName,
-                department: req.body.currentUser.department, brand: brand, accountEmail: newUser.mailboxAddress,
-                clientId: "", clientSecret: "", refreshToken: "", accessToken: "", expiredIn: Number(req.body.expiredIn) || 999999999999999
+                department: department, brand: brand, accountEmail: newUser.mailboxAddress,
             }
             const addedAccount = await emailService.addEmailAccount(userEmail)
 
@@ -97,7 +96,7 @@ export async function addSignature(req: Request, res: Response) {
         const mainAccount = await emailService.getEmailAccountByIDorEmail(acc_id, email)
         if (mainAccount) {
             const zohoService = new UserZohoService(mainAccount.clientId, mainAccount.clientSecret, mainAccount.zohoId)
-            const sig = await zohoService.addSignature({name, content, position, assignUsers}, mainAccount.accessToken)
+            const sig = await zohoService.addSignature({name, content, position, assignUsers})
 
             return res.json({sig})
         }

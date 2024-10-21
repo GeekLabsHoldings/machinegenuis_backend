@@ -322,18 +322,16 @@ export async function registerDomain(
 }
 
 export async function verificationDomain(domainName:string) {
-  try {
+
     const domainManager = new AwsDomainActivation();
     const emailVerificationStatus = await domainManager.checkDomainVerificationStatus(domainName);
     return emailVerificationStatus
-  } catch (error) {
-    console.log(error);
-  }
+
 }
 
 
 export async function activateDomain(domainName:string, brand:string){
-  try {
+
     const domainManager = new AwsDomainActivation();
     const acm = new ACMCLIENT();
 
@@ -364,9 +362,6 @@ if (HostedZoneId) {
     await domainModel.updateOne(query,update,{ new: true })
   }
 }
-  } catch (error) {
-    console.log(error);
-  }
 }
 
 
