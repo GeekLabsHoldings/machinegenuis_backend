@@ -16,6 +16,16 @@ HiringRouter.put('/next-step/:_id', async (req: Request, res: Response): Promise
     }
 })
 
+HiringRouter.put('/previous-step/:_id', async (req: Request, res: Response): Promise<Response> => {
+    try {
+        const { _id } = req.params;
+        const result = await hiringController.toPreviousStep(_id);
+        return res.json(result);
+    } catch (error) {
+        return systemError.sendError(res, error);
+    }
+})
+
 HiringRouter.get('/hiring', async (req: Request, res: Response): Promise<Response> => {
     try {
         const limit = parseInt(req.query.limit as string) || 10;
