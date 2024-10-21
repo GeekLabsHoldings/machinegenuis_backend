@@ -1,3 +1,4 @@
+
 import { findYouTubeLinksForKeywords } from "../../Service/VideoEditingModule/searchInYoutube.js";
 import {
   splitContentInvestocracy,
@@ -8,13 +9,7 @@ export const gitDetailsContent = async (req, res) => {
     const { intro, content } = req.body;
     const introGenerate = await generateIntroJson(intro);
     const bodyAndOutro = await splitContentInvestocracy(content);
-
-    console.log("bodyAndOutro", bodyAndOutro);
-    console.log("introGenerate", introGenerate);
-
-    const keywords = bodyAndOutro.map((item) => item.keywords).flat();
-    const outro = bodyAndOutro.map((item) => item.outro).flat();
-    const videoLinks = await findYouTubeLinksForKeywords(keywords, bodyAndOutro, introGenerate);
+    const videoLinks = await findYouTubeLinksForKeywords(bodyAndOutro, introGenerate);
 
     console.log("videoLinks----", videoLinks);
     return res.status(200).json(videoLinks);

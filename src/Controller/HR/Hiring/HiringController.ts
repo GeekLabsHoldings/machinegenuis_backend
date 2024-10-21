@@ -53,6 +53,21 @@ class HiringController implements IHiringController {
         return result;
     }
 
+    async toPreviousStep(_id: string): Promise<IHiringModel> {
+        const hiring = await hiringService.getOneHiring(_id);
+        if (!hiring)
+            return systemError.setStatus(404).setMessage(ErrorMessages.HIRING_NOT_FOUND).throw();
+        const { currentStep } = hiring;
+        const currentStepIndex = HiringSteps.indexOf(currentStep as HiringStepsEnum);
+        if (currentStepIndex <= 2)
+            return systemError.setStatus(404).setMessage(ErrorMessages.CURRENT_STEP_NOT_FOUND).throw();
+        const prevStep = HiringSteps[currentStepIndex - 1];
+        const result = await hiringService.changeHiringStep(_id, prevStep, HiringStatusLevelEnum.CONTINUE);
+        if (!result)
+            return systemError.setStatus(404).setMessage(ErrorMessages.HIRING_NOT_FOUND).throw();
+        return result;
+    }
+
 
     async getCurrentStepTemplate(_id: string, requestCurrentStep: string | null): Promise<IStepsOfHiring> {
         const hiring = await hiringService.getOneHiring(_id)

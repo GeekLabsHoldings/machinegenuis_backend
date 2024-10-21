@@ -27,4 +27,5 @@ export default interface IHiringController {
     toNextStep(_id: string): Promise<IHiringModel>;
     getCurrentStepTemplate(_id: string, requestCurrentStep: string | null): Promise<IStepsOfHiring>;
     publishJob(hiringId: string, role: string, contract: string, template: string, questions: Array<IQuestionTemplate>, session: ClientSession): Promise<string>;
+    toPreviousStep(_id: string): Promise<IHiringModel>;
 }
