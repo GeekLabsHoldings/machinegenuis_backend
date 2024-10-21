@@ -8,16 +8,23 @@ function getPublishedAfterDate() {
   today.setHours(0, 0, 0, 0);
   return today.toISOString();
 }
-
 async function searchVideos(query) {
   const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=50&publishedAfter=${getPublishedAfterDate()}&order=date&key=${process.env.API_KEY_SEARCH_IN_YOUTUBE}`;
 
   try {
     const searchResponse = await axios.get(searchUrl);
-    console.log("Search response:-------->", searchResponse.data.items);
-    return searchResponse.data.items;
+    const allVideos = searchResponse.data.items;
+
+    const nonLiveVideos = allVideos.filter(video => video.snippet.liveBroadcastContent === 'none');
+
+    console.log("Filtered non-live videos:-------->", nonLiveVideos);
+    return nonLiveVideos;
   } catch (error) {
-    console.error("Error fetching search results:", error);
+    if (error.response && error.response.status === 403 && error.response.data.error.errors.some(e => e.reason === 'quotaExceeded')) {
+      console.error("Error: YouTube API quota exceeded. Please try again later.");
+    } else {
+      console.error("Error fetching search results:", error.message || error);
+    }
     return [];
   }
 }
@@ -39,6 +46,8 @@ async function getVideoDetails(videoIds) {
 
 async function getAwsDownloadLink(youtubeVideoUrl) {
   try {
+    console.log("A -> DownloadVideo",youtubeVideoUrl);
+    
     const response = await axios.post(
       "https://video.machinegenius.io/download-trim-video",
       { url: youtubeVideoUrl }
@@ -66,6 +75,8 @@ async function findVideosForKeyword(keyword, isCnbc) {
 }
 
 export async function findYouTubeLinksForKeywords(bodyAndOutro, introGenerate) {
+  console.log(introGenerate);
+  
   const videoLinks = {
     intro: {
       text: introGenerate.text,
