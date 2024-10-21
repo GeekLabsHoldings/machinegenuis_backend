@@ -114,15 +114,12 @@ export async function FacebookPostInsights(brand: string, postId: string) {
     try {
 
         const acc = await getAccount(brand, "FACEBOOK")
-        const url = `https://graph.facebook.com/${postId}/posts`;
+        const axios = require('axios');
 
-        const response = await axios.get(url, null,{
-            params: {
-                access_token: (acc?.account as IFacebookInAccountData).longAccessToken,
-                fields: 'likes.summary(true),comments.summary(true),shares'
-            }
-        });
-            console.log('Post Data:', response.data);
+
+        const accessToken = (acc?.account as IFacebookInAccountData).longAccessToken;
+        const  response = await axios.get(`https://graph.facebook.com/v17.0/${postId}?fields=likes.summary(true),comments.summary(true)&access_token=${accessToken}`)
+        return response.data
     } catch (error) {
         console.log(error)
     }

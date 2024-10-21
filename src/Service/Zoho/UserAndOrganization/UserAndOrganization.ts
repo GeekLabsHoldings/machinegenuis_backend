@@ -64,32 +64,15 @@ export default class UserZohoService implements IUserZohoService {
         const result = await this.axiosSetup.post(`/organization/${this.organizationId}/accounts`, userData);
         return result.data.data;
     }
-    async addSignture(signtureData:{name: string, content: string, position: number, assignUsers: string}, access_token:string) {
+    async addSignature(signatureData:{name: string, content: string, position: number, assignUsers: string}, access_token:string) {
 
-
-        try {
-            const result = await axios.post(
-                'https://www.zohoapis.com/crm/v2/accounts/signature',
-                {
-                    data: [signtureData]  // Wrap your signature data in a data array
-                },
-                {
-                    headers: {
-                        'Authorization': `Zoho-oauthtoken ${access_token}`, // Replace with your OAuth token
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-    
-            const sig = result.data; // Get the response data
-            console.log(sig); // Log the response
-            return sig; // Return the signature data
-        } catch (error) {
+        try{
+            //   /api/accounts/signature
+        const result = await this.axiosSetup.post(`/organization/${this.organizationId}/signature`, signatureData);
+        return result.data.data;
+        }catch (error) {
             console.log(error);
             
-        }
-      
-
-    
+        } 
     }
 }
