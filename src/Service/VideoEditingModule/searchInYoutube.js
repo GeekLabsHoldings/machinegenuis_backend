@@ -8,20 +8,50 @@ function getPublishedAfterDate() {
   today.setHours(0, 0, 0, 0);
   return today.toISOString();
 }
+function iso8601ToMinutes(duration) {
+  const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
 
+  const hours = (parseInt(match[1]) || 0);
+  const minutes = (parseInt(match[2]) || 0);
+  const seconds = (parseInt(match[3]) || 0);
+
+  return hours * 60 + minutes + seconds / 60;
+}
 async function searchVideos(query) {
   const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=50&publishedAfter=${getPublishedAfterDate()}&order=date&key=${process.env.API_KEY_SEARCH_IN_YOUTUBE}`;
 
   try {
     const searchResponse = await axios.get(searchUrl);
-    console.log("Search response:-------->", searchResponse.data.items);
-    return searchResponse.data.items;
+    const allVideos = searchResponse.data.items;
+
+    const nonLiveVideos = allVideos.filter(video => video.snippet.liveBroadcastContent === 'none');
+    
+    if (nonLiveVideos.length === 0) {
+      console.log("No non-live videos found.");
+      return [];
+    }
+
+    const videoIds = nonLiveVideos.map(video => video.id.videoId);
+
+    const videoDetails = await getVideoDetails(videoIds);
+
+    const filteredVideos = videoDetails.filter(video => {
+      const duration = video.contentDetails.duration;
+      const minutes = iso8601ToMinutes(duration);
+      return minutes >= 1 && minutes <= 6;
+    });
+
+    console.log("Filtered videos between 1 and 6 minutes:-------->", filteredVideos);
+    return filteredVideos;
   } catch (error) {
-    console.error("Error fetching search results:", error);
+    if (error.response && error.response.status === 403 && error.response.data.error.errors.some(e => e.reason === 'quotaExceeded')) {
+      console.error("Error: YouTube API quota exceeded. Please try again later.");
+    } else {
+      console.error("Error fetching search results:", error.message || error);
+    }
     return [];
   }
 }
-
 async function getVideoDetails(videoIds) {
   const detailsUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoIds.join(
     ","
@@ -36,9 +66,10 @@ async function getVideoDetails(videoIds) {
     return [];
   }
 }
-
 async function getAwsDownloadLink(youtubeVideoUrl) {
   try {
+    console.log("A -> DownloadVideo",youtubeVideoUrl);
+    
     const response = await axios.post(
       "https://video.machinegenius.io/download-trim-video",
       { url: youtubeVideoUrl }
@@ -50,7 +81,6 @@ async function getAwsDownloadLink(youtubeVideoUrl) {
     return "video not found";
   }
 }
-
 async function findVideosForKeyword(keyword, isCnbc) {
   let videos = [];
   let attempts = 0;
@@ -64,8 +94,9 @@ async function findVideosForKeyword(keyword, isCnbc) {
   }
   return videos;
 }
-
 export async function findYouTubeLinksForKeywords(bodyAndOutro, introGenerate) {
+  console.log(introGenerate);
+  
   const videoLinks = {
     intro: {
       text: introGenerate.text,
