@@ -137,6 +137,12 @@ export default class TaskController implements ITaskController {
         const checkStepStatus = getCandidate.stepsStatus[currentStepIndex].status === StatusEnum.APPROVED;
         const checkMessageStatus = getCandidate.messageStatus[currentStepIndex].status === StatusEnum.APPROVED;
         console.log("============= check candidate validation ==============");
+        console.log({
+            currentStepIndex,
+            checkCurrentStep,
+            checkStepStatus,
+            checkMessageStatus
+        })
         if (!checkStepStatus || !checkCurrentStep || !checkMessageStatus)
             return systemError.setStatus(406).setMessage(ErrorMessages.CANDIDATE_NOT_FOUND).throw();
 
