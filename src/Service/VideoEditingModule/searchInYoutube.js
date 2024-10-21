@@ -20,10 +20,15 @@ async function searchVideos(query) {
     console.log("Filtered non-live videos:-------->", nonLiveVideos);
     return nonLiveVideos;
   } catch (error) {
-    console.error("Error fetching search results:", error);
+    if (error.response && error.response.status === 403 && error.response.data.error.errors.some(e => e.reason === 'quotaExceeded')) {
+      console.error("Error: YouTube API quota exceeded. Please try again later.");
+    } else {
+      console.error("Error fetching search results:", error.message || error);
+    }
     return [];
   }
 }
+
 async function getVideoDetails(videoIds) {
   const detailsUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoIds.join(
     ","
