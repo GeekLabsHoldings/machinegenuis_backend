@@ -509,7 +509,7 @@ export async function getKPIs(brand:string) {
               $project: {
                 year: { $year: { $toDate: "$timeStamp" }, },
                 month: { $month: { $toDate: "$timeStamp" } },
-
+                brand:1,
                 timeStamp: 1,
                 platform:1,   
                 postsPerDay: 1,
