@@ -2,9 +2,10 @@ import { Types } from "mongoose";
 import IZohoEmailModel from "../../Model/Zoho/Emails/IZohoEmails";
 import ZohoEmailsModel from "../../Model/Zoho/Emails/ZohoEmails";
 import IEmailsZohoModelService from "./IEmailsZohoModelService";
+import IZohoEmailCreation from "../../Controller/Operations/emailCreation/IZohoEmailCreation.interface";
 
 export default class EmailsZohoModelService implements IEmailsZohoModelService {
-    async addEmailAccount(emailAccount: IZohoEmailModel): Promise<IZohoEmailModel> {
+    async addEmailAccount(emailAccount: IZohoEmailModel|IZohoEmailCreation): Promise<IZohoEmailModel> {
         const newEmailAccount = new ZohoEmailsModel(emailAccount);
         const result = await newEmailAccount.save();
         return result;
@@ -26,19 +27,23 @@ export default class EmailsZohoModelService implements IEmailsZohoModelService {
         return result;
     }
 
-    async getEmailAccountByIDorEmail(acc_id:string|null|undefined , email:string): Promise<IZohoEmailModel | null> {
+    async getEmailAccountByIDorEmail(acc_id:string|null|undefined , email:string): Promise<IZohoEmailModel & { _id: Types.ObjectId } | null> {
         const query = (acc_id) ? { _id:acc_id } : {accountEmail: email }
         const result = await ZohoEmailsModel.findOne(query);
         return result;
     }
 
 
-    async updateAccessToken(_id: string, accessToken: string, refreshToken: string, expiredIn: number,  clientId?:string, clientSecret?:string, ): Promise<IZohoEmailModel | null> {
+    async updateAccessToken(_id: string, accessToken: string, expiredIn: number,  ): Promise<IZohoEmailModel & { _id: Types.ObjectId }  | null> {
+        const result = await ZohoEmailsModel.findByIdAndUpdate(_id, { accessToken,  expiredIn }, { new: true });
+        return result;
+    }
+    async updateAccessAndRefreshToken(_id: string, accessToken: string, refreshToken: string, expiredIn: number,  clientId:string, clientSecret:string, ): Promise<IZohoEmailModel | null> {
         const result = await ZohoEmailsModel.findByIdAndUpdate(_id, { accessToken, refreshToken, clientId, clientSecret,  expiredIn }, { new: true });
         return result;
     }
 
-    async getMainAccount (): Promise<IZohoEmailModel | null> {
+    async getMainAccount (): Promise<IZohoEmailModel & { _id: Types.ObjectId }  | null> {
         const mainAccount = await ZohoEmailsModel.findOne({isAdminAccount:true})
         return mainAccount
     }

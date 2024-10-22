@@ -5,6 +5,7 @@ import ScrapCronJob from "./ScrapCronJob";
 import scheduleR from "./SocialCronJob/updateSubs/redditUpdateSubs";
 import scheduleT from "./SocialCronJob/updateSubs/telegramUpdateSubs";
 import scheduleY from "./SocialCronJob/updateSubs/youtubeUpdateSubs";
+import scheduleP from "./SocialCronJob/UpdatePostsInsights/updatePostsEngagements";
 
 const startCronJobs = () => {
     ScrapCronJob.start();
@@ -14,6 +15,7 @@ const startCronJobs = () => {
     scheduleR.start();
     scheduleT.start();
     scheduleY.start();
+    scheduleP.start();
 }
 
 export default startCronJobs;
