@@ -104,7 +104,7 @@ class EventService implements IEventService {
             assignedTo: new Types.ObjectId(employee_id),
             $or: [
                 { startNumber: { $gte: startTime, $lt: endTime } },
-                { endNumber: { $gte: startTime, $lt: endTime } },
+                { endNumber: { $gt: startTime, $lt: endTime } },
                 { startNumber: { $lt: startTime }, endNumber: { $gte: endTime } }
             ]
         }
