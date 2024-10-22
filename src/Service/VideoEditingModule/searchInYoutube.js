@@ -58,6 +58,37 @@ async function getAwsDownloadLink(youtubeVideoUrl) {
     return "video not found";
   }
 }
+async function fetchLatsVideosFromCnbc() {
+  if (cachedCnbcVideos.length > 0) {
+    return cachedCnbcVideos;
+  }
+
+  const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=UCvJJ_dzjViJCoLf5uKUTwoA&type=video&order=date&maxResults=50&key=${process.env.API_KEY_SEARCH_IN_YOUTUBE}`;
+
+  try {
+    const response = await axios.get(searchUrl);
+    const videos = response.data.items;
+    return videos.map((video) => ({
+      videoUrl: `https://www.youtube.com/watch?v=${video.id.videoId}`,
+      duration: "0",
+    }));
+  } catch (error) {
+    if (
+      error.response &&
+      error.response.status === 403 &&
+      error.response.data.error.errors.some((e) => e.reason === "quotaExceeded")
+    ) {
+      console.error("Error: YouTube API quota exceeded.");
+      return { success: false, message: "YouTube API quota exceeded." };
+    } else {
+      console.error("Error fetching search results:", error.message || error);
+      return {
+        success: false,
+        message: error.message || "Unknown error occurred.",
+      };
+    }
+  }
+}
 export async function findYouTubeLinksForKeywords(keywordsArray, isCnbc) {
   const videoLinks = {
     cnbc: [],
@@ -157,34 +188,4 @@ export async function searchVideosYouTubeCnbc(query) {
     }
   }
 }
-export async function fetchLatsVideosFromCnbc() {
-  if (cachedCnbcVideos.length > 0) {
-    return cachedCnbcVideos;
-  }
 
-  const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=UCvJJ_dzjViJCoLf5uKUTwoA&type=video&order=date&maxResults=50&key=${process.env.API_KEY_SEARCH_IN_YOUTUBE}`;
-
-  try {
-    const response = await axios.get(searchUrl);
-    const videos = response.data.items;
-    return videos.map((video) => ({
-      videoUrl: `https://www.youtube.com/watch?v=${video.id.videoId}`,
-      duration: "0",
-    }));
-  } catch (error) {
-    if (
-      error.response &&
-      error.response.status === 403 &&
-      error.response.data.error.errors.some((e) => e.reason === "quotaExceeded")
-    ) {
-      console.error("Error: YouTube API quota exceeded.");
-      return { success: false, message: "YouTube API quota exceeded." };
-    } else {
-      console.error("Error fetching search results:", error.message || error);
-      return {
-        success: false,
-        message: error.message || "Unknown error occurred.",
-      };
-    }
-  }
-}
