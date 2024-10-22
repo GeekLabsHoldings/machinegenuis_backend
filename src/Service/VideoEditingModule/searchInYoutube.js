@@ -135,11 +135,12 @@ export async function searchVideosYouTube(query) {
     }));
   } catch (error) {
     if (error.response && error.response.status === 403 && error.response.data.error.errors.some(e => e.reason === 'quotaExceeded')) {
-      console.error("Error: YouTube API quota exceeded. Please try again later.");
+      console.error("Error: YouTube API quota exceeded.");
+      return { success: false, message: "YouTube API quota exceeded." };
     } else {
       console.error("Error fetching search results:", error.message || error);
+      return { success: false, message: error.message || "Unknown error occurred." };
     }
-    return [];
   }
 }
 export async function searchVideosYouTubeCnbc(query) {
@@ -158,10 +159,11 @@ export async function searchVideosYouTubeCnbc(query) {
     }));
   } catch (error) {
     if (error.response && error.response.status === 403 && error.response.data.error.errors.some(e => e.reason === 'quotaExceeded')) {
-      console.error("Error: YouTube API quota exceeded. Please try again later.");
+      console.error("Error: YouTube API quota exceeded.");
+      return { success: false, message: "YouTube API quota exceeded." };
     } else {
       console.error("Error fetching search results:", error.message || error);
+      return { success: false, message: error.message || "Unknown error occurred." };
     }
-    return [];
   }
 }
