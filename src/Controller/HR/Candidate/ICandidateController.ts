@@ -11,6 +11,7 @@ export default interface ICandidateController {
     getCandidateQuestion(_id: string): Promise<ICandidateQuestionsModel>;
     candidateAddTask(email: string, task_url: string): Promise<ICandidateQuestionsModel>;
     getAllCandidateQuestionsAndTask(department: string): Promise<ICandidateQuestionsModel[]>;
+    getCandidateTasks(_id: string): Promise<ICandidateQuestionsModel[]>
     changeCandidateTaskStatus(_id: string, status: string, session: ClientSession): Promise<ICandidateModel>;
     getAllCandidate(role: string | null, limit: number, skip: number): Promise<ICandidateModel[]>;
 }

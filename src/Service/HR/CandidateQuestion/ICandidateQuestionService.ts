@@ -6,5 +6,6 @@ export default interface ICandidateQuestionsService {
     getCandidateQuestions(candidate_id: string): Promise<ICandidateQuestionsModel | null>;
     candidateSendTask(candidate_id: string, task_url: string): Promise<ICandidateQuestionsModel | null>;
     ReviewCandidateTask(_id: string, taskApprove: string, session: ClientSession): Promise<ICandidateQuestionsModel | null>;
+    getCandidateTaskByHiringId(_id: string): Promise<ICandidateQuestionsModel[]>;
     getAllCandidatesQuestions(department: string): Promise<ICandidateQuestionsModel[]>;
 }

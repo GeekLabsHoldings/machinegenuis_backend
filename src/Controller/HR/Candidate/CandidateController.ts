@@ -98,6 +98,10 @@ export default class CandidateController implements ICandidateController {
         return await candidateService.getAll(role, limit, skip);
     }
 
+    async getCandidateTasks(_id: string): Promise<ICandidateQuestionsModel[]> {
+        return await candidateQuestionsService.getCandidateTaskByHiringId(_id);
+    }
+
     async getCandidateFromLinkedin(): Promise<void> {
         const linkedinAccountsService = new LinkedinAccountService();
         const busyAccounts = await linkedinAccountsService.getBusyAccounts();

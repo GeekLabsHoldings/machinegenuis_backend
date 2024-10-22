@@ -4,10 +4,12 @@ function getPublishedAfterDate() {
   const today = new Date();
   const dayOfWeek = today.getDay();
   const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-  today.setDate(today.getDate() + diffToMonday);
+  today.setDate(today.getDate() + diffToMonday - 7); 
   today.setHours(0, 0, 0, 0);
+  
   return today.toISOString();
 }
+
 
 async function searchVideos(query) {
   const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=50&publishedAfter=${getPublishedAfterDate()}&order=date&key=${process.env.API_KEY_SEARCH_IN_YOUTUBE}`;
@@ -29,7 +31,6 @@ async function searchVideos(query) {
     return [];
   }
 }
-
 async function getAwsDownloadLink(youtubeVideoUrl) {
   try {
     console.log("A -> DownloadVideo", youtubeVideoUrl);
@@ -45,21 +46,27 @@ async function getAwsDownloadLink(youtubeVideoUrl) {
     return "video not found";
   }
 }
-
 async function findVideosForKeyword(keyword, isCnbc) {
   let videos = [];
   let attempts = 0;
+
   while (videos.length === 0 && attempts < 3) {
-    const searchKeyword = isCnbc ? "cnbc channel" : keyword; 
-    videos = await searchVideos(searchKeyword);
+    if (isCnbc) {
+      videos = await searchVideosYouTubeCnbc(keyword);
+    } else {
+      videos = await searchVideos(keyword);
+    }
+
     if (videos.length === 0 && !isCnbc) {
       console.warn(`No videos found for "${keyword}". Trying again with "cnbc"...`);
+      isCnbc = true; 
     }
+
     attempts++;
   }
+
   return videos;
 }
-
 export async function findYouTubeLinksForKeywords(keywordsArray) {
   const videoLinks = {
     cnbc: [], 
@@ -68,7 +75,6 @@ export async function findYouTubeLinksForKeywords(keywordsArray) {
 
   const keywords = keywordsArray.map(item => item.keyword);
 
-  // Fetch CNBC videos for all keywords
   const cnbcVideos = await Promise.all(
     keywords.map(async (keyword) => {
       const videos = await findVideosForKeyword(keyword, true);
@@ -76,18 +82,16 @@ export async function findYouTubeLinksForKeywords(keywordsArray) {
     })
   );
 
-  // Add CNBC videos to the result, limit to 5
   for (const videos of cnbcVideos) {
-    for (const video of videos.slice(0, 5)) { // Limit to 5 videos per keyword
+    for (const video of videos.slice(0, 5)) { 
       const youtubeLink = `https://www.youtube.com/watch?v=${video.id.videoId}`;
-      videoLinks.cnbc.push({ // Adding videos directly into the array
-        youtubeUrl: youtubeLink, // Use the YouTube link directly
-        duration: "0", // Default duration to "0"
+      videoLinks.cnbc.push({ 
+        youtubeUrl: youtubeLink, 
+        duration: "0", 
       });
     }
   }
 
-  // Fetch Footage videos for all keywords
   const footageVideos = await Promise.all(
     keywords.map(async (keyword) => {
       const videos = await findVideosForKeyword(keyword + " footage", false); // Use "footage" instead of "footages"
@@ -95,14 +99,13 @@ export async function findYouTubeLinksForKeywords(keywordsArray) {
     })
   );
 
-  // Add Footage videos to the result, limit to 5
   for (const videos of footageVideos) {
-    if (videos && videos.length > 0) { // Check if videos are returned
-      for (const video of videos.slice(0, 5)) { // Limit to 5 videos per keyword
+    if (videos && videos.length > 0) { 
+      for (const video of videos.slice(0, 5)) { 
         const youtubeLink = `https://www.youtube.com/watch?v=${video.id.videoId}`;
-        videoLinks.Footage.push({ // Adding videos directly into the array
-          youtubeUrl: youtubeLink, // Use the YouTube link directly
-          duration: "0", // Default duration to "0"
+        videoLinks.Footage.push({ 
+          youtubeUrl: youtubeLink,
+          duration: "0", 
         });
       }
     } else {
@@ -110,14 +113,12 @@ export async function findYouTubeLinksForKeywords(keywordsArray) {
     }
   }
 
-  // Limit the result to 5 videos for each category (CNBC and Footage)
   videoLinks.cnbc = videoLinks.cnbc.slice(0, 5);
   videoLinks.Footage = videoLinks.Footage.slice(0, 5);
 
   console.log("Final video links:", videoLinks);
   return videoLinks;
 }
-
 export async function searchVideosYouTube(query) {
   
   const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=100&key=${process.env.API_KEY_SEARCH_IN_YOUTUBE}`;
@@ -134,11 +135,35 @@ export async function searchVideosYouTube(query) {
     }));
   } catch (error) {
     if (error.response && error.response.status === 403 && error.response.data.error.errors.some(e => e.reason === 'quotaExceeded')) {
-      console.error("Error: YouTube API quota exceeded. Please try again later.");
+      console.error("Error: YouTube API quota exceeded.");
+      return { success: false, message: "YouTube API quota exceeded." };
     } else {
       console.error("Error fetching search results:", error.message || error);
+      return { success: false, message: error.message || "Unknown error occurred." };
     }
-    return [];
   }
 }
+export async function searchVideosYouTubeCnbc(query) {
+  
+  const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=UCvJJ_dzjViJCoLf5uKUTwoA&q=${query}&type=video&maxResults=50&publishedAfter=${getPublishedAfterDate()}&order=date&key=${process.env.API_KEY_SEARCH_IN_YOUTUBE}`;
 
+  try {
+    const response = await axios.get(searchUrl);
+    const videos = response.data.items;
+    return videos.map(video => ({
+      title: video.snippet.title,
+      videoId: video.id.videoId,
+      description: video.snippet.description,
+      thumbnail: video.snippet.thumbnails.default.url,
+     videoUrl:`https://www.youtube.com/watch?v=${video.id.videoId}`
+    }));
+  } catch (error) {
+    if (error.response && error.response.status === 403 && error.response.data.error.errors.some(e => e.reason === 'quotaExceeded')) {
+      console.error("Error: YouTube API quota exceeded.");
+      return { success: false, message: "YouTube API quota exceeded." };
+    } else {
+      console.error("Error fetching search results:", error.message || error);
+      return { success: false, message: error.message || "Unknown error occurred." };
+    }
+  }
+}
