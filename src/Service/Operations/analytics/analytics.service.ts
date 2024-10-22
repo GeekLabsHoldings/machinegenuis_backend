@@ -1,7 +1,7 @@
 import mongoose, { Types } from "mongoose";
 import { getAccount } from "../BrandCreation.service";
 import { TelegramB } from "../../../Controller/SocialMedia/socialMedia.telegram.controller";
-import { IFacebookInAccountData, ILinkedInAccountData, IRedditAccountData, ITelegramAccountData, ITwetterAccountData } from "../../../Model/Operations/IPostingAccounts_interface";
+import { IFacebookInAccountData, ILinkedInAccountData, IRedditAccountData, ITelegramAccountData, ITwetterAccountData, IYoutubeAccountData } from "../../../Model/Operations/IPostingAccounts_interface";
 import SocialMediaPosts, { socialMediaModel } from "../../../Model/SocialMedia/SocialMediaPosts.models";
 import GroupsAnalyticsModel from "../../../Model/Operations/analytics/analytics.model";
 import IKPIs from "../../../Model/Operations/analytics/IKPIs.intreface";
@@ -10,7 +10,7 @@ import { log, timeStamp } from "node:console";
 const snoowrap = require('snoowrap');
 const axios = require('axios');
 import socialCommentModel from "../../../Model/SocialMedia/Twitter.SocialMedia.tweets.model";
-import { platform } from "node:os";
+import YouTubeAnalytics from "../../SocialMedia/youtube.services";
 
 
 
@@ -522,17 +522,24 @@ export async function getKPIs(brand:string) {
               $group: {
                 _id: {
                   year: "$year",
-                  month: "$month"
+                  month: "$month",
+                  brand:"$brand"
                 },
                 platforms: { $push: "$$ROOT" }
               }
             },
             // Optionally sort by the year and month
             {
-              $sort: { "_id.year": -1, "_id.month": -1 }
+              $sort: { "_id.year": 1, "_id.month": 1 }
             }
           ]);
          // log("this is the kpis   \n", kpis)
+
+         const acc = await getAccount(brand,"YOUTUBE")
+         const account = (acc?.account as IYoutubeAccountData)
+         console.log("this is ", account, brand)
+
+ 
         const achievedKPIs:any[] = []
         for(const k of kpis){
             const ak :any[]= []
@@ -540,10 +547,10 @@ export async function getKPIs(brand:string) {
                 const achievedD = await noPosts(kpi.timeStamp||Date.now(), "Daily", kpi.platform, 1, 1 , brand)
                 const achievedW = await noPosts(kpi.timeStamp||Date.now(), "Weekly", kpi.platform, 1, 1 , brand) 
                 const achievedM = await noPosts(kpi.timeStamp||Date.now(), "Monthly", kpi.platform, 1, 1 , brand)
-                ak.push({platform:kpi.platform, postPerDay:achievedD[0].data, postPerWeek:achievedW[0].data, postPerMonth:achievedM[0].data})
+                ak.push({platform:kpi.platform, Day:achievedD[0].data, Week:achievedW[0].data, Month:achievedM[0].data})
             }
 
-            achievedKPIs.push({date:k._id,  platforms:ak })
+            achievedKPIs.push({date:{...k._id, brand:brand},  platforms:ak })
         }
         
         return {kpis,achievedKPIs}
