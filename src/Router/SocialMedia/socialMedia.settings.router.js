@@ -5,6 +5,10 @@ import * as brandController from "../../Controller/SocialMedia/socialMedia.setti
 
 const SocialSittingsRouter = Router();
 
+
+//
+SocialSittingsRouter.get("/subscribers", brandController.get_subscripers);
+
 // settings
 SocialSittingsRouter.post("/:id/add-group", brandController.addGroup);
 SocialSittingsRouter.get("/get-groups", brandController.getGroups);
@@ -28,8 +32,7 @@ SocialSittingsRouter.post("/:id/delete-campaigns", brandController.deletCampaign
 SocialSittingsRouter.post("/:id/update-campaigns", brandController.updateCampaigns);
 
 
-//
-SocialSittingsRouter.get("/get-subscripers", brandController.get_subscripers);
+
 
 
 

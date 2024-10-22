@@ -107,6 +107,30 @@ export async function subsGains(req:Request, res:Response) {
 
 
 
+
+export async function percentage(req:Request, res:Response) {
+  try {
+    const brand = String(req.query.brand)
+    const result = await analyticsService.percentage(brand)
+    res.json(result)
+} catch (error) {
+    res.status(500).json(error)
+    console.log(error)
+}
+}
+
+export async function percentageAllBrand(req:Request, res:Response) {
+    try {
+
+      const result = await analyticsService.percentageAllBrand()
+      res.json(result)
+  } catch (error) {
+      res.status(500).json(error)
+      console.log(error)
+  }
+  }
+
+
 export async function getKPIs(req:Request, res:Response) {
     try {
         const brand = req.params.id

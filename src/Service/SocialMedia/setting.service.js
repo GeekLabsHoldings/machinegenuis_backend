@@ -225,7 +225,7 @@ export async function getCampaignByBrand(id,skip,limit) {
 export const GetSubCount = async(
   brand
   )=>{
-    const platforms = ["FACEBOOK", "TELEGRAM", "REDDIT"]; 
+    const platforms = PlatformArr
     try {
       const result = await SocialMediaGroupsModel.aggregate([
         {
@@ -307,3 +307,93 @@ export const GetSubCount = async(
       console.log(error)
     }
   }
+
+
+
+
+  export const GetSubCount_brand = async(
+    brand
+    )=>{
+      const platforms = PlatformArr
+      try {
+        const result = await SocialMediaGroupsModel.aggregate([
+         
+          {
+            $group: {
+              _id: { brand: "$brand", platform: "$platform" },
+              totalSubscribers: { $sum: "$subscribers" }
+            }
+          },
+          {
+            $group: {
+              _id: "$_id.brand",
+              platforms: {
+                $push: {
+                  platform: "$_id.platform",
+                  totalSubscribers: "$totalSubscribers"
+                }
+              }
+            }
+          },
+          {
+            $addFields: {
+              platforms: {
+                $map: {
+                  input: platforms,
+                  as: "platform",
+                  in: {
+                    platform: "$$platform",
+                    totalSubscribers: {
+                      $ifNull: [
+                        {
+                          $arrayElemAt: [
+                            {
+                              $filter: {
+                                input: "$platforms",
+                                as: "p",
+                                cond: { $eq: ["$$p.platform", "$$platform"] }
+                              }
+                            },
+                            0
+                          ]
+                        },
+                        { totalSubscribers: 0 }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            $addFields: {
+              brand: "$_id"
+            }
+          },
+          {
+            $project: {
+              _id: 0,
+              brand: 1,
+              platforms: {
+                $arrayToObject: {
+                  $map: {
+                    input: "$platforms",
+                    as: "platformInfo",
+                    in: {
+                      k: "$$platformInfo.platform",
+                      v: { totalSubscribers: "$$platformInfo.totalSubscribers.totalSubscribers" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]);
+        
+        
+        
+        return result
+      } catch (error) {
+        console.log(error)
+      }
+    }

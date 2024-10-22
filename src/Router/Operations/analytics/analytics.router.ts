@@ -11,7 +11,8 @@ analyticsRouter.get("/comments-count",analyticsController.commentsCount)
 analyticsRouter.get("/post-insights",analyticsController.postsInsights)
 analyticsRouter.get("/group-insights",analyticsController.groupsInsights)
 analyticsRouter.get("/subs-gains",analyticsController.subsGains)
-
+analyticsRouter.get("/percentage-brands",analyticsController.percentage)
+analyticsRouter.get("/percentage",analyticsController.percentageAllBrand)
 //tmp
 analyticsRouter.get("/tmp",analyticsController.tmp)
 // analyticsRouter.get("/chart",analyticsController.PostsCountChart)
