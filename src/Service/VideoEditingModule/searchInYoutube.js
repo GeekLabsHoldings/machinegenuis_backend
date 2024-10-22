@@ -1,144 +1,191 @@
 import axios from "axios";
+import { duration } from "moment";
+let cachedCnbcVideos = [];
 
 function getPublishedAfterDate() {
   const today = new Date();
   const dayOfWeek = today.getDay();
   const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-  today.setDate(today.getDate() + diffToMonday);
+  today.setDate(today.getDate() + diffToMonday - 7);
   today.setHours(0, 0, 0, 0);
+
   return today.toISOString();
 }
-
 async function searchVideos(query) {
-  const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=50&publishedAfter=${getPublishedAfterDate()}&order=date&key=${process.env.API_KEY_SEARCH_IN_YOUTUBE}`;
+  const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=50&key=${process.env.API_KEY_SEARCH_IN_YOUTUBE}`;
+  // const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=50&publishedAfter=${getPublishedAfterDate()}&order=date&key=${process.env.API_KEY_SEARCH_IN_YOUTUBE}`;
 
   try {
     const searchResponse = await axios.get(searchUrl);
     const allVideos = searchResponse.data.items;
 
-    const nonLiveVideos = allVideos.filter(video => video.snippet.liveBroadcastContent === 'none');
+    const nonLiveVideos = allVideos.filter(
+      (video) => video.snippet.liveBroadcastContent === "none"
+    );
 
     console.log("Filtered non-live videos:-------->", nonLiveVideos);
     return nonLiveVideos;
   } catch (error) {
-    if (error.response && error.response.status === 403 && error.response.data.error.errors.some(e => e.reason === 'quotaExceeded')) {
-      console.error("Error: YouTube API quota exceeded. Please try again later.");
+    if (
+      error.response &&
+      error.response.status === 403 &&
+      error.response.data.error.errors.some((e) => e.reason === "quotaExceeded")
+    ) {
+      console.error(
+        "Error: YouTube API quota exceeded. Please try again later."
+      );
     } else {
       console.error("Error fetching search results:", error.message || error);
     }
     return [];
   }
 }
-
 async function getAwsDownloadLink(youtubeVideoUrl) {
   try {
     console.log("A -> DownloadVideo", youtubeVideoUrl);
-    
+
     const response = await axios.post(
       "https://video.machinegenius.io/download-trim-video",
       { url: youtubeVideoUrl }
     );
-    console.log("AWS download link:--------------------------->", response.data.trimmed_video);
+    console.log(
+      "AWS download link:--------------------------->",
+      response.data.trimmed_video
+    );
     return response.data.trimmed_video;
   } catch (error) {
     console.error("Error getting AWS download link:", error);
     return "video not found";
   }
 }
-
-async function findVideosForKeyword(keyword, isCnbc) {
-  let videos = [];
-  let attempts = 0;
-  while (videos.length === 0 && attempts < 3) {
-    const searchKeyword = isCnbc ? "cnbc channel" : keyword; 
-    videos = await searchVideos(searchKeyword);
-    if (videos.length === 0 && !isCnbc) {
-      console.warn(`No videos found for "${keyword}". Trying again with "cnbc"...`);
-    }
-    attempts++;
+async function fetchLatsVideosFromCnbc() {
+  if (cachedCnbcVideos.length > 0) {
+    return cachedCnbcVideos;
   }
-  return videos;
+
+  const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=UCvJJ_dzjViJCoLf5uKUTwoA&type=video&order=date&maxResults=50&key=${process.env.API_KEY_SEARCH_IN_YOUTUBE}`;
+
+  try {
+    const response = await axios.get(searchUrl);
+    const videos = response.data.items;
+    return videos.map((video) => ({
+      videoUrl: `https://www.youtube.com/watch?v=${video.id.videoId}`,
+      duration: "0",
+    }));
+  } catch (error) {
+    if (
+      error.response &&
+      error.response.status === 403 &&
+      error.response.data.error.errors.some((e) => e.reason === "quotaExceeded")
+    ) {
+      console.error("Error: YouTube API quota exceeded.");
+      return { success: false, message: "YouTube API quota exceeded." };
+    } else {
+      console.error("Error fetching search results:", error.message || error);
+      return {
+        success: false,
+        message: error.message || "Unknown error occurred.",
+      };
+    }
+  }
 }
-
-export async function findYouTubeLinksForKeywords(keywordsArray) {
+export async function findYouTubeLinksForKeywords(keywordsArray, isCnbc) {
   const videoLinks = {
-    cnbc: [], 
-    Footage: [], 
+    cnbc: [],
+    Footage: [],
   };
-
-  const keywords = keywordsArray.map(item => item.keyword);
-
-  // Fetch CNBC videos for all keywords
-  const cnbcVideos = await Promise.all(
-    keywords.map(async (keyword) => {
-      const videos = await findVideosForKeyword(keyword, true);
-      return videos;
-    })
-  );
-
-  // Add CNBC videos to the result, limit to 5
-  for (const videos of cnbcVideos) {
-    for (const video of videos.slice(0, 5)) { // Limit to 5 videos per keyword
-      const youtubeLink = `https://www.youtube.com/watch?v=${video.id.videoId}`;
-      videoLinks.cnbc.push({ // Adding videos directly into the array
-        youtubeUrl: youtubeLink, // Use the YouTube link directly
-        duration: "0", // Default duration to "0"
-      });
+  if (isCnbc) {
+    const cnbcVideos = await fetchLatsVideosFromCnbc();
+    if (Array.isArray(cnbcVideos) && cnbcVideos.length > 0) {
+      videoLinks.cnbc.push(...cnbcVideos);
+    } else {
+      console.log("No CNBC videos found or an error occurred");
     }
   }
-
-  // Fetch Footage videos for all keywords
+  const keywords = keywordsArray.map((item) => item.keyword);
   const footageVideos = await Promise.all(
     keywords.map(async (keyword) => {
-      const videos = await findVideosForKeyword(keyword + " footage", false); // Use "footage" instead of "footages"
+      const videos = await searchVideos(`${keyword} footage`);
       return videos;
     })
   );
-
-  // Add Footage videos to the result, limit to 5
   for (const videos of footageVideos) {
-    if (videos && videos.length > 0) { // Check if videos are returned
-      for (const video of videos.slice(0, 5)) { // Limit to 5 videos per keyword
+    if (videos && videos.length > 0) {
+      for (const video of videos.slice(0, 5)) {
         const youtubeLink = `https://www.youtube.com/watch?v=${video.id.videoId}`;
-        videoLinks.Footage.push({ // Adding videos directly into the array
-          youtubeUrl: youtubeLink, // Use the YouTube link directly
-          duration: "0", // Default duration to "0"
+        videoLinks.Footage.push({
+          youtubeUrl: youtubeLink,
+          duration: "0",
         });
       }
     } else {
-      console.log("No footage videos found for keyword:",);
+      console.log("No footage videos found for keyword:");
     }
   }
-
-  // Limit the result to 5 videos for each category (CNBC and Footage)
-  videoLinks.cnbc = videoLinks.cnbc.slice(0, 5);
   videoLinks.Footage = videoLinks.Footage.slice(0, 5);
-
   console.log("Final video links:", videoLinks);
   return videoLinks;
 }
-
 export async function searchVideosYouTube(query) {
-  
   const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=100&key=${process.env.API_KEY_SEARCH_IN_YOUTUBE}`;
 
   try {
     const response = await axios.get(searchUrl);
     const videos = response.data.items;
-    return videos.map(video => ({
+    return videos.map((video) => ({
       title: video.snippet.title,
       videoId: video.id.videoId,
       description: video.snippet.description,
       thumbnail: video.snippet.thumbnails.default.url,
-     videoUrl:`https://www.youtube.com/watch?v=${video.id.videoId}`
+      videoUrl: `https://www.youtube.com/watch?v=${video.id.videoId}`,
     }));
   } catch (error) {
-    if (error.response && error.response.status === 403 && error.response.data.error.errors.some(e => e.reason === 'quotaExceeded')) {
-      console.error("Error: YouTube API quota exceeded. Please try again later.");
+    if (
+      error.response &&
+      error.response.status === 403 &&
+      error.response.data.error.errors.some((e) => e.reason === "quotaExceeded")
+    ) {
+      console.error("Error: YouTube API quota exceeded.");
+      return { success: false, message: "YouTube API quota exceeded." };
     } else {
       console.error("Error fetching search results:", error.message || error);
+      return {
+        success: false,
+        message: error.message || "Unknown error occurred.",
+      };
     }
-    return [];
+  }
+}
+export async function searchVideosYouTubeCnbc(query) {
+  const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=UCvJJ_dzjViJCoLf5uKUTwoA&q=${query}&type=video&maxResults=50&publishedAfter=${getPublishedAfterDate()}&order=date&key=${
+    process.env.API_KEY_SEARCH_IN_YOUTUBE
+  }`;
+
+  try {
+    const response = await axios.get(searchUrl);
+    const videos = response.data.items;
+    return videos.map((video) => ({
+      title: video.snippet.title,
+      videoId: video.id.videoId,
+      description: video.snippet.description,
+      thumbnail: video.snippet.thumbnails.default.url,
+      videoUrl: `https://www.youtube.com/watch?v=${video.id.videoId}`,
+    }));
+  } catch (error) {
+    if (
+      error.response &&
+      error.response.status === 403 &&
+      error.response.data.error.errors.some((e) => e.reason === "quotaExceeded")
+    ) {
+      console.error("Error: YouTube API quota exceeded.");
+      return { success: false, message: "YouTube API quota exceeded." };
+    } else {
+      console.error("Error fetching search results:", error.message || error);
+      return {
+        success: false,
+        message: error.message || "Unknown error occurred.",
+      };
+    }
   }
 }
 

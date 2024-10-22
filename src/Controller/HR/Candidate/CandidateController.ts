@@ -98,10 +98,13 @@ export default class CandidateController implements ICandidateController {
         return await candidateService.getAll(role, limit, skip);
     }
 
+    async getCandidateTasks(_id: string): Promise<ICandidateQuestionsModel[]> {
+        return await candidateQuestionsService.getCandidateTaskByHiringId(_id);
+    }
+
     async getCandidateFromLinkedin(): Promise<void> {
         const linkedinAccountsService = new LinkedinAccountService();
         const busyAccounts = await linkedinAccountsService.getBusyAccounts();
-        console.log("busyAccounts", busyAccounts);
         if (busyAccounts.length === 0)
             return;
         const setupAxios = axios.create({
@@ -156,7 +159,6 @@ export default class CandidateController implements ICandidateController {
                 console.log("Hiring not found");
                 continue;
             }
-            console.log("hiring", hiring.currentStep);
             const candidate = await setupAxios.get(`/linkedin/candidate/${account._id}`);
 
             if (!candidate)
@@ -183,7 +185,11 @@ export default class CandidateController implements ICandidateController {
                     createdAt: moment().valueOf(),
                     recommendation: null
                 }
-                await candidateService.createCandidate(candidateData);
+                console.log("candidateData", item);
+                const checkCandidate = await candidateService.checkCandidateExist((hiring._id).toString(), item.email, item.cvPath);
+                if (!checkCandidate)
+                    await candidateService.createCandidate(candidateData);
+
             };
             await hiringService.changeHiringStatus((hiring._id).toString(), HiringStatusLevelEnum.CONTINUE);
         };
