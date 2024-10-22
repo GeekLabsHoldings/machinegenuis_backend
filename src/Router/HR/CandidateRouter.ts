@@ -103,16 +103,27 @@ CandidateRouter.get('/get-candidate-question-answer/:_id', async (req: Request, 
 })
 
 
-CandidateRouter.get('/all-candidate-with-Answers/:_id', async (req: Request, res: Response): Promise<Response> => {
+CandidateRouter.get('/all-candidate-with-answer/:department', async (req: Request, res: Response): Promise<Response> => {
     try {
-        const { _id } = req.params;
+        const { department } = req.params;
         const candidateController = new CandidateController();
-        const result = await candidateController.getAllCandidateQuestionsAndTask(_id);
+        const result = await candidateController.getAllCandidateQuestionsAndTask(department);
         return res.json(result);
     } catch (error) {
         return systemError.sendError(res, error);
     }
 })
+
+CandidateRouter.get('/candidate-task/:_id', async (req: Request, res: Response): Promise<Response> => {
+    try {
+        const { _id } = req.params;
+        const candidateController = new CandidateController();
+        const result = await candidateController.getCandidateTasks(_id);
+        return res.json(result);
+    } catch (error) {
+        return systemError.sendError(res, error);
+    }
+});
 
 CandidateRouter.put('/convert-to-employee/:_id', async (req: Request, res: Response): Promise<Response> => {
     const session = await mongoose.startSession();

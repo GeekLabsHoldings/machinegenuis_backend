@@ -25,6 +25,64 @@ class CandidateQuestionService implements ICandidateQuestionsService {
         return result;
     }
 
+    async getCandidateTaskByHiringId(_id: string): Promise<ICandidateQuestionsModel[]> {
+        const hiringId = new Types.ObjectId(_id);
+        const pipeline: PipelineStage[] = [
+            {
+                $lookup: {
+                    from: 'candidates',
+                    localField: 'candidate',
+                    foreignField: '_id',
+                    as: 'candidateData'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$candidateData',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: 'roles',
+                    localField: 'candidateData.role',
+                    foreignField: '_id',
+                    as: 'roleData'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$roleData',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $match: {
+                    'candidateData.hiring': { $eq: hiringId }
+                }
+            },
+            {
+                $project: {
+                    candidate: {
+                        _id: '$candidateData._id',
+                        firstName: '$candidateData.firstName',
+                        lastName: '$candidateData.lastName',
+                        phoneNumber: '$candidateData.phoneNumber',
+                        email: '$candidateData.email',
+                        department: '$candidateData.department',
+                        roleName: '$roleData.roleName'  
+                    },
+                    questions: 1,
+                    taskLink: 1,
+                    taskApprove: 1
+                }
+            }
+        ];
+
+        const result = await candidateQuestionModel.aggregate(pipeline);
+        return result;
+    }
+
     async getAllCandidatesQuestions(department: string): Promise<ICandidateQuestionsModel[]> {
         const pipeline: PipelineStage[] = [
             {
@@ -77,9 +135,9 @@ class CandidateQuestionService implements ICandidateQuestionsService {
                 }
             }
         ];
-        
+
         const result = await candidateQuestionModel.aggregate(pipeline);
-        return result;        
+        return result;
     }
 }
 
