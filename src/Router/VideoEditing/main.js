@@ -1,3 +1,4 @@
+import * as fetchVideos from '../../Controller/VideoEditing/fetchVideos';
 import get_all_content from '../../Controller/VideoEditing/getContent';
 import { gitDetailsContent,  } from '../../Controller/VideoEditing/splitAndConvert';
 
@@ -31,7 +32,7 @@ Video_editing_router.post('/find-replace', controllerReplaceWords.findToReplace)
 Video_editing_router.post('/enhance-img', controllerEnhanceImage.editImage);
 Video_editing_router.post('/process-video', controllerProcessOnVideo.processVideo);
 Video_editing_router.post('/split-content-inv',controllerSplitAndGenerate.splitAndConvertINV);
-Video_editing_router.post('/search-youtube',controllerSplitAndGenerate.searchVideosOnYouTube);
+Video_editing_router.post('/search-youtube',fetchVideos.searchVideosOnYouTube);
 
 
 
