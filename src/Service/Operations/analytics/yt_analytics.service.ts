@@ -13,6 +13,7 @@ export async function getData(brand:string, startDate:string, endDate:string, du
     try {
         const acc = await getAccount(brand,"YOUTUBE")
         const account = (acc?.account as IYoutubeAccountData)
+        console.log("this is ", account, brand)
         const oAuth2Client = new google.auth.OAuth2(
             account.client_id, account.client_secret, account.redirect_uris);
             oAuth2Client.setCredentials( account.token);
@@ -39,7 +40,7 @@ export async function getData(brand:string, startDate:string, endDate:string, du
  }
  
  export async function getChannelInfo(brand:string) {
-     try {
+
 
         const acc = await getAccount(brand,"YOUTUBE")
         const account = (acc?.account as IYoutubeAccountData)
@@ -67,13 +68,11 @@ export async function getData(brand:string, startDate:string, endDate:string, du
             return channel
         }
        
-     } catch (error) {
-      console.log(error);
-     }  
+ 
  }
  
  export async function generateAuthUrl(brand:string) {
-     try {
+
         const acc = await getAccount(brand,"YOUTUBE")
         const account = (acc?.account as IYoutubeAccountData)
         const oAuth2Client = new google.auth.OAuth2(
@@ -85,13 +84,11 @@ export async function getData(brand:string, startDate:string, endDate:string, du
           console.log('Authorize this app by visiting this url:', authUrl);
 
         return authUrl
-     } catch (error) {
-      console.log(error);
-     } 
+
  }
 
  export async function updateAccessTokens(brand:string, code:string) {
-    try {
+
        const acc = await getAccount(brand,"YOUTUBE")
        let account = (acc?.account as IYoutubeAccountData)
        const oAuth2Client = new google.auth.OAuth2(
@@ -108,8 +105,4 @@ export async function getData(brand:string, startDate:string, endDate:string, du
            return updatedAcc
         });
 
-
-    } catch (error) {
-     console.log(error);
-    } 
 }

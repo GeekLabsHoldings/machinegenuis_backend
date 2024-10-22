@@ -34,15 +34,12 @@ export default class AwsDomainActivation {
       DomainName: domainName,
     };
   
-    try {
       const result = await this.domains.send(new GetDomainDetailCommand(params));
       const emailVerificationStatus = result.AdminContact?.Email;
   
       console.log(`Email Verification Status: ${emailVerificationStatus}`);
       return emailVerificationStatus;
-    } catch (error) {
-      console.error("Error checking domain status:", error);
-    }
+
   }
 
   // Step 1: Create a Hosted Zone
@@ -52,13 +49,11 @@ export default class AwsDomainActivation {
       CallerReference: `${Date.now()}`,
     };
 
-    try {
+
       const result = await this.route53.send(new CreateHostedZoneCommand(params));
       console.log("Hosted zone created:", result.HostedZone);
       return result.HostedZone?.Id;
-    } catch (error) {
-      console.error("Error creating hosted zone:", error);
-    }
+
   }
 
   // Step 2: Method to get name servers for a hosted zone
@@ -67,14 +62,11 @@ export default class AwsDomainActivation {
       Id: hostedZoneId,
     };
 
-    try {
       const result = await this.route53.send(new GetHostedZoneCommand(params));
       const nsRecords = result.DelegationSet?.NameServers;
       console.log(`Name Servers: ${nsRecords}`);
       return nsRecords;
-    } catch (error) {
-      console.error("Error getting name servers:", error);
-    }
+
   }
 
   // Step 3: Update Name Servers for the domain
@@ -96,12 +88,10 @@ export default class AwsDomainActivation {
       HostedZoneId: HostedZoneId || "ZXXXXXXXXXX",
     };
 
-    try {
+
       const result = await this.route53.send(new ChangeResourceRecordSetsCommand(params));
       console.log("NS updated:", result);
-    } catch (error) {
-      console.error("Error updating NS:", error);
-    }
+
   }
 
 
