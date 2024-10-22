@@ -1,5 +1,6 @@
 import { accountDataType, IYoutubeAccountData } from "../../../Model/Operations/IPostingAccounts_interface";
 import { getAccount, addOrDeleteAccount } from "../BrandCreation.service";
+import { youtubeAnalytics } from "googleapis/build/src/apis/youtubeAnalytics";
 const { google } = require('googleapis');
 const youtube = google.youtube('v3');
 
@@ -13,7 +14,7 @@ export async function getData(brand:string, startDate:string, endDate:string, du
     try {
         const acc = await getAccount(brand,"YOUTUBE")
         const account = (acc?.account as IYoutubeAccountData)
-        console.log("this is ", account, brand)
+        //console.log("this is ", account, brand)
         const oAuth2Client = new google.auth.OAuth2(
             account.client_id, account.client_secret, account.redirect_uris);
             oAuth2Client.setCredentials( account.token);
