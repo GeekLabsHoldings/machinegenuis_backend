@@ -219,7 +219,7 @@ export const updateCampaigns = async(req, res) =>{
 export async function get_subscripers(req, res) {
   try {
     // console.log(req.body.brand);
-    const result = await brandService.GetSubCount("66fcfb8c57531aaf2dca2686");
+    const result = await brandService.GetSubCount(String(req.query.brand));
     res.json(result);
   } catch (error) {
     return systemError.sendError(res, error);
