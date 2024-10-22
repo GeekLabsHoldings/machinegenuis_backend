@@ -1,18 +1,18 @@
 import mongoose, { Types } from "mongoose";
-import { getAccount } from "../BrandCreation.service";
+import { getAccount, getBrandById, getBrands } from "../BrandCreation.service";
 import { TelegramB } from "../../../Controller/SocialMedia/socialMedia.telegram.controller";
 import { IFacebookInAccountData, ILinkedInAccountData, IRedditAccountData, ITelegramAccountData, ITwetterAccountData, IYoutubeAccountData } from "../../../Model/Operations/IPostingAccounts_interface";
 import SocialMediaPosts, { socialMediaModel } from "../../../Model/SocialMedia/SocialMediaPosts.models";
 import GroupsAnalyticsModel from "../../../Model/Operations/analytics/analytics.model";
 import IKPIs from "../../../Model/Operations/analytics/IKPIs.intreface";
 import KPIAnalyticsModel from "../../../Model/Operations/analytics/KPIs.model";
-import { log, timeStamp } from "node:console";
 const snoowrap = require('snoowrap');
 const axios = require('axios');
 import socialCommentModel from "../../../Model/SocialMedia/Twitter.SocialMedia.tweets.model";
 import YouTubeAnalytics from "../../SocialMedia/youtube.services";
-
-
+import { GetSubCount, GetSubCount_brand } from "../../SocialMedia/setting.service";
+import { getGroupsByBrand } from "../../SocialMedia/setting.service";
+import { startOfMonth, endOfMonth } from 'date-fns';
 
 export async function TwitterPostInsights(brand: string, postId: string) {
     try {
@@ -486,9 +486,7 @@ export async function subsGains(endDate:string|number|Date = Date.now(), platfor
         }
       }
     ]);
-  
-    return result[0];
-
+    return result
 }
 
 
@@ -496,6 +494,65 @@ export async function subsGains(endDate:string|number|Date = Date.now(), platfor
 
 
 
+export async function percentage(brand:string) {
+
+    const subs = (await GetSubCount() as {brand:string, platforms:{}}[])
+    const brandObject = subs.find(sub => sub.brand === brand.toString());
+    //  console.log("brandObject,,,,, \n\n",brand, brandObject, subs)
+    let sum = 0
+    const gain = {daily:0,weekly:0,monthly:0}
+    if(brandObject){
+    const platforms = brandObject.platforms as { [key: string]: { totalSubscribers: number } };
+
+    // Iterate over platforms object and sum up totalSubscribers
+    for (const platform of Object.values(platforms)) {
+        sum += platform.totalSubscribers;
+    }
+    
+
+    type GainResponse = {
+        daily: {
+            gain: number;
+        };
+        weekly: {
+            gain: number;
+        };
+        monthly: {
+            gain: number;
+        };
+    };
+    const groups = (await getGroupsByBrand(brand, 0, 99999))?.groups || []
+    
+    for (const g of groups){
+        const result = (await subsGains( Date.now(), g.platform, g.group_id))[0] as GainResponse
+        gain.daily += result.daily.gain
+        gain.weekly += result.weekly.gain
+        gain.monthly += result.monthly.gain
+    }
+    gain.daily =  (gain.daily /sum) * 100
+    gain.weekly = (gain.weekly/sum) * 100 
+    gain.monthly = (gain.monthly/sum) * 100
+}
+    //console.log("this is percentage  \n\n", {followers:sum, percentages:gain})
+    return  {followers:sum, percentages:gain}
+
+}
+
+
+export async function percentageAllBrand() {
+
+    const brands = await getBrands(0,99999)||[]
+    
+    const data = []
+    for(const brand of brands){
+        const p = await percentage(brand._id)
+        data.push({brand:brand._id,...p })
+    }
+
+    //console.log("this is percentage  \n\n", {followers:sum, percentages:gain})
+    return  data
+
+}
 
 export async function getKPIs(brand:string) {
     try {
@@ -538,12 +595,13 @@ export async function getKPIs(brand:string) {
          const acc = await getAccount(brand,"YOUTUBE")
          const account = (acc?.account as IYoutubeAccountData)
          console.log("this is ", account, brand)
-
+         const analytics = new YouTubeAnalytics(account);
  
         const achievedKPIs:any[] = []
         for(const k of kpis){
             const ak :any[]= []
             for(const kpi of k.platforms){
+
                 const achievedD = await noPosts(kpi.timeStamp||Date.now(), "Daily", kpi.platform, 1, 1 , brand)
                 const achievedW = await noPosts(kpi.timeStamp||Date.now(), "Weekly", kpi.platform, 1, 1 , brand) 
                 const achievedM = await noPosts(kpi.timeStamp||Date.now(), "Monthly", kpi.platform, 1, 1 , brand)
@@ -560,11 +618,36 @@ export async function getKPIs(brand:string) {
 }
 
 export async function addKPIs(kpis:IKPIs[]) {
-    const newKpis = kpis.map(kpiData => new KPIAnalyticsModel(kpiData));
+    const newKpis:IKPIs[] = []
+    
+    for(const kpiData of kpis){
+        
+            const date = new Date(kpiData.timeStamp);
+    
+            const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+            startOfMonth.setHours(0, 0, 0, 0);
+
+            // Get the last day of the month
+            const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+            endOfMonth.setHours(23, 59, 59, 999);
+          
+    
+            const kpi = await KPIAnalyticsModel.find({
+                brand:kpiData.brand,
+                platform:kpiData.platform,
+              timeStamp: {
+                $gte: startOfMonth,  // Greater than or equal to the start of the month
+                $lte: endOfMonth,     // Less than the end of the month
+              },
+            });
+            if(!kpi || kpi.length == 0)
+                newKpis.push(new KPIAnalyticsModel(kpiData))
+    }
+
     
     // Save all new KPI documents
     const savedKpis = await KPIAnalyticsModel.insertMany(newKpis);
-
+ 
     return savedKpis; 
 }
 

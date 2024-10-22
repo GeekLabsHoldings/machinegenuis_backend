@@ -1,6 +1,7 @@
 import { accountDataType, IYoutubeAccountData } from "../../../Model/Operations/IPostingAccounts_interface";
 import { getAccount, addOrDeleteAccount } from "../BrandCreation.service";
 import { youtubeAnalytics } from "googleapis/build/src/apis/youtubeAnalytics";
+import { GetSubCount } from "../../SocialMedia/setting.service";
 const { google } = require('googleapis');
 const youtube = google.youtube('v3');
 
@@ -10,7 +11,7 @@ const SCOPES = [
     'https://www.googleapis.com/auth/yt-analytics.readonly'
   ];
 
-export async function getData(brand:string, startDate:string, endDate:string, duration:string="day") {
+export async function getData(brand:string, startDate:string, endDate:string, dimensions:string="day") {
     try {
         const acc = await getAccount(brand,"YOUTUBE")
         const account = (acc?.account as IYoutubeAccountData)
@@ -28,11 +29,11 @@ export async function getData(brand:string, startDate:string, endDate:string, du
           startDate: startDate,
           endDate: endDate,
           metrics: 'views,likes,comments,estimatedMinutesWatched,averageViewDuration,subscribersGained,subscribersLost,',//,estimatedRevenue estimatedAdRevenue
-          dimensions: duration,
+          dimensions: "day",
           sort: 'day',
         });
         
-        const rows =  response.data.rows
+        const rows =  {brand:brand,data:response.data.rows}
         console.log("youtube2\n\n\n\n" , rows)
         return rows
     } catch (error) {

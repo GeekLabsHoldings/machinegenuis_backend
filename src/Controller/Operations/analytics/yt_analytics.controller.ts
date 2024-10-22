@@ -7,8 +7,8 @@ export async function getData(req:Request, res:Response) {
         const brand = String(req.query.brand)
         const startDate = String(req.query.startDate)
         const endDate = String(req.query.endDate)
-        const duration = String(req.query.duration)
-        const data = await yt_analyticsService.getData(brand, startDate, endDate, duration)
+        const dimensions = String(req.query.dimensions)
+        const data = await yt_analyticsService.getData(brand, startDate, endDate, dimensions)
         res.json({data})
    } catch (error) {
     console.log(error);
