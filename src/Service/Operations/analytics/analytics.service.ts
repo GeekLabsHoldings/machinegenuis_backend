@@ -6,10 +6,11 @@ import SocialMediaPosts, { socialMediaModel } from "../../../Model/SocialMedia/S
 import GroupsAnalyticsModel from "../../../Model/Operations/analytics/analytics.model";
 import IKPIs from "../../../Model/Operations/analytics/IKPIs.intreface";
 import KPIAnalyticsModel from "../../../Model/Operations/analytics/KPIs.model";
-import { log } from "node:console";
+import { log, timeStamp } from "node:console";
 const snoowrap = require('snoowrap');
 const axios = require('axios');
 import socialCommentModel from "../../../Model/SocialMedia/Twitter.SocialMedia.tweets.model";
+import { platform } from "node:os";
 
 
 
@@ -498,47 +499,51 @@ export async function subsGains(endDate:string|number|Date = Date.now(), platfor
 
 export async function getKPIs(brand:string) {
     try {
-        const kpis = await KPIAnalyticsModel.aggregate([
+        const kpis :{_id:object, platforms:IKPIs[]}[] = await KPIAnalyticsModel.aggregate([
+            // Match the documents with the specified brand name
             {
-                $match: { brand: brand }  // Filter documents by the specified brand
+              $match: { brand: brand }
             },
+            // Project the month and year from the timeStamp field
             {
-                // Project the year and month from the timestamp
-                $project: {
-                    year: { $year: { $toDate: "$timeStamp" } },
-                    month: { $month: { $toDate: "$timeStamp" } },
-                    brand: 1,
-                    platform: 1,
-                    postsPerDay: 1,
-                    postsPerWeek: 1,
-                    postsPerMonth: 1,
-                }
+              $project: {
+                year: { $year: { $toDate: "$timeStamp" }, },
+                month: { $month: { $toDate: "$timeStamp" } },
+
+                timeStamp: 1,
+                platform:1,   
+                postsPerDay: 1,
+                postsPerWeek: 1,
+                postsPerMonth: 1 // Include any other fields you may want to keep
+              }
             },
+            // Group by year and month
             {
-                // Group the data by year, month, and brand
-                $group: {
-                    _id: { year: "$year", month: "$month", brand: "$brand" },
-                    totalPostsPerDay: { $sum: "$postsPerDay" },
-                    totalPostsPerWeek: { $sum: "$postsPerWeek" },
-                    totalPostsPerMonth: { $sum: "$postsPerMonth" },
-                    platforms: { $addToSet: "$platform" },
-                }
+              $group: {
+                _id: {
+                  year: "$year",
+                  month: "$month"
+                },
+                platforms: { $push: "$$ROOT" }
+              }
             },
+            // Optionally sort by the year and month
             {
-                // Sort by year and month in ascending order
-                $sort: {
-                    "_id.year": 1,
-                    "_id.month": 1
-                }
+              $sort: { "_id.year": -1, "_id.month": -1 }
             }
-        ])
+          ]);
          // log("this is the kpis   \n", kpis)
-        const achievedKPIs:{platform:string, postsPerDay: number, postsPerWeek: number, postsPerMonth: number, timeStamp?:number }[] = []
+        const achievedKPIs:any[] = []
         for(const k of kpis){
-            const achievedD = await noPosts(k.timeStamp||Date.now(), "Daily", k.platform, 1, 1 , brand)
-            const achievedW = await noPosts(k.timeStamp||Date.now(), "Weekly", k.platform, 1, 1 , brand) 
-            const achievedM = await noPosts(k.timeStamp||Date.now(), "Monthly", k.platform, 1, 1 , brand)
-            achievedKPIs.push({platform:k.platform,  postsPerDay: achievedD[0].data, postsPerWeek: achievedW[0].data, postsPerMonth: achievedM[0].data })
+            const ak :any[]= []
+            for(const kpi of k.platforms){
+                const achievedD = await noPosts(kpi.timeStamp||Date.now(), "Daily", kpi.platform, 1, 1 , brand)
+                const achievedW = await noPosts(kpi.timeStamp||Date.now(), "Weekly", kpi.platform, 1, 1 , brand) 
+                const achievedM = await noPosts(kpi.timeStamp||Date.now(), "Monthly", kpi.platform, 1, 1 , brand)
+                ak.push({platform:kpi.platform, postPerDay:achievedD[0].data, postPerWeek:achievedW[0].data, postPerMonth:achievedM[0].data})
+            }
+
+            achievedKPIs.push({date:k._id,  platforms:ak })
         }
         
         return {kpis,achievedKPIs}
