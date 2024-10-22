@@ -74,8 +74,8 @@ export default class CandidateController implements ICandidateController {
         return result;
     }
 
-    async getAllCandidateQuestionsAndTask(_id: string): Promise<ICandidateQuestionsModel[]> {
-        return await candidateQuestionsService.getAllCandidatesQuestions(_id);
+    async getAllCandidateQuestionsAndTask(department: string): Promise<ICandidateQuestionsModel[]> {
+        return await candidateQuestionsService.getAllCandidatesQuestions(department);
     }
 
     async changeCandidateTaskStatus(_id: string, status: string, session: ClientSession): Promise<ICandidateModel> {

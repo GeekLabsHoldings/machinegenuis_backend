@@ -7,8 +7,9 @@ enum DepartmentEnum {
     CEO = "ceo",
     VideoEditing = "video-editing",
     CustomerService = 'customer-service',
-    Development = 'development',
+    Development = 'development'
 }
+
 // enum RoleEnum {
 //     ContentWriter = "Content Writer",
 //     Payroll = "Payroll",

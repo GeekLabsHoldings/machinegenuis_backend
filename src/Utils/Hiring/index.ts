@@ -35,7 +35,7 @@ const CalendlyInterviewStartEndHour = {
 
 const CalendlyAllowedDays = {
     FaceToFace: 5,
-    PhoneCall: 3
+    PhoneCall: 4
 }
 
 

@@ -4,8 +4,9 @@ const getImgs = require("./getImages");
 import { duration } from "moment";
 import wordsModel from "../../Model/VideoEditing/replacementWords_model";
 import { addWordAndReplace_srev } from "./replaceWords";
+import { findYouTubeLinksForKeywords } from "./searchInYoutube";
 const axios = require("axios");
-const ttsService = require('./TTS')
+const ttsService = require("./TTS");
 
 require("dotenv").config();
 
@@ -15,9 +16,9 @@ const splitContentInvestocracy = async (content) => {
   try {
     console.log("Received content:", content);
 
-    const prompt = `Could you please split this content into paragraphs, then give me MULTIPLE KEYWORDS for each paragraph that I can use as search queries on YouTube.
-      Each keyword should be a THREE-WORD PHRASE that captures the essence of the paragraph. Include the name of any famous person (President, Head of government, etc.) or relevant country/government, if mentioned.
-      If no such person or government is mentioned, provide relevant phrases that capture the main idea of the paragraph.
+    const prompt = `Could you please split this content into paragraphs, then give me ONE KEYWORD for each paragraph that I can use as a search query on YouTube.
+      The keyword should be a THREE-WORD PHRASE that captures the essence of the paragraph. Focus on stocks and companies mentioned in the content, or phrases that relate to financial markets, companies, or stock performance.
+      If no specific companies or stocks are mentioned, provide a relevant phrase that captures the financial theme or main idea of the paragraph.
       Please don't change the original content!
       Here is the content:
       ${content}
@@ -25,7 +26,7 @@ const splitContentInvestocracy = async (content) => {
       Format the response like this:
       {
           "paragraphs": [
-              { "text": "Example paragraph", "keywords": ["Three word phrase", "Another three word phrase"] }
+              { "text": "Example paragraph", "keyword": "" }
           ]
       }`;
 
@@ -42,7 +43,6 @@ const splitContentInvestocracy = async (content) => {
     let parsedResult;
     try {
       parsedResult = JSON.parse(rawResult);
-      console.log("Parsed OpenAI response for body ----->:", parsedResult);
     } catch (parseError) {
       console.error("Failed to parse JSON response:", parseError);
       throw new Error("Invalid JSON response from OpenAI");
@@ -50,8 +50,6 @@ const splitContentInvestocracy = async (content) => {
 
     const resultObject = await Promise.all(
       parsedResult.paragraphs.map(async (paragraph, index) => {
-        console.log(`Processing paragraph ${index + 1}:`, paragraph.text);
-
         const wordsList = await wordsModel.find({});
         const upDatedText = await addWordAndReplace_srev.findAndReplaceWords(
           paragraph.text,
@@ -70,15 +68,14 @@ const splitContentInvestocracy = async (content) => {
           );
           audioPath = null;
         }
+        const keywords = [{ keyword: paragraph.keyword }];
 
-        if (audioPath) {
-          audioPath.duration = 0;
-        }
-
+        const videos = await findYouTubeLinksForKeywords(keywords);
         return {
           index,
           text: upDatedText,
-          keywords: paragraph.keywords,
+          keywords,
+          videos,
           audioPath,
         };
       })
@@ -94,20 +91,15 @@ const splitContentInvestocracy = async (content) => {
 
 const generateIntroJson = async (intro) => {
   try {
-    const prompt = `Could you please split this content into 4 paragraphs, and give me MORE THAN ONE KEYWORD for each paragraph. EACH KEYWORD should be THREE WORDS and descriptive enough for searching videos on YouTube. Focus on person names (President, Head of Government, etc.) and mention any countries or governments when relevant. Also give me three most important words as TITLE for each paragraph. Here is the content: ${intro}
+    const prompt = `give me one keyword for each paragraph? Each keyword should consist of three words and be descriptive enough for searching videos on YouTube. Make sure the keywords include stock names related to the title of each paragraph. Focus on stocks related to markets, companies, and the economy. Also, give me three important words as a title for each paragraph. Here is the content: ${intro}
 
     Respond in the format:
     {
       "paragraphs": [
         {
           "text": "Sample paragraph text...",
-          "title": "Policy in Canada",
-          "keywords": ["Three Word Keyword", "Another Three Word Keyword"]
-        },
-        {
-          "text": "Another paragraph text...",
-          "title": "People in ...",
-          "keywords": ["Three Word Keyword", "Another Three Word Keyword"]
+          "title": "CNBC channel",
+          "keyword": ""
         }
       ]
     }`;
@@ -130,25 +122,18 @@ const generateIntroJson = async (intro) => {
       console.error("Failed to parse JSON response:", parseError);
       throw new Error("Invalid JSON response from OpenAI");
     }
-
     const paragraph = parsedResult.paragraphs[0]; // Retrieve the first paragraph only
-
-    const keywordsAndImages = paragraph.keywords.map((keyword) => ({
-      keyword,
-    }));
-
+    const keywords = [{ keyword: paragraph.keyword }];
     // Generate audio but return duration as zero
-    const audioPath = await ttsService.convertTextToAudio(paragraph.text, `S1`);
-
+    const audioPath = await ttsService.convertTextToAudio(paragraph.text, `intro`);
+    const videos = await findYouTubeLinksForKeywords(keywords);
     return {
       index: 0, // Always return single index
       title: paragraph.title,
       text: paragraph.text,
-      keywordsAndImages,
-      audioPath: {
-        ...audioPath,
-        duration: 0, // Always return duration as zero
-      },
+      keywords,
+      videos,
+      audioPath,
     };
   } catch (error) {
     console.error("Error generating intro JSON:", error);
@@ -160,3 +145,4 @@ module.exports = {
   splitContentInvestocracy,
   generateIntroJson,
 };
+
