@@ -1,4 +1,6 @@
 import axios from "axios";
+import { duration } from "moment";
+let cachedCnbcVideos = [];
 
 function getPublishedAfterDate() {
   const today = new Date();
@@ -9,8 +11,6 @@ function getPublishedAfterDate() {
   
   return today.toISOString();
 }
-
-
 async function searchVideos(query) {
   const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=50&publishedAfter=${getPublishedAfterDate()}&order=date&key=${process.env.API_KEY_SEARCH_IN_YOUTUBE}`;
 
@@ -46,59 +46,24 @@ async function getAwsDownloadLink(youtubeVideoUrl) {
     return "video not found";
   }
 }
-async function findVideosForKeyword(keyword, isCnbc) {
-  let videos = [];
-  let attempts = 0;
-
-  while (videos.length === 0 && attempts < 3) {
-    if (isCnbc) {
-      videos = await searchVideosYouTubeCnbc(keyword);
-    } else {
-      videos = await searchVideos(keyword);
-    }
-
-    if (videos.length === 0 && !isCnbc) {
-      console.warn(`No videos found for "${keyword}". Trying again with "cnbc"...`);
-      isCnbc = true; 
-    }
-
-    attempts++;
-  }
-
-  return videos;
-}
 export async function findYouTubeLinksForKeywords(keywordsArray) {
   const videoLinks = {
     cnbc: [], 
     Footage: [], 
   };
-
+ const cnbcVideos = await fetchLatsVideosFromCnbc();
+ if (Array.isArray(cnbcVideos) && cnbcVideos.length > 0) {
+  videoLinks.cnbc.push(...cnbcVideos);
+} else {
+  console.log("No CNBC videos found or an error occurred");
+}
   const keywords = keywordsArray.map(item => item.keyword);
-
-  const cnbcVideos = await Promise.all(
-    keywords.map(async (keyword) => {
-      const videos = await findVideosForKeyword(keyword, true);
-      return videos;
-    })
-  );
-
-  for (const videos of cnbcVideos) {
-    for (const video of videos.slice(0, 5)) { 
-      const youtubeLink = `https://www.youtube.com/watch?v=${video.id.videoId}`;
-      videoLinks.cnbc.push({ 
-        youtubeUrl: youtubeLink, 
-        duration: "0", 
-      });
-    }
-  }
-
   const footageVideos = await Promise.all(
     keywords.map(async (keyword) => {
-      const videos = await findVideosForKeyword(keyword + " footage", false); // Use "footage" instead of "footages"
+      const videos =  await searchVideos(`${keyword} footage`);
       return videos;
     })
   );
-
   for (const videos of footageVideos) {
     if (videos && videos.length > 0) { 
       for (const video of videos.slice(0, 5)) { 
@@ -112,10 +77,7 @@ export async function findYouTubeLinksForKeywords(keywordsArray) {
       console.log("No footage videos found for keyword:",);
     }
   }
-
-  videoLinks.cnbc = videoLinks.cnbc.slice(0, 5);
   videoLinks.Footage = videoLinks.Footage.slice(0, 5);
-
   console.log("Final video links:", videoLinks);
   return videoLinks;
 }
@@ -156,6 +118,30 @@ export async function searchVideosYouTubeCnbc(query) {
       description: video.snippet.description,
       thumbnail: video.snippet.thumbnails.default.url,
      videoUrl:`https://www.youtube.com/watch?v=${video.id.videoId}`
+    }));
+  } catch (error) {
+    if (error.response && error.response.status === 403 && error.response.data.error.errors.some(e => e.reason === 'quotaExceeded')) {
+      console.error("Error: YouTube API quota exceeded.");
+      return { success: false, message: "YouTube API quota exceeded." };
+    } else {
+      console.error("Error fetching search results:", error.message || error);
+      return { success: false, message: error.message || "Unknown error occurred." };
+    }
+  }
+}
+export async function fetchLatsVideosFromCnbc() {
+  if (cachedCnbcVideos.length > 0) {
+    return cachedCnbcVideos;
+  }
+  
+  const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=UCvJJ_dzjViJCoLf5uKUTwoA&type=video&order=date&maxResults=50&key=${process.env.API_KEY_SEARCH_IN_YOUTUBE}`;
+
+  try {
+    const response = await axios.get(searchUrl);
+    const videos = response.data.items;
+    return videos.map(video => ({
+     videoUrl:`https://www.youtube.com/watch?v=${video.id.videoId}`,
+     duration: "0",
     }));
   } catch (error) {
     if (error.response && error.response.status === 403 && error.response.data.error.errors.some(e => e.reason === 'quotaExceeded')) {
