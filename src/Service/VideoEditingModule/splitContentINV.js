@@ -16,23 +16,25 @@ const splitContentInvestocracy = async (content) => {
   try {
     console.log("Received content:", content);
 
-    const prompt = `Could you please split this content into paragraphs, then give me ONE KEYWORD for each paragraph that I can use as a search query on YouTube.
-      The keyword should be a THREE-WORD PHRASE that captures the essence of the paragraph. Focus on stocks and companies mentioned in the content, or phrases that relate to financial markets, companies, or stock performance.
-      If no specific companies or stocks are mentioned, provide a relevant phrase that captures the financial theme or main idea of the paragraph.
-      Please don't change the original content!
-      Here is the content:
-      ${content}
+    const prompt = `Please split the content into paragraphs and give me ONE RELEVANT KEYWORD for each paragraph to search for footage on YouTube.
+    The keyword should reflect the main idea of each paragraph and be helpful for finding related footage (e.g., market trends, economic outlook). If no clear theme is present, provide a general keyword based on the financial topic. Don't change the original content.
 
-      Format the response like this:
-      {
-          "paragraphs": [
-              { "text": "Example paragraph", "keyword": "" }
-          ]
-      }`;
+    Here’s the content:
+    ${content}
+
+    Format the response like this:
+    {
+      "paragraphs": [
+        { "text": "Example paragraph", "keyword": "market trends" }
+      ]
+    }`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
-      messages: [{ role: "user", content: prompt }],
+      messages: [
+        { role: "user", content: prompt },
+        { role: "system", content: prompt },
+      ],
     });
 
     console.log("Received completion from OpenAI:", completion);
@@ -70,7 +72,7 @@ const splitContentInvestocracy = async (content) => {
         }
         const keywords = [{ keyword: paragraph.keyword }];
 
-        const videos = await findYouTubeLinksForKeywords(keywords);
+        const videos = await findYouTubeLinksForKeywords(keywords , false);
         return {
           index,
           text: upDatedText,
@@ -91,15 +93,17 @@ const splitContentInvestocracy = async (content) => {
 
 const generateIntroJson = async (intro) => {
   try {
-    const prompt = `give me one keyword for each paragraph? Each keyword should consist of three words and be descriptive enough for searching videos on YouTube. Make sure the keywords include stock names related to the title of each paragraph. Focus on stocks related to markets, companies, and the economy. Also, give me three important words as a title for each paragraph. Here is the content: ${intro}
+    const prompt = `give me the just ONE ticker or stock name that mintioned in content. and give me three words title 
+
+    Here is the content: ${intro}
 
     Respond in the format:
     {
       "paragraphs": [
         {
           "text": "Sample paragraph text...",
-          "title": "CNBC channel",
-          "keyword": ""
+          "title": "Three-word title",
+          "keyword": "TSLA"
         }
       ]
     }`;
@@ -122,13 +126,15 @@ const generateIntroJson = async (intro) => {
       console.error("Failed to parse JSON response:", parseError);
       throw new Error("Invalid JSON response from OpenAI");
     }
-    const paragraph = parsedResult.paragraphs[0]; // Retrieve the first paragraph only
+    const paragraph = parsedResult.paragraphs[0];
     const keywords = [{ keyword: paragraph.keyword }];
-    // Generate audio but return duration as zero
-    const audioPath = await ttsService.convertTextToAudio(paragraph.text, `intro`);
-    const videos = await findYouTubeLinksForKeywords(keywords);
+    const audioPath = await ttsService.convertTextToAudio(
+      paragraph.text,
+      `intro`
+    );
+    const videos = await findYouTubeLinksForKeywords(keywords , true);
     return {
-      index: 0, // Always return single index
+      index: 0, 
       title: paragraph.title,
       text: paragraph.text,
       keywords,
@@ -145,4 +151,3 @@ module.exports = {
   splitContentInvestocracy,
   generateIntroJson,
 };
-

@@ -107,7 +107,7 @@ const generateSlideJson = async (intro) => {
   try {
     const prompt = `Could you please split this content into 4 paragraphs, and give me JUST ONE KEYWORD for each paragraph. ONLY ONE KEYWORD !!!
     Focus on person names (President, Head of Government, etc.) and mention any countries or governments when relevant.
-    also give me three most important words as TITLE for each splited paragraph
+    also give me three most important words as TITLE for each splited paragraph, Please don't change the original content!
     Here is the content:
     ${intro}
 
