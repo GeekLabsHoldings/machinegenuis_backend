@@ -1,19 +1,17 @@
+import { Types } from "mongoose";
 import SocialMediaPosts from "../../../Model/SocialMedia/SocialMediaPosts.models";
 
 
 
 
 
-export async function getEngagement(){
-    
-}
 
-
-async function getTwitterEngagement(subs: number, noPosts: number) {
+export async function getTwitterEngagement(subs: number,brand:string|Types.ObjectId) {
     const engagementData = await SocialMediaPosts.aggregate([
+      {$match: {platform:"TWITTER" }},
       {
         $group: {
-          _id: { brand: '$brand', brandId:"$brandId", platform: '$platform' },
+          _id: { brand: '$brand', brandId: "$brandId", platform: '$platform' },
           totalLikes: { $sum: '$likes' },
           totalComments: { $sum: '$comments' },
           totalShares: { $sum: '$shares' },
@@ -22,11 +20,22 @@ async function getTwitterEngagement(subs: number, noPosts: number) {
       },
       {
         $addFields: {
-          totalInteractions: { $sum: ['$totalLikes', '$totalComments', '$totalShares'] },
+          totalInteractions: {
+            $add: ['$totalLikes', '$totalComments', '$totalShares'], // Add interactions
+          },
+        },
+      },
+      {
+        $addFields: {
           engagement: {
             $multiply: [
-              { $divide: ['$totalInteractions', { $multiply: [subs, noPosts] }] },
-              100,
+              {
+                $divide: [
+                  '$totalInteractions',
+                  { $multiply: [subs, '$totalPosts'] }, // Assuming subs is a variable you define before this query
+                ],
+              },
+              100, // Convert to percentage
             ],
           },
         },
