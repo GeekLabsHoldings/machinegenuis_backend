@@ -17,6 +17,7 @@ import { DepartmentEnum } from "../../Utils/DepartmentAndRoles";
 import { redis } from "../../Utils/Redis/redis";
 import moment from "moment";
 import { addReply } from "../../Service/SocialMedia/twitter.api";
+import EmailService from "../../Service/Message/EmailService";
 export const tweets = async () => {
   try {
     const brands = await getAllBrands();
@@ -46,16 +47,24 @@ export const tweets = async () => {
           twitterData.account.BearerToken
         );
 
-        if (tweetsPage?.status === 401 || tweetsPage?.status === 429) {
-          const errorMessage =
-            tweetsPage.status === 401 ? "Unauthorized" : "Too Many Requests";
-          console.log("Error----:", errorMessage);
-          resError.push({
-            error: true,
-            message: errorMessage,
-            details: tweetsPage.data || tweetsPage,
-            statusCode: tweetsPage.status,
-          });
+        if (tweetsPage?.status !== 200) {
+          const warningHTMLEmail = () => {
+            const message = x.title;
+            const html = `
+          <h1>test</h1>
+          <p>${message}</p>`;
+            return html;
+          };
+          const emailService = new EmailService();
+          for (const x of [
+            "abdulrahmangeeklab1@gmail.com",
+            "mostafageeklabs@gmail.com",
+          ])
+            await emailService.sendEmail({
+              to: x,
+              subject: `Twitter brand :${brand.brand_name}`,
+              html: warningHTMLEmail(),
+            });
         }
 
         if (tweetsPage.length) {
@@ -102,7 +111,7 @@ export const tweets = async () => {
                   reply,
                   accountName: account.userName,
                   campaignType: account.campaignType,
-                  profile_image_url:account.profile_image_url
+                  profile_image_url: account.profile_image_url,
                 };
                 await eventEmitter.emit("TwitterNewTweets", data);
               }
