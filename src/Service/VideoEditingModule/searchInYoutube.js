@@ -40,24 +40,6 @@ async function searchVideos(query) {
     return [];
   }
 }
-async function getAwsDownloadLink(youtubeVideoUrl) {
-  try {
-    console.log("A -> DownloadVideo", youtubeVideoUrl);
-
-    const response = await axios.post(
-      "https://video.machinegenius.io/download-trim-video",
-      { url: youtubeVideoUrl }
-    );
-    console.log(
-      "AWS download link:--------------------------->",
-      response.data.trimmed_video
-    );
-    return response.data.trimmed_video;
-  } catch (error) {
-    console.error("Error getting AWS download link:", error);
-    return "video not found";
-  }
-}
 async function fetchLatsVideosFromCnbc() {
   if (cachedCnbcVideos.length > 0) {
     return cachedCnbcVideos;
@@ -188,4 +170,15 @@ export async function searchVideosYouTubeCnbc(query) {
     }
   }
 }
-
+export async function trimVideoAws(youtubeVideoUrl, start_Time, end_Time) {
+  try {
+    const response = await axios.post(
+      "https://video.machinegenius.io/download-trim-video",
+      { url: youtubeVideoUrl, start_Time, end_Time }
+    );
+    return response.data.trimmed_video;
+  } catch (error) {
+    console.error("Error getting AWS download link:", error);
+    return error;
+  }
+}
