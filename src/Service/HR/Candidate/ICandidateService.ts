@@ -2,6 +2,7 @@ import { ClientSession, Types } from "mongoose";
 import ICandidateModel, { IStepStatus } from "../../../Model/HR/Candidate/ICandidateModel";
 
 export default interface ICandidateService {
+    checkCandidateExist(hiringId: string, email: string): Promise<ICandidateModel | null>
     createCandidate(candidate: ICandidateModel): Promise<void>
     getAllCandidateByHiring(hiring: string, hiringStep: string, limit: number | null, skip: number | null): Promise<ICandidateModel[]>
     getCandidate(_id: string, session?: ClientSession): Promise<ICandidateModel | null>;
