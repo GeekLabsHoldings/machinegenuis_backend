@@ -37,10 +37,7 @@ const splitContentInvestocracy = async (content) => {
       ],
     });
 
-    console.log("Received completion from OpenAI:", completion);
-
     const rawResult = completion.choices[0].message.content.trim();
-    console.log("Trimmed OpenAI response for body---->:", rawResult);
 
     let parsedResult;
     try {
@@ -117,7 +114,6 @@ const generateIntroJson = async (intro) => {
     });
 
     const rawResult = completion.choices[0].message.content.trim();
-    console.log("Trimmed Response:", rawResult);
     let parsedResult;
 
     try {
