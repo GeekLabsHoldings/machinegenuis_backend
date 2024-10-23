@@ -26,7 +26,7 @@ export default class UserSubscriptionService implements IUserSubscriptionService
         const pipeline: PipelineStage[] = ([
             {
                 $match: {
-                    brand: { $eq: brandId },
+                    brand: brand,
                     updatedAt: { $gte: startDate }
                 }
             },

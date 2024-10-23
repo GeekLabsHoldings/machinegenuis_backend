@@ -50,14 +50,64 @@ class SocialMediaNewsLetterController implements ISocialMediaNewsLetterControlle
         return zohoEmailService;
     }
     generateHTMLContent(subjectLine: string, openingLine: string, articles: INewsLetterArticle[]): string {
-        let htmlContent = `<h1>${openingLine}</h1><br><h2>${subjectLine}</h2><br><br>`;
+        let htmlContent = `
+        <html lang="en">
+            <head>
+                <style>
+                  * {
+                    font-family: Arial, Helvetica, sans-serif;
+                    box-sizing: border-box;
+                  }
+                  body {
+                    padding: 20px;
+                  }
+                  h1 {
+                    color: #333;
+                  }
+                  h2 {
+                    text-align: center;
+                    color: #333;
+                  }
+
+                  .banner {
+                    border-radius: 15px;
+                    overflow: hidden;
+                    width: fit-content;
+                  }
+
+                  .banner img {
+                    object-fit: cover;
+                  }
+
+                  .title {
+                    color: #fff;
+                    background-color: #e1c655;
+                    text-align: center;
+                    padding: 10px;
+                    border-radius: 5px;
+                  }
+
+                  .title:not(:first-of-type) {
+                    margin-top: 40px;
+                  }
+                a {
+                    text-align: center;
+                }
+                </style>
+            </head>
+            <body>
+                <h1>${openingLine}</h1>
+                <br />
+                <h2>${subjectLine}</h2>
+                <br /><br />`;
         for (const article of articles) {
-            htmlContent += `<h3>${article.generalTitle}</h3>`;
+            htmlContent += `<h3 class="title">${article.generalTitle}</h3>`;
             for (const content of article.content) {
-                htmlContent += `<a href="https://api-development.machinegenius.io/un-authorized/news-letter/article/${content.article_id}/[[email]]/[[newLetter_id]]">${content.title}</a><br>`;
+                htmlContent += `<a href="https://api-development.machinegenius.io/un-authorized/news-letter/article/${content.article_id}/[[email]]/[[newLetter_id]]">${content.title}</a><br /><br />`;
             }
+            htmlContent += `<br /><br />`;
         }
-        htmlContent += `<br><br><p>Thank you for reading our newsletter</p><br><img src="https://api-development.machinegenius.io/un-authorized/news-letter/opening-image/[[email]]/[[newLetter_id]]" alt="Opening Image">`;
+        htmlContent += `<br /><div class="banner"><img src="https://api-development.machinegenius.io/un-authorized/news-letter/opening-image/[[email]]/[[newLetter_id]]" alt="Opening Image"/></div></body></html>`;
         return htmlContent;
     }
     async getGeneratedNewsLetter(brand: string, stockName: string): Promise<IGeneratedContentResponse[]> {
