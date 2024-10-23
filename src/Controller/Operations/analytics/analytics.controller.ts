@@ -6,7 +6,7 @@ export async function tmp(req:Request, res:Response) {
     try {
         
         //const result1 = await analyticsService.LinkedinPostInsights("66fcfb8c57531aaf2dca2686", "urn:li:share:7251141737144852480") 
-        const result2 = await analyticsService.FacebookPostInsights("66fcfb8c57531aaf2dca2686","449650021555087")
+        const result2 = await analyticsService.FacebookPostInsights("66fcfb8c57531aaf2dca2686",)
 
         res.json({result2})
     } catch (error) {

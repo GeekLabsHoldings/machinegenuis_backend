@@ -18,7 +18,7 @@ const cron = require('node-cron');
 
 */
 //0 */12 * * *
-const scheduleP =  cron.schedule("0 */12 * * *", async () => {
+const scheduleTP =  cron.schedule("0 */12 * * *", async () => {
     console.log("this is update Twitter Posts cron job \n\n\n", );
     const date = new Date();
 
@@ -50,4 +50,4 @@ const scheduleP =  cron.schedule("0 */12 * * *", async () => {
   });
 
 
-export default scheduleP
+export default scheduleTP

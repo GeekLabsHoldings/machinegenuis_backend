@@ -5,8 +5,9 @@ import * as brandController from "../../Controller/Operations/BrandCreation.cont
 
 const BrandCreationRouter = Router();
 
-// Domains
+// Domains 
 BrandCreationRouter.post("/check-domain-availability", brandController.checkDomains);
+BrandCreationRouter.post("/check-domain-with-prices", brandController.checkDomainsWithPrices);
 BrandCreationRouter.post("/register-domain", brandController.registerDomain);
 BrandCreationRouter.post("/check-domain-email-verification", brandController.verificationDomain);
 BrandCreationRouter.post("/activate-domain", brandController.activateDomain);
