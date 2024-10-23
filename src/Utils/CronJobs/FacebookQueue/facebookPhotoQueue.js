@@ -36,7 +36,7 @@ addPostQueue.process(async (job) => {
     imageUrl: url,
     FACEBOOK_PAGE_ID: facebookData.account.pageID,
   });
-  const postId = response.id;
+  const postId = response.post_id;
     const createPost = await createSocialAccountAddPost(
       PlatformEnum.FACEBOOK,
       brandId,
