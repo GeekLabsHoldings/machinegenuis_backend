@@ -4,9 +4,9 @@ import ICandidateService from "./ICandidateService";
 import candidateModel from "../../../Model/HR/Candidate/CandidateModel";
 
 class CandidateService implements ICandidateService {
-    async checkCandidateExist(hiringId: string, email: string, cvLink: string): Promise<boolean> {
-        const result = await candidateModel.findOne({ hiring: hiringId, email, cvLink });
-        return result ? true : false;
+    async checkCandidateExist(hiringId: string, email: string): Promise<ICandidateModel | null> {
+        const result = await candidateModel.findOne({ hiring: hiringId, email });
+        return result
     }
     async createCandidate(candidate: ICandidateModel): Promise<void> {
         await candidateModel.findOneAndUpdate(

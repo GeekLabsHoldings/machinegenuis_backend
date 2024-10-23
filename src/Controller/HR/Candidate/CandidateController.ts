@@ -186,10 +186,20 @@ export default class CandidateController implements ICandidateController {
                     recommendation: null
                 }
                 console.log("candidateData", item);
-                const checkCandidate = await candidateService.checkCandidateExist((hiring._id).toString(), item.email, item.cvPath);
-                if (!checkCandidate)
+                const candidateExist = await candidateService.checkCandidateExist((hiring._id).toString(), item.email);
+                console.log("candidateExist", candidateExist?.hiring.toString(), candidateExist?.cvLink);
+                const checkCandidate =
+                    candidateExist ?
+                        candidateExist.hiring.toString() !== hiring._id.toString() || candidateExist.cvLink !== item.cvPath ?
+                            true :
+                            false
+                        : true;
+                if (checkCandidate) {
+                    console.log("candidate not exist", { email: candidateData.email })
                     await candidateService.createCandidate(candidateData);
-
+                } else {
+                    console.log("candidate exist", { email: candidateData.email })
+                }
             };
             await hiringService.changeHiringStatus((hiring._id).toString(), HiringStatusLevelEnum.CONTINUE);
         };
