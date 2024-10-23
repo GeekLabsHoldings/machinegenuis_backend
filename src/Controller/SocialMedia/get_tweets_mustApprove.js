@@ -49,7 +49,7 @@ export const tweets = async () => {
 
         if (tweetsPage?.status !== 200) {
           const warningHTMLEmail = () => {
-            const message = x.title;
+            const message = tweetsPage.title;
             const html = `
           <h1>test</h1>
           <p>${message}</p>`;
