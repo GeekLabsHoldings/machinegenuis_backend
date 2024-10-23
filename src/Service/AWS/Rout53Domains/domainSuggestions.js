@@ -2,9 +2,15 @@ const {
     CheckDomainAvailabilityCommand,
     GetDomainSuggestionsCommand,
     ListPricesCommand,
+    Route53Domains
   } = require("@aws-sdk/client-route-53-domains");
-  const { route53 } = require("../config/awsConfig");
-  
+  import { Route53Domains, RegisterDomainCommand , CountryCode  } from '@aws-sdk/client-route-53-domains';
+  import { fromIni, fromEnv } from '@aws-sdk/credential-providers';
+  var route53 = new Route53Domains({ region:process.env.AWS_REGION,
+    credentials: fromEnv()  });
+
+
+  import { fromIni, fromEnv } from '@aws-sdk/credential-providers';
   const supportedTLDs = new Set([
     "com",
     "net",
@@ -53,7 +59,7 @@ const {
     }
   }
   
-  async function checkDomainExists(domain) {
+export  async function checkDomainExists(domain) {
     const domainTLD = getTLD(domain);
   
     if (!isSupportedTLD(domainTLD)) {

@@ -1,10 +1,10 @@
 import { model, Schema } from 'mongoose';
 import IAudienceModel from './IAudienceModel';
-import { RequiredNumber, RequiredSpecificNumber, RequiredString } from '../../../Utils/Schemas';
+import { RefType, RequiredNumber, RequiredSpecificNumber, RequiredString } from '../../../Utils/Schemas';
 import { SchemaTypesReference } from '../../../Utils/Schemas/SchemaTypesReference';
 
 const AudienceSchema = new Schema<IAudienceModel>({
-    brand: RequiredString,
+    brand: RefType(SchemaTypesReference.Brands, true),
     date: RequiredNumber,
     count: RequiredSpecificNumber(1)
 });

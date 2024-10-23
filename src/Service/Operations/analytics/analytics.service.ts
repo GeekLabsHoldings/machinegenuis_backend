@@ -13,6 +13,7 @@ import YouTubeAnalytics from "../../SocialMedia/youtube.services";
 import { GetSubCount, GetSubCount_brand } from "../../SocialMedia/setting.service";
 import { getGroupsByBrand } from "../../SocialMedia/setting.service";
 import { startOfMonth, endOfMonth } from 'date-fns';
+import { getPageAccessToken } from "../../SocialMedia/facebook.service";
 
 export async function TwitterPostInsights(brand: string, postId: string) {
     try {
@@ -110,16 +111,24 @@ export async function TelegramPostInsights(brand: string, chatId: string, postId
     }
 }
 
-
-export async function FacebookPostInsights(brand: string, postId: string) {
+//https://graph.facebook.com/449650021555087/posts?access_token=&fields=likes.summary(true),comments.summary(true),shares
+export async function FacebookPostInsights(brand: string) {
     try {
 
         const acc = await getAccount(brand, "FACEBOOK")
         const axios = require('axios');
+        
+        const account = (acc?.account as IFacebookInAccountData)
+        const accessToken =  await getPageAccessToken(account.pageID, account.longAccessToken)
 
 
-        const accessToken = (acc?.account as IFacebookInAccountData).longAccessToken;
-        const  response = await axios.get(`https://graph.facebook.com/v17.0/${postId}?fields=likes.summary(true),comments.summary(true)&access_token=${accessToken}`)
+        console.log("this is facebook generated access tokens\n\n", accessToken.access_token,accessToken.id, account.pageID)
+        const url = `https://graph.facebook.com/${account.pageID}/posts`;
+        const params = {
+            access_token: accessToken.access_token,
+            fields: 'likes.summary(true),comments.summary(true),shares'
+        };
+        const  response = await axios.get(url, { params })
         return response.data
     } catch (error) {
         console.log(error)
@@ -134,8 +143,7 @@ export async function LinkedinPostInsights(brand: string, postId: string) {
         if (acc && acc.account) {
 
             const account = (acc.account as ILinkedInAccountData)
-            console.log(account)
-            console.log("accounts  \n\n", account)
+
             const response = await axios.get(
                 `https://api.linkedin.com/v2/socialActions/${postId}`,
                 {
@@ -188,6 +196,20 @@ export async function getInsights(platform: string, posts: { brand: string; post
         }
         
         return sum
+    }else if (platform == "FACEBOOK") {
+
+        const length = posts.length
+        for (const post of posts) {
+            const result = await RedditPostInsights(post.brand, post.post_id)
+            sum.like_count += result?.ups || 0
+            sum.num_comments += result?.num_comments || 0
+            sum.retweet_count += result?.score || 0
+        }
+        if(length){
+            sum.like_count /= length
+            sum.num_comments /= length
+            sum.retweet_count /= length
+        }
     }
     return null
 }
@@ -477,6 +499,9 @@ export async function subsGains(endDate:string|number|Date = Date.now(), platfor
     startOfMonth.setMonth(startOfMonth.getMonth() - 1);
     startOfMonth.setHours(0, 0, 0, 0);
   
+    const startOfYear = new Date(endDate.getFullYear(), 0, 1);
+    startOfYear.setHours(0, 0, 0, 0);
+
     const result = await GroupsAnalyticsModel.aggregate([
       {
         $match: {
@@ -525,6 +550,19 @@ export async function subsGains(endDate:string|number|Date = Date.now(), platfor
                 _id: 0,
                 gain: { $subtract: ["$endSubs", "$startSubs"] }
             } }
+          ],
+          yearly: [
+            { $match: { timestamp: { $gte: startOfYear.getTime() } } },
+            { $sort: { timestamp: 1 } },
+            { $group: {
+                _id: null,
+                startSubs: { $first: "$subs" },
+                endSubs: { $last: "$subs" }
+            } },
+            { $project: {
+                _id: 0,
+                gain: { $subtract: ["$endSubs", "$startSubs"] }
+            } }
           ]
         }
       },
@@ -532,7 +570,8 @@ export async function subsGains(endDate:string|number|Date = Date.now(), platfor
         $project: {
           daily: { $arrayElemAt: ["$daily", 0] },
           weekly: { $arrayElemAt: ["$weekly", 0] },
-          monthly: { $arrayElemAt: ["$monthly", 0] }
+          monthly: { $arrayElemAt: ["$monthly", 0] },
+          yearly: { $arrayElemAt: ["$yearly", 0] }
         }
       }
     ]);
@@ -615,11 +654,19 @@ export async function getKPIs(brand:string) {
             // Project the month and year from the timeStamp field
             {
               $project: {
-                year: { $year: { $toDate: "$timeStamp" }, },
-                month: { $month: { $toDate: "$timeStamp" } },
-                brand:1,
+                year: { 
+                  $year: { 
+                    $toDate: "$timeStamp"  // Directly convert as it's in milliseconds
+                  } 
+                },
+                month: { 
+                  $month: { 
+                    $toDate: "$timeStamp" 
+                  } 
+                },
+                brand: 1,
                 timeStamp: 1,
-                platform:1,   
+                platform: 1,
                 postsPerDay: 1,
                 postsPerWeek: 1,
                 postsPerMonth: 1 // Include any other fields you may want to keep
@@ -631,7 +678,7 @@ export async function getKPIs(brand:string) {
                 _id: {
                   year: "$year",
                   month: "$month",
-                  brand:"$brand"
+                  brand: "$brand"
                 },
                 platforms: { $push: "$$ROOT" }
               }
@@ -643,10 +690,10 @@ export async function getKPIs(brand:string) {
           ]);
          // log("this is the kpis   \n", kpis)
 
-         const acc = await getAccount(brand,"YOUTUBE")
-         const account = (acc?.account as IYoutubeAccountData)
-         console.log("this is ", account, brand)
-         const analytics = new YouTubeAnalytics(account);
+        //  const acc = await getAccount(brand,"YOUTUBE")
+        //  const account = (acc?.account as IYoutubeAccountData)
+        //  console.log("this is ", account, brand)
+        //  const analytics = new YouTubeAnalytics(account);
  
         const achievedKPIs:any[] = []
         for(const k of kpis){
@@ -659,7 +706,7 @@ export async function getKPIs(brand:string) {
                 ak.push({platform:kpi.platform, Day:achievedD[0].data, Week:achievedW[0].data, Month:achievedM[0].data})
             }
 
-            achievedKPIs.push({date:{...k._id, brand:brand},  platforms:ak })
+            achievedKPIs.push({_id:k._id,  platforms:ak })
         }
         
         return {kpis,achievedKPIs}

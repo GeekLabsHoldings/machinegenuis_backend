@@ -103,10 +103,16 @@ export default class AudienceController implements IAudienceController {
         const growthPercentageThisMessage =
             countNewUsers[countNewUsers.length - 1] === 0 ?
                 0 : parseFloat((((NewSubscribersThisMonth - UnSubscribersThisMonth) * 100) / countNewUsers[countNewUsers.length - 1]).toFixed(2));
+
+        const publishedNewsLetterThisMonth =
+            countNewsLetterResult.length >= 2 ? countNewsLetterResult[1].totalEmails :
+                countNewsLetterResult.length >= 1 ? countNewsLetterResult[0].totalEmails : 0;
+        const publishedNewsLetterLastMonth =
+            countNewsLetterResult.length >= 2 ? countNewsLetterResult[0].totalEmails : 0;
         return {
             PublishedNewsLetter: {
-                this_month: countNewsLetterResult[1].totalEmails,
-                last_month: countNewsLetterResult[0].totalEmails,
+                this_month: publishedNewsLetterThisMonth,
+                last_month:publishedNewsLetterLastMonth,
             },
             GrowthPercentage: {
                 this_month: `${growthPercentageThisMessage} % `,
