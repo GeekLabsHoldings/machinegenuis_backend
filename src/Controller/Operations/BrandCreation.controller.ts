@@ -8,6 +8,7 @@ import { accountDataType } from "../../Model/Operations/IPostingAccounts_interfa
 import { IBrand, ISubBrand } from "../../Model/Operations/IBrand_interface";
 import { ImportVolumeCommand } from "@aws-sdk/client-ec2";
 import { PlatformArr } from "../../Utils/SocialMedia/Platform";
+import { checkDomainExists } from "../../Service/AWS/Rout53Domains/domainSuggestions";
 
 
 
@@ -335,6 +336,17 @@ export const deleteAccount = async(req: Request, res: Response) =>{
 export const checkDomains = async (req: Request, res: Response) => {
   try {
     const result = await brandService.checkAndSuggest(req.body.domainName);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    return systemError.sendError(res, error);
+  }
+};
+
+
+export const checkDomainsWithPrices = async (req: Request, res: Response) => {
+  try {
+    const result = await checkDomainExists(req.body.domainName);
     res.json(result);
   } catch (error) {
     console.log(error);
