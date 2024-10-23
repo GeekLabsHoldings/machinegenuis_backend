@@ -1,10 +1,10 @@
 import { model, Schema } from 'mongoose';
-import { RequiredNumber, RequiredString } from '../../../Utils/Schemas';
+import { RefType, RequiredNumber, RequiredString } from '../../../Utils/Schemas';
 import { SchemaTypesReference } from '../../../Utils/Schemas/SchemaTypesReference';
 import INewsLettersModel from './INewsLettersModel';
 
 const NewsLettersSchema = new Schema<INewsLettersModel>({
-    brand: RequiredString,
+    brand: RefType(SchemaTypesReference.Brands, true),
     title: RequiredString,
     subjectLine: RequiredString,
     openingLine: RequiredString,

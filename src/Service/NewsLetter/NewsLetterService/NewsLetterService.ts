@@ -16,10 +16,11 @@ export default class NewsLetterService implements INewsLettersService {
     }
 
     async countNewsLetterByBrandAndDate(brand: string, startDate: number): Promise<any[]> {
+        const brandId = new Types.ObjectId(brand);
         const pipeline: PipelineStage[] = ([
             {
                 $match: {
-                    brand: brand,
+                    brand: { $eq: brandId },
                     createdAt: { $gte: startDate }
                 }
             },
