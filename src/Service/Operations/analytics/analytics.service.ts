@@ -268,6 +268,21 @@ export async function noPosts(day: string|number|Date = Date.now(), duration: st
         }
 
        
+    }else if (duration == "Yearly") {
+        const date = new Date(day);
+
+        for (let i = 0; i < limit; i++) {
+            // Get the first day of the month
+            const startOfYear = new Date(date.getFullYear(), 1, 1);
+            startOfYear.setHours(0, 0, 0, 0);
+    
+            // Get the last day of the year
+            const endOfYear = new Date(date.getFullYear(), 0, 31);
+            endOfYear.setHours(23, 59, 59, 999);
+            const result = await fetchPosts(platform, startOfYear, endOfYear, brand, true)
+            resultList.push({date: startOfYear, data: (result as number)})
+            date.setFullYear(date.getFullYear() + sign);
+        }
     }
     return sign==-1?resultList.reverse():resultList;
 }
@@ -331,6 +346,23 @@ export async function postsInsights(day: string|number|Date = Date.now(), durati
         }
 
         
+    }else if (duration == "Yearly") {
+        const date = new Date(day);
+
+        for (let i = 0; i < limit; i++) {
+            // Get the first day of the month
+            const startOfYear = new Date(date.getFullYear(), 0, 1);
+            startOfYear.setHours(0, 0, 0, 0);
+    
+            // Get the last day of the year
+            const endOfYear = new Date(date.getFullYear(), 11, 31);
+            endOfYear.setHours(23, 59, 59, 999);
+            const postCount = await fetchPosts(platform, startOfYear, endOfYear, brand)
+            const insights = await getInsights(platform, postCount as { brand: string, post_id: string, group_id: string }[])
+            if(insights)
+                resultList.push({date:startOfYear,data:insights})
+            date.setFullYear(date.getFullYear() + sign);
+        }
     }
     return sign==-1?resultList.reverse():resultList;
 }
@@ -406,6 +438,24 @@ export async function groupsInsights(day: string|number|Date = Date.now(), durat
         }
 
         
+    }else if (duration == "Yearly") {
+        const date = new Date(day);
+
+        for (let i = 0; i < limit; i++) {
+            // Get the first day of the month
+            const startOfYear = new Date(date.getFullYear(), 0, 1);
+            startOfYear.setHours(0, 0, 0, 0);
+    
+            // Get the last day of the year
+            const endOfYear = new Date(date.getFullYear(), 11, 31);
+            endOfYear.setHours(23, 59, 59, 999);
+            const result = await fetchGroups(platform, group_id, startOfYear, endOfYear)
+            if (result)
+                resultList.push({date: startOfYear, result: result})
+            else 
+                resultList.push(resultList[resultList.length-1])
+            date.setFullYear(date.getFullYear() + sign);
+        }
     }
     return sign==-1?resultList.reverse():resultList;
 }
@@ -509,7 +559,7 @@ export async function percentage(brand:string) {
         sum += platform.totalSubscribers;
     }
     
-
+    
     type GainResponse = {
         daily: {
             gain: number;
@@ -525,9 +575,10 @@ export async function percentage(brand:string) {
     
     for (const g of groups){
         const result = (await subsGains( Date.now(), g.platform, g.group_id))[0] as GainResponse
-        gain.daily += result.daily.gain
-        gain.weekly += result.weekly.gain
-        gain.monthly += result.monthly.gain
+        console.log("this is percentage  \n\n",sum, gain, result)
+        gain.daily += result.daily ? result.daily.gain:0
+        gain.weekly += result.weekly ? result.weekly.gain:0
+        gain.monthly += result.monthly ? result.monthly.gain:0
     }
     gain.daily =  (gain.daily /sum) * 100
     gain.weekly = (gain.weekly/sum) * 100 
@@ -728,6 +779,23 @@ export async function commentsCount(day: string | number | Date = Date.now(), du
             resultList.push({ day: startOfMonth, data: result });
 
             date.setDate(date.getDate() + 30 * sign);
+        }
+    }else if (duration == "Yearly") {
+        const date = new Date(day);
+
+        for (let i = 0; i < limit; i++) {
+            // Get the first day of the month
+            const startOfYear = new Date(date.getFullYear(), 0, 1);
+            startOfYear.setHours(0, 0, 0, 0);
+    
+            // Get the last day of the year
+            const endOfYear = new Date(date.getFullYear(), 11, 31);
+            endOfYear.setHours(23, 59, 59, 999);
+            
+            const result = await fetchComments(platform, brand, startOfYear, endOfYear);
+            resultList.push({ day: startOfYear, data: result });
+
+            date.setFullYear(date.getFullYear() + sign);
         }
     }
     return sign == -1 ? resultList.reverse() : resultList;
