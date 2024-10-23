@@ -706,7 +706,7 @@ export async function getKPIs(brand:string) {
                 ak.push({platform:kpi.platform, Day:achievedD[0].data, Week:achievedW[0].data, Month:achievedM[0].data})
             }
 
-            achievedKPIs.push({_id:k._id,  platforms:ak })
+            achievedKPIs.push({date:k._id,  platforms:ak })
         }
         
         return {kpis,achievedKPIs}
