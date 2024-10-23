@@ -170,11 +170,15 @@ export async function searchVideosYouTubeCnbc(query) {
     }
   }
 }
-export async function trimVideoAws(youtubeVideoUrl, start_Time, end_Time) {
+export async function trimVideoAws(youtubeVideoUrl, start_Time = null, end_Time = null) {
   try {
+    const requestData = { url: youtubeVideoUrl };
+    if (start_Time !== null) requestData.start_Time = start_Time;
+    if (end_Time !== null) requestData.end_Time = end_Time;
+
     const response = await axios.post(
       "https://video.machinegenius.io/download-trim-video",
-      { url: youtubeVideoUrl, start_Time, end_Time }
+      requestData
     );
     return response.data.trimmed_video;
   } catch (error) {
@@ -182,3 +186,4 @@ export async function trimVideoAws(youtubeVideoUrl, start_Time, end_Time) {
     return error;
   }
 }
+
