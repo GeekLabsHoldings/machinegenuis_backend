@@ -2,7 +2,7 @@
 import AnalyticsModel from "../../../Model/NewsLetter/Analytics/AnalyticsModel";
 import IAnalyticsModel from "../../../Model/NewsLetter/Analytics/Analytics";
 import IAnalysisNewsLetterService, { IAnalysisNewsLetterServiceResponseService } from "./IAnalysisService";
-import { PipelineStage, SchemaTypes } from "mongoose";
+import { PipelineStage, SchemaTypes, Types } from "mongoose";
 import { SchemaTypesReference } from "../../../Utils/Schemas/SchemaTypesReference";
 import { AnalyticsType } from "../../../Utils/NewsLetter";
 
@@ -17,6 +17,7 @@ export default class AnalysisNewsLetterService implements IAnalysisNewsLetterSer
     }
 
     async getUsersEmailsAnalysis(brand: string): Promise<IAnalyticsModel[]> {
+        const brandId = new Types.ObjectId(brand);
         const pipeline: PipelineStage[] = [
             {
                 $lookup: {
@@ -31,7 +32,7 @@ export default class AnalysisNewsLetterService implements IAnalysisNewsLetterSer
             },
             {
                 $match: {
-                    'newsletterDetails.brand': brand
+                    'newsletterDetails.brand': { $eq: brandId }
                 }
             },
             {
@@ -48,6 +49,7 @@ export default class AnalysisNewsLetterService implements IAnalysisNewsLetterSer
 
     }
     async getNewsLetterAnalysis(brand: string): Promise<IAnalysisNewsLetterServiceResponseService[]> {
+        const brandId = new Types.ObjectId(brand);
         const pipeline: PipelineStage[] = [
             {
                 $lookup: {
@@ -62,8 +64,19 @@ export default class AnalysisNewsLetterService implements IAnalysisNewsLetterSer
             },
             {
                 $match: {
-                    'newsletterDetails.brand': brand
+                    'newsletterDetails.brand': brandId
                 }
+            },
+            {
+                $lookup: {
+                    from: `${SchemaTypesReference.Brands}s`,
+                    localField: 'newsletterDetails.brand',
+                    foreignField: '_id',
+                    as: 'brandDetails'
+                }
+            },
+            {
+                $unwind: '$brandDetails'
             },
             {
                 $group: {
@@ -79,7 +92,7 @@ export default class AnalysisNewsLetterService implements IAnalysisNewsLetterSer
                         }
                     },
                     title: { $first: '$newsletterDetails.title' },
-                    brand: { $first: '$newsletterDetails.brand' },
+                    brand: { $first: '$brandDetails.brand_name' },
                     createdAt: { $first: '$newsletterDetails.createdAt' },
                     userSubscriptionCount: { $first: '$newsletterDetails.userSubscriptionCount' }
                 }

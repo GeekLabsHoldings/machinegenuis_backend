@@ -1,5 +1,8 @@
+import { Types } from "mongoose";
+import { IBrand } from "../../Operations/IBrand_interface";
+
 export default interface INewsLettersModel {
-    brand: string;
+    brand: string | Types.ObjectId | IBrand;
     title: string;
     subjectLine: string;
     openingLine: string;

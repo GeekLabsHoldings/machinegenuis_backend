@@ -13,20 +13,51 @@ import INewsLettersModel from "../../../../Model/NewsLetter/NewsLetters/INewsLet
 import NewsLetterService from "../../../../Service/NewsLetter/NewsLetterService/NewsLetterService";
 import moment from "../../../../Utils/DateAndTime"
 import { Types } from "mongoose";
+import EmailsZohoModelService from "../../../../Service/Emails/EmailsZohoModelService";
+import EmailZohoService from "../../../../Service/Zoho/Emails/EmailZohoService";
+import IZohoEmailModel from "../../../../Model/Zoho/Emails/IZohoEmails";
+import { DepartmentEnum } from "../../../../Utils/DepartmentAndRoles";
+import { ISendEmailData } from "../../../../Service/Zoho/Emails/IEmailZohoService";
 
 
 class SocialMediaNewsLetterController implements ISocialMediaNewsLetterController {
 
+    async getAccountEmail(department: string | null, brandId: string | null): Promise<IZohoEmailModel & { _id: Types.ObjectId }> {
+        const emailsZohoModelService = new EmailsZohoModelService();
+        const senderAccount = await emailsZohoModelService.getEmailAccount(department, brandId);
+        if (!senderAccount) {
+            return systemError.setStatus(404).setMessage(ErrorMessages.INVALID_EMAILS).throw();
+        }
+        return senderAccount;
+    }
 
+    async setAccountAccessToken(senderAccount: IZohoEmailModel & { _id: Types.ObjectId }) {
+        const emailsZohoModelService = new EmailsZohoModelService();
+        const { _id, accountId, accessToken, expiredIn, clientId, clientSecret, refreshToken, zohoId } = senderAccount;
+        const zohoEmailService = new EmailZohoService(accountId, clientId, clientSecret, zohoId);
+        console.log("Expired In", expiredIn);
+        if (!expiredIn || expiredIn <= new Date().valueOf()) {
+            console.log("Enter Here");
+            const accessToken = await zohoEmailService.generateAccessToken(refreshToken);
+            const expire = new Date().valueOf() + 3600000;
+            await emailsZohoModelService.updateAccessToken((_id.toString()), accessToken, expire);
+        }
+        else {
+            console.log("Set Access Token");
+            await zohoEmailService.setAccessToken(accessToken);
+        }
+
+        return zohoEmailService;
+    }
     generateHTMLContent(subjectLine: string, openingLine: string, articles: INewsLetterArticle[]): string {
         let htmlContent = `<h1>${openingLine}</h1><br><h2>${subjectLine}</h2><br><br>`;
         for (const article of articles) {
             htmlContent += `<h3>${article.generalTitle}</h3>`;
             for (const content of article.content) {
-                htmlContent += `<a href="https://api.machinegenius.io/un-authorized/news-letter/article/${content.article_id}/[[email]]/[[newLetter_id]]">${content.title}</a><br>`;
+                htmlContent += `<a href="https://api-development.machinegenius.io/un-authorized/news-letter/article/${content.article_id}/[[email]]/[[newLetter_id]]">${content.title}</a><br>`;
             }
         }
-        htmlContent += `<br><br><p>Thank you for reading our newsletter</p><br><img src="https://api.machinegenius.io/un-authorized/news-letter/opening-image/[[email]]/[[newLetter_id]]" alt="Opening Image">`;
+        htmlContent += `<br><br><p>Thank you for reading our newsletter</p><br><img src="https://api-development.machinegenius.io/un-authorized/news-letter/opening-image/[[email]]/[[newLetter_id]]" alt="Opening Image">`;
         return htmlContent;
     }
     async getGeneratedNewsLetter(brand: string, stockName: string): Promise<IGeneratedContentResponse[]> {
@@ -62,22 +93,26 @@ class SocialMediaNewsLetterController implements ISocialMediaNewsLetterControlle
 
     async sendNewsLetter(job: Job<INewsLettersModel & { _id: Types.ObjectId | string }>): Promise<void> {
         console.log("Start Queue");
-        const emailService = new EmailService();
         const usersSubscriptions = new UserSubscriptionService();
-        const users = await usersSubscriptions.getUsersSubscriptionByBrand(job.data.brand);
+        const senderAccount = await this.getAccountEmail(DepartmentEnum.SocialMedia, (job.data.brand as string));
+        const { accountEmail } = senderAccount;
+        const zohoEmailService = await this.setAccountAccessToken(senderAccount);
+        const users = await usersSubscriptions.getUsersSubscriptionByBrand((job.data.brand as string));
         let htmlContent = job.data.content.replace(/\[\[newLetter_id]]/g, job.data._id.toString());
 
         for (const item of users) {
             // Replace the email placeholder for each user
             const personalizedContent = htmlContent.replace(/\[\[email]]/g, item.email);
 
-            const data: MailOptions = {
-                to: item.email,
+            const emailData: ISendEmailData = {
+                fromAddress: accountEmail,
+                toAddress: item.email,
                 subject: job.data.subjectLine,
-                html: personalizedContent
-            };
+                content: personalizedContent,
+                askReceipt: 'yes'
+            }
 
-            await Promise.all([emailService.sendEmail(data), usersSubscriptions.addReceivedEmails(item.email, job.data.brand)]);
+            await Promise.all([zohoEmailService.sendEmail(emailData), usersSubscriptions.addReceivedEmails(item.email, (job.data.brand as string))]);
         }
         console.log("End Queue");
     }

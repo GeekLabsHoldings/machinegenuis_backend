@@ -1,4 +1,4 @@
-import { PipelineStage } from "mongoose";
+import { PipelineStage, Types } from "mongoose";
 import IUserSubscriptionModel from "../../../Model/NewsLetter/UsersSubscriptions/IUserSubscriptionModel";
 import UserSubscriptionModel from "../../../Model/NewsLetter/UsersSubscriptions/UserSubscriptionModel";
 import IUserSubscriptionService from "./IUserSubscriptionService";
@@ -22,10 +22,11 @@ export default class UserSubscriptionService implements IUserSubscriptionService
     }
 
     async countUsersByBrandAndDate(brand: string, startDate: number): Promise<any> {
+        const brandId = new Types.ObjectId(brand);
         const pipeline: PipelineStage[] = ([
             {
                 $match: {
-                    brand: brand,
+                    brand: { $eq: brandId },
                     updatedAt: { $gte: startDate }
                 }
             },

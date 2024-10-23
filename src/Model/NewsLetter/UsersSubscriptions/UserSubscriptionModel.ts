@@ -1,11 +1,11 @@
 import { model, Schema } from 'mongoose';
 import IUserSubscription from './IUserSubscriptionModel';
-import { RequiredString, RequiredBoolean, RequiredNumber } from '../../../Utils/Schemas';
+import { RequiredString, RequiredBoolean, RequiredNumber, RefType } from '../../../Utils/Schemas';
 import { SchemaTypesReference } from '../../../Utils/Schemas/SchemaTypesReference';
 
 const UserSubscriptionSchema = new Schema<IUserSubscription>({
     email: RequiredString,
-    brand: RequiredString,
+    brand: RefType(SchemaTypesReference.Brands, true),
     subscriptionDate: RequiredNumber,
     subscriptionStatus: RequiredBoolean,
     receivedEmails: RequiredNumber,
