@@ -45,7 +45,7 @@ unAuthorizerNewsLetterRouter.post('/subscribe-users', async (req: Request, res: 
         await audience.addNewUser(email, brand);
         return res.status(200).send("User Subscribed Successfully");
     } catch (error) {
-        return;
+        return res.status(500).send("Internal Server Error");
     }
 })
 
