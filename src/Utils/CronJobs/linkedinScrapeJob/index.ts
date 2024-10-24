@@ -11,7 +11,7 @@ const warningHTMLEmail = () => {
     return html;
 }
 
-const LinkedinScrapeJob = cron.schedule('* 0 * * *', async () => {
+const LinkedinScrapeJob = cron.schedule('0 0 * * *', async () => {
     try {
         const candidate = new CandidateController();
         await candidate.getCandidateFromLinkedin();

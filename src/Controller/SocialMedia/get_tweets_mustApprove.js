@@ -47,25 +47,25 @@ export const tweets = async () => {
           twitterData.account.BearerToken
         );
 
-        if (tweetsPage?.status !== 200) {
-          const warningHTMLEmail = () => {
-            const message = tweetsPage.title;
-            const html = `
-          <h1>twitter warning 😊</h1>
-          <p>${message}</p>`;
-            return html;
-          };
-          const emailService = new EmailService();
-          for (const x of [
-            "abdulrahmangeeklab1@gmail.com",
-            "mostafageeklabs@gmail.com",
-          ])
-            await emailService.sendEmail({
-              to: x,
-              subject: `Twitter brand :${brand.brand_name}🔥`,
-              html: warningHTMLEmail(),
-            });
-        }
+        // if (tweetsPage?.status !== 200) {
+        //   const warningHTMLEmail = () => {
+        //     const message = tweetsPage.title;
+        //     const html = `
+        //   <h1>twitter warning 😊</h1>
+        //   <p>${message}</p>`;
+        //     return html;
+        //   };
+        //   const emailService = new EmailService();
+        //   for (const x of [
+        //     "abdulrahmangeeklab1@gmail.com",
+        //     "mostafageeklabs@gmail.com",
+        //   ])
+        //     await emailService.sendEmail({
+        //       to: x,
+        //       subject: `Twitter brand :${brand.brand_name}🔥`,
+        //       html: warningHTMLEmail(),
+        //     });
+        // }
 
         if (tweetsPage.length) {
           let postCount = 0;
