@@ -159,8 +159,13 @@ export default class CandidateController implements ICandidateController {
                 console.log("Hiring not found");
                 continue;
             }
-            const candidate = await setupAxios.get(`/linkedin/candidate/${account._id}`);
-
+            let candidate;
+            try {
+                candidate = await setupAxios.get(`/linkedin/candidate/${account._id}`);
+            } catch (error) {
+                console.log("can not get candidate");
+                continue;
+            }
             if (!candidate)
                 continue;
             for (const item of candidate.data) {

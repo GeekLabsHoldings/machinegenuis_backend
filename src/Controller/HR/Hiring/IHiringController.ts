@@ -16,9 +16,9 @@ export interface IStepsOfHiring {
     _id: string
 }
 export interface IQuestionTemplate {
-    type: number,
+    type: string,
     question: string
-    answer: number
+    answer: string
 }
 export default interface IHiringController {
     createHiring(hiring: IHiringModel): Promise<IHiringModel>;
