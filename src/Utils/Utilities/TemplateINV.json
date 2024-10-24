@@ -1,0 +1,11 @@
+{
+    "output_format": "mp4",
+    "width": 1920,
+    "height": 1080,
+    "snapshot_time": 7.42,
+    "fill_color": "#120a0a",
+    "multipart": 120,
+    "prefetch": true,
+    "elements": [
+    ]
+}

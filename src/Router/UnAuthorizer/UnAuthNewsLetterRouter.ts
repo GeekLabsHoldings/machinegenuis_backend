@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import AnalysisNewsLetterController from '../../Controller/SocialMedia/NewsLetter/AnalysisNewsLetter/AnalysisNewsLetterController';
 import { AnalyticsType } from '../../Utils/NewsLetter';
 import ArticleController from '../../Controller/SocialMedia/NewsLetter/Article/ArticleController';
+import AudienceController from '../../Controller/SocialMedia/NewsLetter/Audiences/AudiencesController';
 
 
 const unAuthorizerNewsLetterRouter = Router();
@@ -35,5 +36,17 @@ unAuthorizerNewsLetterRouter.get('/article/:article_id/:email/:newLetter_id', as
         return;
     }
 });
+
+
+unAuthorizerNewsLetterRouter.post('/subscribe-users', async (req: Request, res: Response) => {
+    try {
+        const audience = new AudienceController();
+        const { email, brand } = req.body;
+        await audience.addNewUser(email, brand);
+        return res.status(200).send("User Subscribed Successfully");
+    } catch (error) {
+        return res.status(500).send("Internal Server Error");
+    }
+})
 
 export default unAuthorizerNewsLetterRouter;

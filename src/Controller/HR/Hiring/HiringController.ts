@@ -96,8 +96,13 @@ class HiringController implements IHiringController {
                 jobTitle: role,
                 contract_type: contract,
                 description: template,
-                questions
-
+                questions: questions.map((question: IQuestionTemplate) => {
+                    return {
+                        question: question.question,
+                        type: question.type === "Yes or No" ? 0 : 1,
+                        answer: question.type === "Yes or No" ? question.answer === "Yes" ? 1 : 0 : question.answer
+                    }
+                })
             }
         };
         console.log("data", data);
@@ -114,6 +119,7 @@ class HiringController implements IHiringController {
         await hiringService.addHiringLinkedinAccount(hiringId, _id, session);
         return "Job Published Successfully";
     }
+
 
 
 }
