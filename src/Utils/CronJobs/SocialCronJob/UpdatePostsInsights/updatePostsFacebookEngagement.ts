@@ -2,11 +2,15 @@ import { postsInsights, fetchPosts, getInsights, TwitterPostInsights, FacebookPo
 
 
 import GroupsAnalyticsModel from "../../../../Model/Operations/analytics/analytics.model";
-import { getAccount, getBrands } from "../../../../Service/Operations/BrandCreation.service";
+import { getAccount, getBrands, getBrandsByPlatform } from "../../../../Service/Operations/BrandCreation.service";
 import { ListCallAnalyticsJobsCommand } from "@aws-sdk/client-transcribe";
 import SocialMediaPosts from "../../../../Model/SocialMedia/SocialMediaPosts.models";
 import { resourceLimits } from "worker_threads";
 const cron = require('node-cron');
+
+
+
+
 
 
 
@@ -17,25 +21,32 @@ const cron = require('node-cron');
                 sum.retweet_count += result?.retweet_count || 0
 
 */
-//0 */12 * * *
+//0 */12 * * *     */1 * * * *
 const scheduleFP =  cron.schedule("0 */12 * * *", async () => {
-    const brands = await getBrands(0,9999999999) || []
+    const brands = await getBrandsByPlatform("FACEBOOK",0,9999999999) || []
+    console.log("facebook post cron job brands", brands)
     for (const brand of brands){
-        const result = (await FacebookPostInsights( brand._id.toString()) as {id:string|number, likes:{summary:{total_count:number}}, comments:{summary:{total_count:number}},}[])
-        result.forEach(post => {
+        
+        const result = (await FacebookPostInsights( brand?._id?.toString()||"") as {id:string|number, likes:{summary:{total_count:number}}, 
+        comments:{summary:{total_count:number}}, shares:{count:number}}[])
+        console.log(`result in facebook cron job ${result}  \n\n`);
+        for (const post of result){
             // Sum the likes and comments for this post
+            
+            
             const postLikes = post.likes.summary.total_count;
             const postComments = post.comments.summary.total_count;
+            const postShares = post.shares.count;
             SocialMediaPosts.updateOne(
                 {post_id:post.id, platform:"FACEBOOK"},
                 //shares:result?.retweet_count
-                {$set:{likes:postLikes, comments:postComments,  }}
+                {$set:{likes:postLikes, comments:postComments, shares:postShares}}
             )
 
         
             // Output the post ID, likes, and comments
             console.log(`Post ID: ${post.id}, Likes: ${postLikes}, Comments: ${postComments}`);
-        });
+        };
         
 
     }
