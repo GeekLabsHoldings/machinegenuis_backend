@@ -27,10 +27,10 @@ const uploadToS3 = async (audioStream, index) => {
       await upload.done();
       console.log(`Audio uploaded succ`)
       const audioUrl = `https://machine-genius.s3.amazonaws.com/My_Audios/audio-${id}.mp3`;
-      const duration =  await getAudioDurationInSeconds(audioUrl);
+      // const duration =  await getAudioDurationInSeconds(audioUrl);
 
       index = `${id}`
-      return { index , url: audioUrl, duration };
+      return { index , url: audioUrl, duration:10 };
     } catch (error) {
       console.error("Error uploading to S3:", error);
       throw error;
