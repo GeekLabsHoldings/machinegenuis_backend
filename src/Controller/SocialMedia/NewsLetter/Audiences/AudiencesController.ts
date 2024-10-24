@@ -24,10 +24,10 @@ export default class AudienceController implements IAudienceController {
             receivedEmails: 0,
             updatedAt: dateNow.valueOf()
         };
-        const checkEmailValid = await axios.get(`https://api.hunter.io/v2/email-verifier?email=${email}&api_key=${process.env.HUNTER_API_KEY}`);
-        if (checkEmailValid.data.data.status !== "valid") {
-            return systemError.setStatus(400).setMessage(ErrorMessages.INVALID_EMAILS).throw();
-        }
+        // const checkEmailValid = await axios.get(`https://api.hunter.io/v2/email-verifier?email=${email}&api_key=${process.env.HUNTER_API_KEY}`);
+        // if (checkEmailValid.data.data.status !== "valid") {
+        //     return systemError.setStatus(400).setMessage(ErrorMessages.INVALID_EMAILS).throw();
+        // }
         await userSubscriptionService.createUserSubscription(userSubscribeData);
         const startOfMonth = StartOfMonth(dateNow);
         await audienceService.updateMonthAudience({
