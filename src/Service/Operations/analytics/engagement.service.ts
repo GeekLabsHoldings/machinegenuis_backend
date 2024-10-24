@@ -5,10 +5,10 @@ import SocialMediaPosts from "../../../Model/SocialMedia/SocialMediaPosts.models
 
 
 
-
+// {$and:[{brandId: { $in: [brand, new Types.ObjectId(brand)] }},{platform:"TWITTER" }]}
 export async function getTwitterEngagement(subs: number,brand:string|Types.ObjectId) {
     const engagementData = await SocialMediaPosts.aggregate([
-      {$match: {platform:"TWITTER" }},
+      {$match:{platform:"TWITTER" } },
       {
         $group: {
           _id: { brand: '$brand', brandId: "$brandId", platform: '$platform' },
@@ -23,7 +23,7 @@ export async function getTwitterEngagement(subs: number,brand:string|Types.Objec
           totalInteractions: {
             $add: ['$totalLikes', '$totalComments', '$totalShares'], // Add interactions
           },
-        },
+        }, 
       },
       {
         $addFields: {
