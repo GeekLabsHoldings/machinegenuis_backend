@@ -147,15 +147,32 @@ const renderVideo = async (req, res) => {
         },
       ],
       source:
-        "https://drive.google.com/file/d/1usbexWCpNdrq-wiqvbVIhJHfuxiTkcf4/view?usp=sharing",
+        "https://machine-genius.s3.us-east-1.amazonaws.com/BackGround_Video/background%2Bsherry+-+Trim.mp4",
+    };
+    const track1Element2 = {
+      id: "b7e651cc-3cc0-46c7-99a8-77d8a1ba2758",
+      type: "video",
+      track: 1,
+      time: (currentTime - 1.2) + (10 * 60),
+      animations: [
+        {
+          time: 0,
+          duration: 0.001,
+          transition: true,
+          type: "fade",
+        },
+      ],
+      source:
+        "https://machine-genius.s3.us-east-1.amazonaws.com/BackGround_Video/background%2Bsherry+-+Trim.mp4",
     };
     template.elements[0].elements.push(track1Element);
+    template.elements[0].elements.push(track1Element2);
 
     paragraphJson.forEach((paragraph, index) => {
       const { text, keywordsAndImages, audioPath, videoPath } = paragraph;
       const audioDuration = audioPath ? audioPath.duration || 15 : 15;
       let duration = audioDuration;
-
+    
       if (videoPath) {
         const videoElement = {
           id: `video`,
@@ -193,18 +210,18 @@ const renderVideo = async (req, res) => {
         };
         template.elements[0].elements.push(videoElement);
       } else {
-        // If no videoPath, proceed with adding images this is the normal condition the vid will render without videooooooos only images , audios
-        const imageUrls = keywordsAndImages[0].imageUrl;
-        const imageCount = Math.round(audioDuration / 10);
 
-        // Add image elements for each keyword's images
+        const imageUrls = keywordsAndImages[0].imageUrl;
+        const imageCount = Math.floor(audioDuration / 10); 
+        const remainderTime = audioDuration % 10; 
+
         for (let i = 0; i < imageCount && i < imageUrls.length; i++) {
           const imageElement = {
             id: `image-${index}-${i}`,
             type: "image",
             track: 2,
             time: currentTime + i * 10,
-            duration: Math.min(10, audioDuration - i * 10),
+            duration: 10, 
             width: "60.1639%",
             height: "58.8122%",
             x_scale: [
@@ -236,8 +253,48 @@ const renderVideo = async (req, res) => {
           };
           template.elements[0].elements.push(imageElement);
         }
+    
+        if (remainderTime > 0 && imageUrls.length > 0) {
+          const lastImageIndex = imageCount < imageUrls.length ? imageCount : imageUrls.length - 1;
+          const lastImageElement = {
+            id: `image-${index}-${lastImageIndex}`,
+            type: "image",
+            track: 2,
+            time: currentTime + imageCount * 10,
+            duration: 10 + remainderTime, 
+            width: "60.1639%",
+            height: "58.8122%",
+            x_scale: [
+              { time: 0.077, value: "100%" },
+              { time: "end", value: "115%" },
+            ],
+            y_scale: [
+              { time: 0.077, value: "100%" },
+              { time: "end", value: "115%" },
+            ],
+            stroke_color: "#fdfdfd",
+            stroke_width: "1.5 vmin",
+            stroke_join: "miter",
+            shadow_color: "rgba(0,0,0,0.65)",
+            shadow_blur: "5.5 vmin",
+            shadow_x: "4 vmin",
+            shadow_y: "4 vmin",
+            clip: true,
+            animations: [
+              {
+                time: 0.077,
+                duration: 1.566,
+                transition: true,
+                type: "slide",
+                direction: "90°",
+              },
+            ],
+            source: imageUrls[lastImageIndex],
+          };
+          template.elements[0].elements.push(lastImageElement);
+        }
       }
-
+    
       const audioElement = {
         id: `audio-${index}`,
         type: "audio",
@@ -247,9 +304,9 @@ const renderVideo = async (req, res) => {
         source: audioPath.url,
       };
       template.elements[0].elements.push(audioElement);
-
+    
       currentTime += duration + timePadding;
-    });
+    });    
 
     const track4Elements = [
       {
@@ -271,7 +328,7 @@ const renderVideo = async (req, res) => {
         track: 4,
         time: template.duration - 15,
         duration: 20,
-        source: "fdd26979-7b5a-4fee-b2bd-d8c7dec8c93c",
+        source: "93d16adf-784e-459c-894e-d46aa8b1b44d",
       },
     ];
 
