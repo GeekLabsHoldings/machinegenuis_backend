@@ -8,7 +8,7 @@ const youtube = google.youtube('v3');
 const SCOPES = [
     'https://www.googleapis.com/auth/youtube.readonly',
     'https://www.googleapis.com/auth/yt-analytics-monetary.readonly',
-    'https://www.googleapis.com/auth/yt-analytics.readonly'
+    'https://www.googleapis.com/auth/yt-analytics.readonly',
   ];
 
 export async function getData(brand:string, startDate:string, endDate:string, dimensions:string="day") {
@@ -18,8 +18,12 @@ export async function getData(brand:string, startDate:string, endDate:string, di
         //console.log("this is ", account, brand)
         const oAuth2Client = new google.auth.OAuth2(
             account.client_id, account.client_secret, account.redirect_uris);
-            oAuth2Client.setCredentials( account.token);
+            oAuth2Client.setCredentials( {
+                access_token: account.tokenY?.access_token,
+            });
 
+        // console.log("brands  \n\n\n", account);
+        
         const youtubeAnalytics = google.youtubeAnalytics('v2');
         //console.log("youtube\n\n\n\n", account)
          
@@ -28,7 +32,7 @@ export async function getData(brand:string, startDate:string, endDate:string, di
           ids: 'channel==MINE',  // Change 'MINE' to the channel ID if necessary
           startDate: startDate,
           endDate: endDate,
-          metrics: 'views,likes,comments,estimatedMinutesWatched,averageViewDuration,subscribersGained,subscribersLost,',//,estimatedRevenue estimatedAdRevenue
+          metrics: 'views,likes,comments,averageViewDuration,subscribersGained',//            ,estimatedRevenue,estimatedAdRevenue
           dimensions: "day",
           sort: 'day',
         });
@@ -48,17 +52,20 @@ export async function getData(brand:string, startDate:string, endDate:string, di
         const account = (acc?.account as IYoutubeAccountData)
         const oAuth2Client = new google.auth.OAuth2(
             account.client_id, account.client_secret, account.redirect_uris);
-            oAuth2Client.setCredentials( account.token);
+            oAuth2Client.setCredentials( {
+                access_token: account.tokenY?.access_token,
+            });
 
         const response = await youtube.channels.list({
             auth: oAuth2Client,
             mine: true, 
+            //id: "UCudBuoivh_X4NbJIoARMHVg",
     // or use 'forUsername' for username
             part: 'id,statistics', // Specify the parts you want
         });
     
         const channels = response.data.items;
-        if (channels.length === 0) {
+        if (!channels || channels.length === 0) {
             console.log('No channel found.');
         } else {
             const channel = channels[0];
@@ -96,12 +103,18 @@ export async function getData(brand:string, startDate:string, endDate:string, di
        const oAuth2Client = new google.auth.OAuth2(
         account.client_id, account.client_secret, account.redirect_uris);
         
-        console.log(" logging    \n\n\n", account)
-        oAuth2Client.getToken(code, async (err: string, token: string) => {
+        console.log(" logging    \n\n\n", account, code)
+        oAuth2Client.getToken(code, async (err: string, token: {
+            access_token: string;
+            scope: string;
+            token_type: string;
+            expiry_date: number;
+          }) => {
             if (err) return console.error('Error retrieving access token', err);
             oAuth2Client.setCredentials(token);
             // Store the token to disk for later program executions
-            const newccount:accountDataType = {platform:"YOUTUBE", account:{...account, token:token}}
+            console.log(" logging2    \n\n\n", account)
+            const newccount:accountDataType = {platform:"YOUTUBE", account:{...account, tokenY:token}}
             const updatedAcc = await addOrDeleteAccount(brand, newccount)
     
            return updatedAcc

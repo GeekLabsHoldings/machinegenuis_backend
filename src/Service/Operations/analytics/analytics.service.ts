@@ -48,6 +48,7 @@ export async function TwitterPostInsights(brand: string, postId: string) {
 
 
 
+  
 
 
 
@@ -119,16 +120,22 @@ export async function FacebookPostInsights(brand: string) {
         const axios = require('axios');
         
         const account = (acc?.account as IFacebookInAccountData)
+        // console.log("FacebookPostInsights \n\n", account);
         const accessToken =  await getPageAccessToken(account.pageID, account.longAccessToken)
 
+        
 
-        console.log("this is facebook generated access tokens\n\n", accessToken.access_token,accessToken.id, account.pageID)
+        // console.log("this is facebook generated access tokens\n\n", accessToken.access_token,accessToken.id, account.pageID)
         const url = `https://graph.facebook.com/${account.pageID}/posts`;
         const params = {
             access_token: accessToken.access_token,
             fields: 'likes.summary(true),comments.summary(true),shares'
         };
         const  response = await axios.get(url, { params })
+
+
+        console.log(`FacebookPostInsights \n\n  ${response.data}`);
+        
         return response.data
     } catch (error) {
         console.log(error)
