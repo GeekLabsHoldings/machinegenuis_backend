@@ -17,6 +17,7 @@ export const sendMessageNotification = async (req: Request, res: Response) => {
       message: req.body.message,
       firstName: req.body.currentUser.firstName,
       lastName: req.body.currentUser.lastName,
+      messageId:createMessage._id
     };
     eventEmitter.emit("BroadCastNotification", notificationData);
     return res.status(200).json({
