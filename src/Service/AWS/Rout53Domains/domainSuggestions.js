@@ -22,7 +22,10 @@ const {
     "io",
     "xyz",
     "fun",
-    "tech"
+    "tech",
+    "click",
+    "link",
+
   ]);
   
   const tldPriceCache = new Map();

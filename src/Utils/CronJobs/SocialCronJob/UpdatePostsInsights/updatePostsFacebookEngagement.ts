@@ -22,23 +22,22 @@ const cron = require('node-cron');
 
 */
 //0 */12 * * *     */1 * * * *
-const scheduleFP =  cron.schedule("0 */12 * * *", async () => {
+const scheduleFP =  cron.schedule("0 */12 * * * ", async () => {
     const brands = await getBrandsByPlatform("FACEBOOK",0,9999999999) || []
     console.log("facebook post cron job brands", brands)
     for (const brand of brands){
         
-        const result = (await FacebookPostInsights( brand?._id?.toString()||"") as {id:string|number, likes:{summary:{total_count:number}}, 
-        comments:{summary:{total_count:number}}, shares:{count:number}}[])
-        console.log(`result in facebook cron job ${result}  \n\n`);
+        const result = (await FacebookPostInsights( brand?._id?.toString()||"") ).data
+        console.log(`result in facebook cron job   \n\n`, result, result.length);
         for (const post of result){
             // Sum the likes and comments for this post
+            console.log(`post in facebook cron job \n\n`, post);
             
-            
-            const postLikes = post.likes.summary.total_count;
-            const postComments = post.comments.summary.total_count;
-            const postShares = post.shares.count;
-            SocialMediaPosts.updateOne(
-                {post_id:post.id, platform:"FACEBOOK"},
+            const postLikes = post.likes?.summary.total_count||0;
+            const postComments = post.comments?.summary.total_count||0;
+            const postShares = post.shares?.count||0;
+            await SocialMediaPosts.updateOne(
+                {postId:post.id, platform:"FACEBOOK"},
                 //shares:result?.retweet_count
                 {$set:{likes:postLikes, comments:postComments, shares:postShares}}
             )

@@ -120,7 +120,7 @@ export async function FacebookPostInsights(brand: string) {
         const axios = require('axios');
         
         const account = (acc?.account as IFacebookInAccountData)
-        // console.log("FacebookPostInsights \n\n", account);
+        console.log("FacebookPostInsights \n\n", account);
         const accessToken =  await getPageAccessToken(account.pageID, account.longAccessToken)
 
         
@@ -133,8 +133,6 @@ export async function FacebookPostInsights(brand: string) {
         };
         const  response = await axios.get(url, { params })
 
-
-        console.log(`FacebookPostInsights \n\n  ${response.data}`);
         
         return response.data
     } catch (error) {
