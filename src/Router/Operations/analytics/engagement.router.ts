@@ -9,7 +9,7 @@ const  engagementRouter = Router();
 
 // kpis
 engagementRouter.get("/get-engagement",engagementController.getEngagement)
+engagementRouter.get("/get-all-engagement",engagementController.getEngagement)
 
 
-
-export default engagementRouter;
+export default engagementRouter;  
