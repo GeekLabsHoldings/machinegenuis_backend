@@ -309,6 +309,7 @@ export const addOrChangeAcount = async (req: Request, res: Response) => {
     }
     return res.status(400).json({message:"error adding account check Platform and the correct Inputs for the platform"});
   } catch (error) {
+    console.log(error);
     return systemError.sendError(res, error);
   }
 };
